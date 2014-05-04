@@ -1,0 +1,81 @@
+{
+    "res": {
+        "asyncTest:page/index.tpl": {
+            "uri": "/template/asyncTest/page/index.tpl",
+            "type": "tpl",
+            "extras": {
+                "isPage": true,
+                "async": [
+                    "asyncTest:widget/widgetB/widgetB.js"
+                ]
+            },
+            "deps": [
+                "asyncTest:widget/widgetA/widgetA.js"
+            ]
+        },
+        "asyncTest:page/layout.tpl": {
+            "uri": "/template/asyncTest/page/layout.tpl",
+            "type": "tpl",
+            "extras": {
+                "isPage": true
+            }
+        },
+        "asyncTest:static/css/bootstrap-theme.css": {
+            "uri": "/static/asyncTest/css/bootstrap-theme.css",
+            "type": "css",
+            "pkg": "asyncTest:p1"
+        },
+        "asyncTest:static/css/bootstrap.css": {
+            "uri": "/static/asyncTest/css/bootstrap.css",
+            "type": "css",
+            "pkg": "asyncTest:p1"
+        },
+        "asyncTest:static/js/bootstrap.js": {
+            "uri": "/static/asyncTest/js/bootstrap.js",
+            "type": "js",
+            "pkg": "asyncTest:p0"
+        },
+        "asyncTest:static/js/jquery-1.10.2.js": {
+            "uri": "/static/asyncTest/js/jquery-1.10.2.js",
+            "type": "js",
+            "pkg": "asyncTest:p0"
+        },
+        "asyncTest:static/js/mod.js": {
+            "uri": "/static/asyncTest/js/mod.js",
+            "type": "js"
+        },
+        "asyncTest:widget/widgetA/widgetA.js": {
+            "uri": "/static/asyncTest/widget/widgetA/widgetA.js",
+            "type": "js",
+            "pkg": "asyncTest:p0"
+        },
+        "asyncTest:widget/widgetB/widgetB.js": {
+            "uri": "/static/asyncTest/widget/widgetB/widgetB.js",
+            "type": "js",
+            "deps": [
+                "asyncTest:widget/widgetA/widgetA.js"
+            ],
+            "pkg": "asyncTest:p0"
+        }
+    },
+    "pkg": {
+        "asyncTest:p0": {
+            "uri": "/static/asyncTest/pkg/all.js",
+            "type": "js",
+            "has": [
+                "asyncTest:static/js/jquery-1.10.2.js",
+                "asyncTest:static/js/bootstrap.js",
+                "asyncTest:widget/widgetA/widgetA.js",
+                "asyncTest:widget/widgetB/widgetB.js"
+            ]
+        },
+        "asyncTest:p1": {
+            "uri": "/static/asyncTest/pkg/all.css",
+            "type": "css",
+            "has": [
+                "asyncTest:static/css/bootstrap-theme.css",
+                "asyncTest:static/css/bootstrap.css"
+            ]
+        }
+    }
+}

@@ -19,10 +19,14 @@ public class Html extends Block {
 
         super.init(rs, context, node);
 
+        // for debug
+        ResourceSingleton.getInstance().log = log;
+
         // 从velocity.properties里面读取fis.mapDir。
         // 用来指定map文件存放目录。
         String mapDir = rs.getString("fis.mapDir", "WEB-INF/config");
         ResourceSingleton.getInstance().setMapDir(mapDir);
+        ResourceSingleton.getInstance().setDebug(rs.getBoolean("fis.debug", false));
     }
 
     @Override

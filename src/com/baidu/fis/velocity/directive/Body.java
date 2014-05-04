@@ -17,7 +17,7 @@ public class Body extends Block {
 
     @Override
     public String getName() {
-        return "block";
+        return "body";
     }
 
     @Override

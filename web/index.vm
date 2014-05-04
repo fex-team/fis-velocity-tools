@@ -1,1 +1,11 @@
-Hello World22.
+#html("asyncTest:static/js/mod.js", "lang", "en")
+    #head()
+    <meta charset="utf-8"/>
+    #end
+
+    #body()
+    Hello World.
+    #end
+
+    #require("asyncTest:page/index.tpl")
+#end
