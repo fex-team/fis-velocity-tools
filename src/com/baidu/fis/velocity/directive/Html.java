@@ -1,7 +1,7 @@
 package com.baidu.fis.velocity.directive;
 
 
-import com.baidu.fis.ResourceSingleton;
+import com.baidu.fis.velocity.ResourceSingleton;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -19,14 +19,8 @@ public class Html extends Block {
 
         super.init(rs, context, node);
 
-        // for debug
-        ResourceSingleton.getInstance().log = log;
-
-        // 从velocity.properties里面读取fis.mapDir。
-        // 用来指定map文件存放目录。
-        String mapDir = rs.getString("fis.mapDir", "WEB-INF/config");
-        ResourceSingleton.getInstance().setMapDir(mapDir);
-        ResourceSingleton.getInstance().setDebug(rs.getBoolean("fis.debug", false));
+        // 初始化 fis 的 Resource 模块。
+        ResourceSingleton.init(rs);
     }
 
     @Override

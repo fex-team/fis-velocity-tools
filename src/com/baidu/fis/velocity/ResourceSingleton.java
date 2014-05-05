@@ -1,5 +1,8 @@
-package com.baidu.fis;
+package com.baidu.fis.velocity;
 
+import org.apache.velocity.runtime.RuntimeServices;
+
+import java.io.FileNotFoundException;
 import java.io.Writer;
 
 /**
@@ -16,6 +19,10 @@ public class ResourceSingleton {
         return res;
     }
 
+    public static void init(RuntimeServices rs) {
+        getInstance().init(rs);
+    }
+
     public static void setFramework(String framework) {
         getInstance().setFramework(framework);
     }
@@ -28,8 +35,8 @@ public class ResourceSingleton {
         getInstance().renderJS(writer);
     }
 
-    public static void  addResource(String uri) {
-        getInstance().addResource(uri);
+    public static void  addResource(String id) throws FileNotFoundException{
+        getInstance().addResource(id);
     }
 
     public static void addJS(String uri) {
