@@ -61,6 +61,8 @@ public class Html extends Block {
 
         writer.write(str);
 
+        // 重要：必须得重置，否则会出现资源重复。
+        ResourceSingleton.reset();
         return true;
     }
 }
