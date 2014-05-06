@@ -23,6 +23,10 @@ public class ResourceSingleton {
         getInstance().init(rs);
     }
 
+    public static void reset() {
+        getInstance().reset();
+    }
+
     public static void setFramework(String framework) {
         getInstance().setFramework(framework);
     }

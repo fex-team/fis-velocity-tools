@@ -41,6 +41,13 @@ public class Resource {
         this.embed = new HashMap<String, StringBuilder>();
     }
 
+    public void reset() {
+        this.map.clear();
+        this.loaded.clear();
+        this.collection.clear();
+        this.embed.clear();
+    }
+
     public void init(RuntimeServices rs) {
 
         // 避免重复初始化
@@ -212,10 +219,6 @@ public class Resource {
         }
 
         return uri;
-    }
-
-    public void reset() {
-
     }
 
     public String renderCSS() {
