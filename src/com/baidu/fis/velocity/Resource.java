@@ -248,7 +248,7 @@ public class Resource {
         Boolean needModJs = framework != null && (!arr.isEmpty() || !defferMap.isEmpty());
 
         if (needModJs) {
-            sb.append("<style type=\"text/javascript\" href=\"" + getUri(framework) + "\"></script>");
+            sb.append("<script type=\"text/javascript\" href=\"" + getUri(framework) + "\"></script>");
         }
 
         if (!defferMap.isEmpty()){
@@ -257,7 +257,7 @@ public class Resource {
 
         if (arr != null) {
             for (String uri : arr) {
-                sb.append("<style type=\"text/javascript\" href=\"" + uri + "\"></script>");
+                sb.append("<script type=\"text/javascript\" href=\"" + uri + "\"></script>");
             }
         }
 
