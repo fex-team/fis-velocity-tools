@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Created by liaoxuezhi on 5/4/14.
+ * Created by 2betop on 5/4/14.
  */
 public class Widget extends Parse {
     @Override
@@ -27,6 +27,7 @@ public class Widget extends Parse {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
+        // todo 路径得修改，否则无法内嵌。
         super.render(context, writer, node);
 
         // 添加资源 Like Require
