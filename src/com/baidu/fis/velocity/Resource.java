@@ -2,11 +2,11 @@ package com.baidu.fis.velocity;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.resource.ContentResource;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,27 +73,41 @@ public class Resource {
         this.framework = framework;
     }
 
-    public void addJS(String uri) {
-
+    public void addJS(String id) {
+        this.addResource(id);
     }
 
     public void addJSEmbed(String content) {
+        StringBuilder sb = embed.get("js");
 
+        if (sb == null) {
+            sb = new StringBuilder();
+            embed.put("js", sb);
+        }
+
+        sb.append(content);
     }
 
-    public void addCSS(String uri) {
-
+    public void addCSS(String id) {
+        this.addResource(id);
     }
 
     public void addCSSEmbed(String content) {
+        StringBuilder sb = embed.get("css");
 
+        if (sb == null) {
+            sb = new StringBuilder();
+            embed.put("css", sb);
+        }
+
+        sb.append(content);
     }
 
-    public void addResource(String id) throws FileNotFoundException{
+    public void addResource(String id){
         this.addResource(id, false);
     }
 
-    public void addResource(String id, Boolean deffer) throws FileNotFoundException {
+    public void addResource(String id, Boolean deffer) {
         JSONObject map, node, info;
 
         // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
@@ -157,6 +171,10 @@ public class Resource {
 
         if (type.equals("js") && deffer) {
             type = "jsDeffer";
+
+            // 如果是异步 js，用 id 代替 uri。因为还要生成依赖。
+            // 注意：此处 uri 已不再是 uri。
+            uri = id;
         }
 
         ArrayList<String> list = collection.get(type);
@@ -169,10 +187,14 @@ public class Resource {
         list.add(uri);
     }
 
-    public String getUri(String str) {
+    public String getUri(String id) {
         JSONObject map, node, info;
 
         String uri;
+
+        map = this.getMap(id);
+        node = map.getJSONObject("res");
+        info = node.getJSONObject(id);
 
         if (info == null) {
             throw new IllegalArgumentException("missing resource [" + id + "]");
@@ -185,17 +207,11 @@ public class Resource {
             info = node.getJSONObject(pkg);
             uri = info.getString("uri");
 
-            if (info.containsKey("has")) {
-                JSONArray has = info.getJSONArray("has");
-
-                for (Object obj : has) {
-                    loaded.put(obj.toString(), deffer);
-                }
-            }
         } else {
             uri = info.getString("uri");
-            loaded.put(id, deffer);
         }
+
+        return uri;
     }
 
     public void reset() {
@@ -203,22 +219,61 @@ public class Resource {
     }
 
     public String renderCSS() {
-        return "";
+        StringBuilder sb = new StringBuilder();
+        ArrayList<String> arr = collection.get("css");
+
+        if (arr != null) {
+            for (String uri : arr) {
+                sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + uri + "\"/>");
+            }
+        }
+
+        StringBuilder embedCSS = embed.get("css");
+
+        if (embedCSS != null) {
+            sb.append("<style type=\"text/css\">" + embedCSS.toString() + "</style>");
+        }
+
+        return sb.toString();
     }
 
     public String renderJS() {
-        log.warn(collection);
-        return "";
+        StringBuffer sb = new StringBuffer();
+        ArrayList<String> arr = collection.get("js");
+        Map<String, Map> defferMap = this.buildDefferMap();
+
+        Boolean needModJs = framework != null && (!arr.isEmpty() || !defferMap.isEmpty());
+
+        if (needModJs) {
+            sb.append("<style type=\"text/javascript\" href=\"" + getUri(framework) + "\"></script>");
+        }
+
+        if (!defferMap.isEmpty()){
+            sb.append("<script type=\"text/javascript\">require.resourceMap(" + JSONObject.toJSON(defferMap) + ");</script>");
+        }
+
+        if (arr != null) {
+            for (String uri : arr) {
+                sb.append("<style type=\"text/javascript\" href=\"" + uri + "\"></script>");
+            }
+        }
+
+        // 输出 embed js
+        StringBuilder embedJS = embed.get("js");
+
+        if (embedJS != null) {
+            sb.append("<script type=\"text/javascript\">" + embedJS.toString() + "</script>");
+        }
+
+        return sb.toString();
     }
 
     /**
      * 根据资源的 namespace 读取对应的 fis map 产出表。
      *
      * @param id
-     * @return
-     * @throws FileNotFoundException
      */
-    protected JSONObject getMap(String id) throws FileNotFoundException {
+    protected JSONObject getMap(String id) {
         String ns = "__global__";
         int pos = id.indexOf(":");
 
@@ -229,15 +284,113 @@ public class Resource {
         if (!this.map.containsKey(ns)) {
             String filename = mapDir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
 
-            // 通过 velocity 的资源加载器读取内容。
-            // 实在是没找到读取 servlet context 的方法，导致定位不到文件。
-            // 所以还是用 velocity 的 RuntimeServices 吧
-            ContentResource file = rs.getContent(filename);
+            try {
 
-            this.map.put(ns, JSONObject.parseObject(file.getData().toString()));
+                // 通过 velocity 的资源加载器读取内容。
+                // 实在是没找到读取 servlet context 的方法，导致定位不到文件。
+                // 所以还是用 velocity 的 RuntimeServices 吧
+                ContentResource file = rs.getContent(filename);
+                this.map.put(ns, JSONObject.parseObject(file.getData().toString()));
+
+            } catch ( ResourceNotFoundException error ) {
+                log.error(error.getMessage());
+            }
         }
 
         return this.map.get(ns);
+    }
+
+    /**
+     * 生成异步JS资源表。
+     * @return
+     */
+    protected Map<String, Map> buildDefferMap() {
+        Map<String, Map> defferMap = new HashMap<String, Map>();
+        Map<String, JSONObject> res = new HashMap<String, JSONObject>();
+        Map<String, JSONObject> pkgMap = new HashMap<String, JSONObject>();
+
+        ArrayList<String> list = collection.get("jsDeffer");
+        JSONObject map, node, info;
+
+        if (list != null) {
+
+            for (String id : list) {
+
+                // 已经同步加载，则忽略。
+                if (loaded.get(id) != null && !loaded.get(id)) {
+                    continue;
+                }
+
+                map = this.getMap(id);
+                node = map.getJSONObject("res");
+                info = node.getJSONObject(id);
+
+                if (info == null) {
+                    throw new IllegalArgumentException("missing resource [" + id + "]");
+                }
+
+                // 先加 res
+                node = map.getJSONObject("res");
+                info = node.getJSONObject(id);
+                String pkg = info.getString("pkg");
+
+                JSONObject infoCopy = new JSONObject();
+                infoCopy.put("url", info.getString("uri"));
+
+                // 保留 pkg 信息
+                if (!debug && pkg != null) {
+                    infoCopy.put("pkg", pkg);
+                }
+
+                // 过滤掉非 .js 的依赖。
+                // 同时过滤掉已经同步加载的依赖。
+                if (info.containsKey("deps")) {
+                    JSONArray deps = info.getJSONArray("deps");
+                    JSONArray depsFilter = new JSONArray();
+
+                    for (Object dep : deps) {
+                        String sDep = dep.toString();
+
+                        if (!sDep.contains(".js")) {
+                            continue;
+                        } else if ( loaded.get(sDep) != null && !loaded.get(sDep)) {
+
+                            // 同步中已经依赖。
+                            continue;
+                        }
+
+                        depsFilter.add(sDep);
+                    }
+
+                    if (!depsFilter.isEmpty()) {
+                        infoCopy.put("deps", depsFilter);
+                    }
+                }
+
+                // 再把对应的 pkg 加入。
+                if (!debug && pkg != null) {
+                    node = map.getJSONObject("pkg");
+                    info = node.getJSONObject(pkg);
+
+                    info.put("url", info.getString("uri"));
+                    info.remove("uri");
+
+                    pkgMap.put(pkg, info);
+                }
+
+                res.put(id, infoCopy);
+            }
+        }
+
+        if (!res.isEmpty()) {
+            defferMap.put("res", res);
+        }
+
+        if (!pkgMap.isEmpty()) {
+            defferMap.put("pkg", pkgMap);
+        }
+
+        return defferMap;
     }
 
 }
