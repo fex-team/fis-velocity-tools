@@ -1,6 +1,7 @@
 package com.baidu.fis.velocity.directive;
 
 
+import com.baidu.fis.velocity.Resource;
 import com.baidu.fis.velocity.ResourceSingleton;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -11,6 +12,7 @@ import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 
 public class Html extends Block {
@@ -31,8 +33,9 @@ public class Html extends Block {
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
         String framework;
+        StringWriter buffer = new StringWriter();
 
-        writer.write("<html");
+        buffer.write("<html");
 
         // 如果指定了 framework （通过第一个参数指定）
         // 如: #html( "static/js/mod.js")#end
@@ -41,15 +44,22 @@ public class Html extends Block {
             ResourceSingleton.setFramework(framework);
 
             // 生成attributes
-            writer.write(this.buildAttrs(node, context, 1));
+            buffer.write(this.buildAttrs(node, context, 1));
         }
 
-        writer.write(">");
+        buffer.write(">");
 
         // 让父级去渲染 block body。
-        super.render(context, writer);
+        super.render(context, buffer);
 
-        writer.write("</html>");
+        buffer.write("</html>");
+
+        String str = buffer.toString();
+
+        str = str.replace(Resource.STYLE_PLACEHOLDER, ResourceSingleton.renderCSS());
+        str = str.replace(Resource.SCRIPT_PLACEHOLDER, ResourceSingleton.renderJS());
+
+        writer.write(str);
 
         return true;
     }

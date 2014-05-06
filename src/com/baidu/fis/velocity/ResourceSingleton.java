@@ -27,12 +27,12 @@ public class ResourceSingleton {
         getInstance().setFramework(framework);
     }
 
-    public static void renderCSS(Writer writer) {
-        getInstance().renderCSS(writer);
+    public static String renderCSS() {
+        return getInstance().renderCSS();
     }
 
-    public static void renderJS(Writer writer) {
-        getInstance().renderJS(writer);
+    public static String renderJS() {
+        return getInstance().renderJS();
     }
 
     public static void  addResource(String id) throws FileNotFoundException{

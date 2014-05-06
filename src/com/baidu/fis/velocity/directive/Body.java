@@ -1,6 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.ResourceSingleton;
+import com.baidu.fis.velocity.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -33,7 +33,7 @@ public class Body extends Block {
         super.render(context, writer);
 
         // 在头部把所有的样式输出。
-        ResourceSingleton.renderJS(writer);
+        writer.write(Resource.SCRIPT_PLACEHOLDER);
 
         writer.write("</body>");
 
