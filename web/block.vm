@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+    #html("asyncTest:static/js/mod.js")
+    #head()
+<meta charset="utf-8"/>
+<meta content="" name="description">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Demo</title>
+#require("asyncTest:static/css/bootstrap.css")
+#require("asyncTest:static/css/bootstrap-theme.css")
+#require("asyncTest:static/js/jquery-1.10.2.js")
+#require("asyncTest:static/js/bootstrap.js")
+
+#end ## end head
+
+#body()
+<div id="wrapper">
+    #block("body_content")
+        This is body.
+    #end
+</div>
+#end ## end body
+
+#require("asyncTest:page/layout.tpl")
+#end ## end html

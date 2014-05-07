@@ -15,15 +15,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class Html extends Block {
-    @Override
-    public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
-
-        super.init(rs, context, node);
-
-        // 初始化 fis 的 Resource 模块。
-        ResourceSingleton.init(rs);
-    }
+public class Html extends abstractBlock {
 
     @Override
     public String getName() {
@@ -54,15 +46,10 @@ public class Html extends Block {
 
         buffer.write("</html>");
 
-        String str = buffer.toString();
+        // todo filterContent 应该放在整个velocity输出的最后。
+        // todo 建议添加个 tomcat filter 控制在内容输出到页面的时候来做替换。
+        writer.write(ResourceSingleton.filterContent(buffer.toString()));
 
-        str = str.replace(Resource.STYLE_PLACEHOLDER, ResourceSingleton.renderCSS());
-        str = str.replace(Resource.SCRIPT_PLACEHOLDER, ResourceSingleton.renderJS());
-
-        writer.write(str);
-
-        // 重要：必须得重置，否则会出现资源重复。
-        ResourceSingleton.reset();
         return true;
     }
 }

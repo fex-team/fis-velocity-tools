@@ -354,7 +354,7 @@ public class Resource {
                     for (Object dep : deps) {
                         String sDep = dep.toString();
 
-                        if (!sDep.contains(".js")) {
+                        if (!sDep.endsWith(".js")) {
                             continue;
                         } else if ( loaded.get(sDep) != null && !loaded.get(sDep)) {
 
@@ -394,6 +394,16 @@ public class Resource {
         }
 
         return defferMap;
+    }
+
+    public String filterContent(String input) {
+        input = input.replace(Resource.STYLE_PLACEHOLDER, renderCSS());
+        input = input.replace(Resource.SCRIPT_PLACEHOLDER, renderJS());
+
+        // 重要：必须得重置，否则会出现资源重复。
+        reset();
+
+        return input;
     }
 
 }

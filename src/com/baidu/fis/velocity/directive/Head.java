@@ -13,7 +13,7 @@ import java.io.Writer;
 /**
  * Created by 2betop on 5/4/14.
  */
-public class Head extends Block {
+public class Head extends abstractBlock {
 
     @Override
     public String getName() {

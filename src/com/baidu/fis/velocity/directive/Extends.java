@@ -14,9 +14,10 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Created by 2betop on 5/4/14.
+ * Created by 2betop on 5/7/14.
  */
-public class Widget extends Parse {
+public class Extends extends Parse {
+
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
         super.init(rs, context, node);
@@ -27,22 +28,16 @@ public class Widget extends Parse {
 
     @Override
     public String getName() {
-        return "widget";
+        return "extends";
     }
 
     @Override
-    public String getScopeName() {
-        return "widget";
+    public int getType() {
+        return BLOCK;
     }
 
     @Override
-    public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        // todo 路径得修改，否则无法内嵌。
-        super.render(context, writer, node);
-
-        // 添加资源 Like Require
-        ResourceSingleton.addResource(node.jjtGetChild(0).value(context).toString());
-
-        return true;
+    public boolean render(InternalContextAdapter internalContextAdapter, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
+        return false;
     }
 }

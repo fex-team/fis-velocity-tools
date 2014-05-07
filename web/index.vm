@@ -1,30 +1,14 @@
-<!DOCTYPE html>
-#html("asyncTest:static/js/mod.js")
-    #head()
-        <meta charset="utf-8"/>
-        <meta content="" name="description">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Demo</title>
-        #require("asyncTest:static/css/bootstrap.css")
-        #require("asyncTest:static/css/bootstrap-theme.css")
-        #require("asyncTest:static/js/jquery-1.10.2.js")
-        #require("asyncTest:static/js/bootstrap.js")
+#extends("block.vm")
 
-    #end ## end head
+<h1>Hello Demo</h1>
 
-    #body()
-        <div id="wrapper">
-            <h1>Hello Demo</h1>
+#script()
+// var widgetA = require("asyncTest:widget/widgetA/widgetA.js");
 
-            #script()
-            // var widgetA = require("asyncTest:widget/widgetA/widgetA.js");
+require.async("asyncTest:widget/widgetB/widgetB.js", function(api) {
+api.sayHelloWorld();
+});
+#end ## end script
 
-            require.async("asyncTest:widget/widgetB/widgetB.js", function(api) {
-            api.sayHelloWorld();
-            });
-            #end ## end script
-        </div>
-    #end ## end body
-
-    #require("asyncTest:page/index.tpl")
-#end ## end html
+#require("asyncTest:page/index.tpl")
+#end

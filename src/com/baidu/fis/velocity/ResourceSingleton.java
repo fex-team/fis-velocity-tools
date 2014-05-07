@@ -62,4 +62,8 @@ public class ResourceSingleton {
     public static String getUri(String uri) {
         return getInstance().getUri(uri);
     }
+
+    public static String filterContent(String input) {
+        return getInstance().filterContent(input);
+    }
 }
