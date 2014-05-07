@@ -7,12 +7,10 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.exception.VelocityException;
 import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.Node;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -35,20 +33,22 @@ public class Block extends AbstractBlock {
         return opStack.pop();
     }
 
-    private Boolean isSetMode() {
+    protected Boolean isSetMode() {
         return !opStack.isEmpty() && opStack.peek().equals(SET_MODE);
     }
 
-    private String getSetTarget() {
-        if (isSetMode()) {
-            for(int i = opStack.size() - 1; i >= 0; i--) {
-                if (!opStack.get(i).equals(SET_MODE)) {
-                    return opStack.get(i).toString();
-                }
+    /**
+     * 获取 extends 对象的名字。
+     * @return
+     */
+    protected String getSetTarget() {
+        for(int i = opStack.size() - 1; i >= 0; i--) {
+            if (!opStack.get(i).equals(SET_MODE)) {
+                return opStack.get(i).toString();
             }
         }
 
-        return null;
+        return "";
     }
 
 
@@ -75,23 +75,27 @@ public class Block extends AbstractBlock {
         Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
 
         String target = getSetTarget();
-        StringWriter content = blocks.get(id);
+        StringWriter content = blocks.get(target + id);
 
         // 设置模式。
-        if ( target != null) {
+        // 把结果暂存起来。
+        if (isSetMode()) {
 
             if (content==null) {
                 content = new StringWriter();
-                blocks.put(id, content);
+                blocks.put(target + id, content);
             }
 
             block.render(context, content);
         } else {
             block.render(context, writer);
 
+            // 看看之前有没暂存数据
             if ( content != null ) {
                 writer.write(content.toString());
-                blocks.remove(id);
+
+                // 应该没用了，清理掉
+                blocks.remove(target + id);
             }
         }
 
