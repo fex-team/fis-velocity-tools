@@ -1,5 +1,6 @@
 #extends("block.vm")
 
+#block("body_content")
 <h1>Hello Demo</h1>
 
 #script()
@@ -9,6 +10,7 @@ require.async("asyncTest:widget/widgetB/widgetB.js", function(api) {
 api.sayHelloWorld();
 });
 #end ## end script
+#end ## end block
 
 #require("asyncTest:page/index.tpl")
 #end

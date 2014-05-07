@@ -14,7 +14,7 @@ import java.io.Writer;
 /**
  * Created by 2betop on 5/4/14.
  */
-public class Script extends abstractBlock {
+public class Script extends AbstractBlock {
     @Override
     public String getName() {
         return "script";

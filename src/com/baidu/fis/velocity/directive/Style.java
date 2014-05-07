@@ -14,7 +14,7 @@ import java.io.Writer;
 /**
  * Created by liaoxuezhi on 5/4/14.
  */
-public class Style extends abstractBlock {
+public class Style extends AbstractBlock {
     @Override
     public String getName() {
         return "style";

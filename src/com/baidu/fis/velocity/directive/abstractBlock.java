@@ -10,7 +10,7 @@ import org.apache.velocity.runtime.parser.node.Node;
  * 提取一些公共的方法
  * Created by 2betop on 5/4/14.
  */
-public abstract class abstractBlock extends org.apache.velocity.runtime.directive.Block {
+public abstract class AbstractBlock extends org.apache.velocity.runtime.directive.Block {
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
         super.init(rs, context, node);
