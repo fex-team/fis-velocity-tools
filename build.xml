@@ -23,7 +23,7 @@
             </fileset>
         </path>
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac srcdir="${src}" destdir="${build}" classpathref="lib.classpath"/>
+        <javac srcdir="${src}" destdir="${build}" includeantruntime="false" classpathref="lib.classpath"/>
     </target>
 
     <target name="dist" depends="compile"
