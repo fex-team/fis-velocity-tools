@@ -1,6 +1,8 @@
 package com.baidu.fis.velocity.directive;
 
 import com.baidu.fis.velocity.ResourceSingleton;
+import com.baidu.fis.velocity.event.IncludeFisSource;
+import org.apache.velocity.app.event.EventCartridge;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.RuntimeServices;
@@ -69,7 +71,12 @@ public class Extends extends Parse {
         Block.popOp();
 
         // 开始渲染 extends 对象
+        EventCartridge ec = new EventCartridge();
+        ec.addEventHandler(new IncludeFisSource());
+        context.attachEventCartridge(ec);
         super.render(context, writer, node);
+        context.attachEventCartridge(null);
+
         writer.write(blockContent.toString());
 
         Block.popOp();
