@@ -6,6 +6,7 @@ import org.apache.velocity.context.Context;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -37,5 +38,23 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         p.setProperty("file.resource.loader.path", getServletContext().getRealPath("./") + "//");
 
         return p;
+    }
+
+    @Override
+    protected Context createContext(HttpServletRequest request, HttpServletResponse response) {
+        Context context = super.createContext(request, response);
+
+        attachJson(context, request, response);
+        includeJsp(context, request, response);
+
+        return context;
+    }
+
+    protected void attachJson(Context context, HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response) {
+
     }
 }
