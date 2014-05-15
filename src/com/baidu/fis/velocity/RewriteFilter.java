@@ -44,6 +44,7 @@ public class RewriteFilter implements Filter {
                 url = req.getServletContext().getResource(candidate);
 
                 if (url != null) {
+                    System.out.println("Forward from " + path + " to " + candidate);
                     request.getRequestDispatcher(candidate).forward(req, resp);
                     return;
                 }

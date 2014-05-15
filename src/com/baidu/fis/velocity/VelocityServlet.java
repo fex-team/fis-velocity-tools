@@ -5,9 +5,17 @@ import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Locale;
 import java.util.Properties;
 
 @SuppressWarnings("deprecated")
@@ -54,7 +62,23 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 
     }
 
-    protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response) {
+    protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
+        String path = request.getServletPath();
+        String jspPath = path.replaceAll("\\..+$", ".jsp");
 
+        jspPath = jspPath.replaceAll("^/templates", "");
+        jspPath = "/test" + jspPath;
+
+        try {
+            URL url = request.getServletContext().getResource(jspPath);
+
+            if (url != null) {
+                request.setAttribute("context", context);
+                request.getRequestDispatcher(jspPath).include(request, response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
