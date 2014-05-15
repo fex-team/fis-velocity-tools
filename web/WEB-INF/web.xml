@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
     <filter>
-        <filter-name>RewirteFilter</filter-name>
+        <filter-name>RewriteFilter</filter-name>
         <filter-class>com.baidu.fis.velocity.RewriteFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>RewirteFilter</filter-name>
+        <filter-name>RewriteFilter</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
