@@ -2,18 +2,14 @@ package com.baidu.fis.velocity;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 /**
  * Created by 2betop on 5/7/14.
  */
-public class RewirteFilter implements Filter {
+public class RewriteFilter implements Filter {
     public void destroy() {
     }
 

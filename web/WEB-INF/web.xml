@@ -5,7 +5,7 @@
          version="3.1">
     <filter>
         <filter-name>RewirteFilter</filter-name>
-        <filter-class>com.baidu.fis.velocity.RewirteFilter</filter-class>
+        <filter-class>com.baidu.fis.velocity.RewriteFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>RewirteFilter</filter-name>
