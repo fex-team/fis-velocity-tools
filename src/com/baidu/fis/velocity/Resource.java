@@ -13,6 +13,8 @@ import java.util.Map;
 
 /**
  * Created by 2betop on 4/29/14.
+ *
+ * Fis 资源管理
  */
 public class Resource {
 

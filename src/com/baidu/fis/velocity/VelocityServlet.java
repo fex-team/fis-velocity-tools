@@ -115,8 +115,10 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
             URL url = request.getServletContext().getResource(jspPath);
 
             if (url != null) {
+                ServletResponseWrapper resp = new ResponseWrapper(response);
+
                 request.setAttribute("context", context);
-                request.getRequestDispatcher(jspPath).include(request, response);
+                request.getRequestDispatcher(jspPath).include(request, resp);
             }
 
         } catch (Exception e) {
