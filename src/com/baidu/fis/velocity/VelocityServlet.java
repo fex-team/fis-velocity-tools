@@ -1,6 +1,5 @@
 package com.baidu.fis.velocity;
 
-
 import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 
@@ -12,11 +11,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import com.alibaba.fastjson.JSONObject;
+
 
 @SuppressWarnings("deprecated")
 public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
@@ -60,6 +62,41 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 
     protected void attachJson(Context context, HttpServletRequest request, HttpServletResponse response) {
 
+        String path = request.getServletPath();
+        String jsonPath = path.replaceAll("\\..+$", ".json");
+
+        // 只给 templates 目录下面的 vm 文件自动关联 jsp 文件。
+        if (!jsonPath.startsWith("/templates/")) {
+            return;
+        }
+
+        jsonPath = jsonPath.replaceAll("^/templates", "");
+        jsonPath = "/test" + jsonPath;
+
+        try {
+            URL url = request.getServletContext().getResource(jsonPath);
+
+            if (url != null) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        url.openStream()));
+                String data = "";
+                String inputLine;
+                while ((inputLine = in.readLine()) != null){
+                    data += inputLine;
+                }
+                in.close();
+                HashMap<String, JSONObject> obj = JSONObject.parseObject(data, HashMap.class);
+                Iterator<Map.Entry<String, JSONObject>> iterator = obj.entrySet().iterator();
+                Map.Entry<String, JSONObject> entry;
+
+                while( iterator.hasNext()) {
+                    entry = iterator.next();
+                    context.put(entry.getKey(), entry.getValue());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){

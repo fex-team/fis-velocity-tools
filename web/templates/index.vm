@@ -1,3 +1,10 @@
 Hello world.
 
 I am ${name}.
+
+I am ${some} years old
+
+#foreach( $i in $some.keySet())
+    <h2>$i</h2>
+    <h1>$some.get($i)</h1>
+#end
