@@ -65,6 +65,11 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         String path = request.getServletPath();
         String jsonPath = path.replaceAll("\\..+$", ".json");
 
+        // 只给 templates 目录下面的 vm 文件自动关联 jsp 文件。
+        if (!jsonPath.startsWith("/templates/")) {
+            return;
+        }
+
         jsonPath = jsonPath.replaceAll("^/templates", "");
         jsonPath = "/test" + jsonPath;
 
