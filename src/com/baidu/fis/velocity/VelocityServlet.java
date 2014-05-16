@@ -64,13 +64,13 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
         String path = request.getServletPath();
-        String jspPath = path.replaceAll("\\..+$", ".jsp");
 
         // 只给 templates 目录下面的 vm 文件自动关联 jsp 文件。
-        if (!jspPath.startsWith("/templates/")) {
+        if (!path.startsWith("/templates/")) {
             return;
         }
 
+        String jspPath = path.replaceAll("\\..+$", ".jsp");
         jspPath = jspPath.replaceAll("^/templates", "");
         jspPath = "/test" + jspPath;
 
