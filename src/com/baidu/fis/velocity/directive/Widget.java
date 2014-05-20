@@ -19,7 +19,6 @@ import java.io.Writer;
  * Created by 2betop on 5/4/14.
  */
 public class Widget extends Parse {
-    private static boolean eventHanderFlat = false;
 
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
@@ -44,6 +43,7 @@ public class Widget extends Parse {
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
 
+        // 支持 include fis id.
         EventCartridge ec = new EventCartridge();
         ec.addEventHandler(new IncludeFisSource());
         context.attachEventCartridge(ec);

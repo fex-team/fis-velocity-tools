@@ -20,7 +20,7 @@ public abstract class AbstractBlock extends org.apache.velocity.runtime.directiv
     }
 
     protected String buildAttrs(Node node, InternalContextAdapter context, int start) {
-        return this.buildAttrs(node, context, start, -1);
+        return this.buildAttrs(node, context, start, node.jjtGetNumChildren() - 2);
     }
 
     /**
@@ -42,10 +42,6 @@ public abstract class AbstractBlock extends org.apache.velocity.runtime.directiv
     protected String buildAttrs(Node node, InternalContextAdapter context, int start, int end) {
         StringBuilder sb;
         Node item;
-
-        if (end == -1) {
-            end = node.jjtGetNumChildren() - 2;
-        }
 
         if (end < start) {
             return "";

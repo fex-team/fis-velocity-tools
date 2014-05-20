@@ -11,44 +11,20 @@ import org.apache.velocity.runtime.parser.node.Node;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by 2betop on 5/7/14.
  */
 public class Block extends AbstractBlock {
+    protected static Map<String, Map> blocks = new HashMap<String, Map>();
 
-    private static Stack<String> opStack = new Stack<String>();
-    private static Map<String, StringWriter> blocks = new HashMap<String, StringWriter>();
-
-    final public static String SET_MODE = "<set>";
-
-    public static void pushOp(String op) {
-        opStack.push(op);
+    public static void registerBlocks(String templateName, Map<String, Stack<Node>> map) {
+        blocks.put(templateName, map);
     }
 
-    public static String popOp() {
-        return opStack.pop();
-    }
-
-    protected Boolean isSetMode() {
-        return !opStack.isEmpty() && opStack.peek().equals(SET_MODE);
-    }
-
-    /**
-     * 获取 extends 对象的名字。
-     * @return
-     */
-    protected String getSetTarget() {
-        for(int i = opStack.size() - 1; i >= 0; i--) {
-            if (!opStack.get(i).equals(SET_MODE)) {
-                return opStack.get(i).toString();
-            }
-        }
-
-        return "";
+    public static void unRegisterBlocks(String templateName) {
+        blocks.remove(templateName);
     }
 
 
@@ -73,29 +49,21 @@ public class Block extends AbstractBlock {
         }
 
         Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
+        block.render(context, writer);
 
-        String target = getSetTarget();
-        StringWriter content = blocks.get(target + id);
 
-        // 设置模式。
-        // 把结果暂存起来。
-        if (isSetMode()) {
+        String templateName = context.getCurrentTemplateName();
+        Map<String, Stack<Node>> map = blocks.get(templateName);
+        if (map != null) {
 
-            if (content==null) {
-                content = new StringWriter();
-                blocks.put(target + id, content);
-            }
+            Stack<Node> arr = map.get(id);
+            Node extend;
 
-            block.render(context, content);
-        } else {
-            block.render(context, writer);
-
-            // 看看之前有没暂存数据
-            if ( content != null ) {
-                writer.write(content.toString());
-
-                // 应该没用了，清理掉
-                blocks.remove(target + id);
+            if (arr!=null) {
+                while(!arr.isEmpty()) {
+                    extend = arr.pop();
+                    extend.render(context, writer);
+                }
             }
         }
 

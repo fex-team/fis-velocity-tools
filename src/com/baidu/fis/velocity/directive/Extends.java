@@ -8,11 +8,12 @@ import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.directive.Parse;
 import org.apache.velocity.runtime.log.Log;
+import org.apache.velocity.runtime.parser.node.ASTDirective;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
+import java.util.*;
 
 /**
  * Created by 2betop on 5/7/14.
@@ -20,6 +21,8 @@ import java.io.Writer;
 public class Extends extends Parse {
 
     protected Log log;
+
+    protected Map<String, Stack<Node>> map;
 
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
@@ -59,16 +62,34 @@ public class Extends extends Parse {
             throw  new VelocityException("#extends(): the first argument is empty.");
         }
 
-        Block.pushOp(target);
-        Block.pushOp(Block.SET_MODE);
 
-        // 开始渲染 block content
+        // 先将 block 与基模板中的block绑定。
         Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
+        Map<String, Stack<Node>> map = new HashMap<String, Stack<Node>>();
+        Stack<Node> list;
+        Node child;
+        String blockId;
 
-        StringWriter blockContent = new StringWriter();
-        block.render(context, blockContent);
+        for (int i = 0, len = block.jjtGetNumChildren(); i < len; i++) {
+            child = block.jjtGetChild(i);
 
-        Block.popOp();
+            if (child instanceof ASTDirective &&
+                    ((ASTDirective)child).getDirectiveName().equals("block")) {
+                blockId = child.jjtGetChild(0).value(context).toString();
+
+                list = map.get(blockId);
+                if (list == null) {
+                    list = new Stack<Node>();
+                    map.put(blockId, list);
+                }
+
+                list.add(child);
+            }
+        }
+
+        if (!map.isEmpty()) {
+            this.map = map;
+        }
 
         // 开始渲染 extends 对象
         EventCartridge ec = new EventCartridge();
@@ -77,10 +98,29 @@ public class Extends extends Parse {
         super.render(context, writer, node);
         context.attachEventCartridge(null);
 
-        writer.write(blockContent.toString());
-
-        Block.popOp();
-
         return true;
+    }
+
+    @Override
+    protected void preRender(InternalContextAdapter context) {
+
+        if (this.map != null) {
+            List macroLibraries = context.getMacroLibraries();
+            String templateName = macroLibraries.get(macroLibraries.size() - 1).toString();
+
+            Block.registerBlocks(templateName, this.map);
+        }
+
+        super.preRender(context);
+    }
+
+    @Override
+    protected void postRender(InternalContextAdapter context) {
+        Block.unRegisterBlocks(context.getCurrentTemplateName());
+
+        this.map.clear();
+        this.map = null;
+
+        super.postRender(context);
     }
 }

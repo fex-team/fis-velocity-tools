@@ -12,5 +12,9 @@ api.sayHelloWorld();
 #end ## end script
 #end ## end block
 
+#block("header")
+<h2>Sub title</h2>
+#end
+
 #require("asyncTest:page/index.tpl")
 #end
