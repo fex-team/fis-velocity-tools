@@ -35,6 +35,28 @@ public class Resource {
     protected Log log;
     protected RuntimeServices rs;
 
+    protected static Map<RuntimeServices, Resource> instances = new HashMap<RuntimeServices, Resource>();
+    public static Resource getByVelocityRS(RuntimeServices rs) {
+        Resource res = instances.get(rs);
+
+        if (res==null) {
+            res = new Resource();
+            res.init(rs);
+            instances.put(rs, res);
+        }
+
+        return res;
+    }
+
+    public static void removeByVelocityRS(RuntimeServices rs) {
+        Resource res = instances.get(rs);
+
+        if (res!=null) {
+            res.reset();
+            instances.remove(rs);
+        }
+    }
+
 
     public Resource() {
         this.map = new HashMap<String, JSONObject>();
@@ -48,6 +70,8 @@ public class Resource {
         this.loaded.clear();
         this.collection.clear();
         this.embed.clear();
+        this.framework = null;
+        // this.rs = null;
     }
 
     public void init(RuntimeServices rs) {
@@ -196,10 +220,8 @@ public class Resource {
         list.add(uri);
     }
 
-    public String getUri(String id) {
+    protected JSONObject getNode(String id) {
         JSONObject map, node, info;
-
-        String uri;
 
         map = this.getMap(id);
         node = map.getJSONObject("res");
@@ -214,13 +236,13 @@ public class Resource {
         if (!debug && pkg != null) {
             node = map.getJSONObject("pkg");
             info = node.getJSONObject(pkg);
-            uri = info.getString("uri");
-
-        } else {
-            uri = info.getString("uri");
         }
 
-        return uri;
+        return info;
+    }
+
+    public String getUri(String id) {
+        return getNode(id).getString("uri");
     }
 
     public String renderCSS() {
@@ -248,9 +270,11 @@ public class Resource {
         Map<String, Map> defferMap = this.buildDefferMap();
 
         Boolean needModJs = framework != null && (!arr.isEmpty() || !defferMap.isEmpty());
+        String modJs = "";
 
         if (needModJs) {
-            sb.append("<script type=\"text/javascript\" src=\"" + getUri(framework) + "\"></script>");
+            modJs = getUri(framework);
+            sb.append("<script type=\"text/javascript\" src=\"" + modJs + "\"></script>");
         }
 
         if (!defferMap.isEmpty()){
@@ -259,6 +283,9 @@ public class Resource {
 
         if (arr != null) {
             for (String uri : arr) {
+                if (uri.equals(modJs)) {
+                    continue;
+                }
                 sb.append("<script type=\"text/javascript\" src=\"" + uri + "\"></script>");
             }
         }

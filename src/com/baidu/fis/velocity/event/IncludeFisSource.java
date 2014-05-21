@@ -1,18 +1,26 @@
 package com.baidu.fis.velocity.event;
 
-import com.baidu.fis.velocity.ResourceSingleton;
+import com.baidu.fis.velocity.Resource;
 
 /**
  * Created by 2betop on 5/8/14.
  */
 public class IncludeFisSource implements org.apache.velocity.app.event.IncludeEventHandler {
 
+    protected Resource fisResource = null;
+
+    public Resource getFisResource() {
+        return fisResource;
+    }
+
+    public void setFisResource(Resource fisResource) {
+        this.fisResource = fisResource;
+    }
 
     @Override
     public String includeEvent(String includeResourcePath, String currentResourcePath, String directiveName) {
-
-        if ( includeResourcePath.contains(":") ) {
-            return "/templates/" + ResourceSingleton.getUri(includeResourcePath);
+        if ( includeResourcePath.contains(":") && fisResource != null ) {
+            return "/templates/" + fisResource.getUri(includeResourcePath);
         } else if (includeResourcePath.startsWith("/") || includeResourcePath.startsWith("\\") ) {
             return includeResourcePath;
         }

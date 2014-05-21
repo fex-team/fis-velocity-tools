@@ -1,22 +1,28 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.ResourceSingleton;
+import com.baidu.fis.velocity.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.TemplateInitException;
 import org.apache.velocity.runtime.RuntimeServices;
+import org.apache.velocity.runtime.parser.node.ASTprocess;
 import org.apache.velocity.runtime.parser.node.Node;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 
 /**
  * 提取一些公共的方法
  * Created by 2betop on 5/4/14.
  */
 public abstract class AbstractBlock extends org.apache.velocity.runtime.directive.Block {
+
+    protected Resource fisResource = null;
+
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
+        fisResource = Resource.getByVelocityRS(rs);
         super.init(rs, context, node);
-
-        // 初始化 fis 的 Resource 模块。
-        ResourceSingleton.init(rs);
     }
 
     protected String buildAttrs(Node node, InternalContextAdapter context, int start) {

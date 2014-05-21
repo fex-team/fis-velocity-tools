@@ -1,6 +1,5 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.ResourceSingleton;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -36,7 +35,7 @@ public class Script extends AbstractBlock {
 
         // embed.write("</script>");
 
-        ResourceSingleton.addJSEmbed(embed.toString());
+        fisResource.addJSEmbed(embed.toString());
 
         return true;
     }
