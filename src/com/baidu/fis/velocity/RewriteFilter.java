@@ -29,6 +29,7 @@ public class RewriteFilter implements Filter {
         }
 
         HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) resp;
         String path = request.getServletPath();
 
         URL url = req.getServletContext().getResource(path);
@@ -62,6 +63,10 @@ public class RewriteFilter implements Filter {
                     return;
                 }
             }
+        } else if (path.endsWith(".json")) {
+
+            // todo use a mime-type map for add more types.
+            response.addHeader("Content-Type", "application/json");
         }
 
         chain.doFilter(req, resp);

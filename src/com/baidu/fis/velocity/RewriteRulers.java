@@ -11,7 +11,7 @@ public class RewriteRulers {
 
     final public static String DEFAULT_PATH = "WEB-INF/server.conf";
 
-    protected class Ruler {
+    protected static class Ruler {
         final public static int TYPE_REWRITE = 0;
         final public static int TYPE_REDIRECT = 1;
 
