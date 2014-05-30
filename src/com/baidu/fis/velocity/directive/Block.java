@@ -17,7 +17,26 @@ import java.util.*;
  * Created by 2betop on 5/7/14.
  */
 public class Block extends AbstractBlock {
-    protected static Map<String, Map> blocks = new HashMap<String, Map>();
+    protected static Map<String, Map<String, Node>> blocks = new HashMap<String, Map<String, Node>>();
+    protected static Stack<String> templates = new Stack<String>();
+
+    public static void pushTemplate(String template) {
+        templates.push(template);
+    }
+
+    public static String popTemplate() {
+        if (templates.isEmpty()) {
+            return "";
+        }
+        return templates.pop();
+    }
+
+    public static String getCurrentTemplate() {
+        if (templates.isEmpty()) {
+            return "";
+        }
+        return templates.peek();
+    }
 
     public static void registerBlocks(String templateName, Map<String, Node> map) {
         blocks.put(templateName, map);
@@ -49,7 +68,7 @@ public class Block extends AbstractBlock {
         }
 
 
-        String templateName = context.getCurrentTemplateName();
+        String templateName = getCurrentTemplate();
         Map<String, Node> map = blocks.get(templateName);
         Boolean overrated = false;
         if (map != null) {
@@ -58,7 +77,9 @@ public class Block extends AbstractBlock {
             if (extend != null) {
                 overrated = true;
                 map.remove(id);
+                popTemplate();
                 extend.render(context, writer);
+                pushTemplate(templateName);
             }
         }
 

@@ -59,10 +59,10 @@ public class Extends extends AbstractInclude {
     @Override
     protected void preRender(InternalContextAdapter context) {
 
-        if (this.map != null) {
+        if (this.map != null && !this.map.isEmpty()) {
             List macroLibraries = context.getMacroLibraries();
             String templateName = macroLibraries.get(macroLibraries.size() - 1).toString();
-
+            Block.pushTemplate(templateName);
             Block.registerBlocks(templateName, this.map);
         }
 
@@ -71,11 +71,8 @@ public class Extends extends AbstractInclude {
 
     @Override
     protected void postRender(InternalContextAdapter context) {
-        Block.unRegisterBlocks(context.getCurrentTemplateName());
-
-        this.map.clear();
-        this.map = null;
-
+        String templateName = Block.popTemplate();
+        Block.unRegisterBlocks(templateName);
         super.postRender(context);
     }
 
@@ -96,36 +93,44 @@ public class Extends extends AbstractInclude {
         }
 
 
-        // 先将 block 与基模板中的block绑定。
-        Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
+        Node content = node.jjtGetChild(node.jjtGetNumChildren() - 1);
         Map<String, Node> map = new HashMap<String, Node>();
-        Node child;
-        String blockId;
-        ArrayList<Node> rest = new ArrayList<Node>();
+        ArrayList<Node> children = new ArrayList<Node>();
 
-        for (int i = 0, len = block.jjtGetNumChildren(); i < len; i++) {
-            child = block.jjtGetChild(i);
+        for (int i = 0, len = content.jjtGetNumChildren(); i < len; i++) {
+            Node child = content.jjtGetChild(i);
+            String blockId;
 
-            // 找出 block 节点
+            // 找出 content 节点
             if (child instanceof ASTDirective &&
                     ((ASTDirective)child).getDirectiveName().equals("block")) {
                 blockId = child.jjtGetChild(0).value(context).toString();
 
                 map.put(blockId, child);
-            } else {
-                rest.add(child);
             }
+
+            children.add(child);
         }
 
-        if (!map.isEmpty()) {
-            this.map = map;
-        }
+        this.map = map;
+        Collection<Node> blocks = new ArrayList<Node>(map.values());
 
         super.render(context, writer, node);
 
+        // 把覆盖过的删除了。
+        for(Node block:blocks) {
+            if (!map.containsValue(block)) {
+                children.remove(block);
+            }
+        }
+
+        blocks.clear();
+        map.clear();
+        this.map = null;
+
         // 把 rest 的 Node 渲染了
-        for (Node _rest:rest) {
-            _rest.render(context, writer);
+        for (Node child:children) {
+            child.render(context, writer);
         }
     }
 }
