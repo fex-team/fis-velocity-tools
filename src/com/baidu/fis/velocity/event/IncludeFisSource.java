@@ -20,7 +20,7 @@ public class IncludeFisSource implements org.apache.velocity.app.event.IncludeEv
     @Override
     public String includeEvent(String includeResourcePath, String currentResourcePath, String directiveName) {
         if ( includeResourcePath.contains(":") && fisResource != null ) {
-            return "/templates/" + fisResource.getUri(includeResourcePath);
+            return fisResource.getUri(includeResourcePath);
         } else if (includeResourcePath.startsWith("/") || includeResourcePath.startsWith("\\") ) {
             return includeResourcePath;
         }

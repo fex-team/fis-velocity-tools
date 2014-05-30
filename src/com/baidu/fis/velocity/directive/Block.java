@@ -19,7 +19,7 @@ import java.util.*;
 public class Block extends AbstractBlock {
     protected static Map<String, Map> blocks = new HashMap<String, Map>();
 
-    public static void registerBlocks(String templateName, Map<String, Stack<Node>> map) {
+    public static void registerBlocks(String templateName, Map<String, Node> map) {
         blocks.put(templateName, map);
     }
 
@@ -48,23 +48,23 @@ public class Block extends AbstractBlock {
             throw new VelocityException("#block(): the first argument is empty ");
         }
 
-        Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
-        block.render(context, writer);
-
 
         String templateName = context.getCurrentTemplateName();
-        Map<String, Stack<Node>> map = blocks.get(templateName);
+        Map<String, Node> map = blocks.get(templateName);
+        Boolean overrated = false;
         if (map != null) {
 
-            Stack<Node> arr = map.get(id);
-            Node extend;
-
-            if (arr!=null) {
-                while(!arr.isEmpty()) {
-                    extend = arr.pop();
-                    extend.render(context, writer);
-                }
+            Node extend = map.get(id);
+            if (extend != null) {
+                overrated = true;
+                map.remove(id);
+                extend.render(context, writer);
             }
+        }
+
+        if (!overrated) {
+            Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
+            block.render(context, writer);
         }
 
         return true;

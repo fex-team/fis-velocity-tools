@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class Extends extends AbstractInclude {
 
-    protected Map<String, Stack<Node>> map;
+    protected Map<String, Node> map;
 
     @Override
     public String getName() {
@@ -98,8 +98,7 @@ public class Extends extends AbstractInclude {
 
         // 先将 block 与基模板中的block绑定。
         Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
-        Map<String, Stack<Node>> map = new HashMap<String, Stack<Node>>();
-        Stack<Node> list;
+        Map<String, Node> map = new HashMap<String, Node>();
         Node child;
         String blockId;
         ArrayList<Node> rest = new ArrayList<Node>();
@@ -112,13 +111,7 @@ public class Extends extends AbstractInclude {
                     ((ASTDirective)child).getDirectiveName().equals("block")) {
                 blockId = child.jjtGetChild(0).value(context).toString();
 
-                list = map.get(blockId);
-                if (list == null) {
-                    list = new Stack<Node>();
-                    map.put(blockId, list);
-                }
-
-                list.add(child);
+                map.put(blockId, child);
             } else {
                 rest.add(child);
             }
