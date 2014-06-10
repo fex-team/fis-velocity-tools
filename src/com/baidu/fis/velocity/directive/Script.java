@@ -21,21 +21,19 @@ public class Script extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        StringWriter embed = new StringWriter();
 
-        // embed.write("<script type=\"text/javascript\"");
+        // 指定了 url
+        if (node.jjtGetNumChildren() > 1) {
+            String uri = node.jjtGetChild(0).value(context).toString();
+            fisResource.addJS(uri);
+        } else {
+            StringWriter embed = new StringWriter();
 
-        // 生成attributes
-        // embed.write(this.buildAttrs(node, context, 0));
+            // 让父级去渲染 block body。
+            super.render(context, embed);
 
-        // embed.write(">");
-
-        // 让父级去渲染 block body。
-        super.render(context, embed);
-
-        // embed.write("</script>");
-
-        fisResource.addJSEmbed(embed.toString());
+            fisResource.addJSEmbed(embed.toString());
+        }
 
         return true;
     }

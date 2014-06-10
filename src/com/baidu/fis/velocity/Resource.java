@@ -107,7 +107,19 @@ public class Resource {
     }
 
     public void addJS(String id) {
-        this.addResource(id);
+       if (id.contains(":") && !id.startsWith("http")) {
+           this.addResource(id);
+       } else {
+           String type = "js";
+           ArrayList<String> list = collection.get(type);
+
+           if (list == null) {
+               list = new ArrayList<String>();
+               collection.put(type, list);
+           }
+
+           list.add(id);
+       }
     }
 
     public void addJSEmbed(String content) {
@@ -122,7 +134,19 @@ public class Resource {
     }
 
     public void addCSS(String id) {
-        this.addResource(id);
+        if (id.contains(":") && !id.startsWith("http")) {
+            this.addResource(id);
+        } else {
+            String type = "css";
+            ArrayList<String> list = collection.get(type);
+
+            if (list == null) {
+                list = new ArrayList<String>();
+                collection.put(type, list);
+            }
+
+            list.add(id);
+        }
     }
 
     public void addCSSEmbed(String content) {
@@ -144,7 +168,7 @@ public class Resource {
         JSONObject map, node, info;
 
         // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
-        // 如果之前是同步的这次异步添加则忽略掉。
+        // 如果之前是同步的这次异步添加则忽略掉。都同步添加过了，不需要异步再添加一次。
         // 注意：null 不能直接用来和 false\true 比较，否则报错。
         if ( loaded.get(id) != null && loaded.get(id) == deffer ||
                 deffer && loaded.get(id) != null && !loaded.get(id) ) {

@@ -65,7 +65,7 @@ public class RewriteFilter implements Filter {
             }
         } else if (path.endsWith(".json")) {
 
-            // todo use a mime-type map for add more types.
+            // todo use a mime-type map for more types.
             response.addHeader("Content-Type", "application/json");
         }
 

@@ -21,21 +21,19 @@ public class Style extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        StringWriter embed = new StringWriter();
 
-        // embed.write("<style type=\"text/css\"");
+        // 指定了 url
+        if (node.jjtGetNumChildren() > 1) {
+            String uri = node.jjtGetChild(0).value(context).toString();
+            fisResource.addCSS(uri);
+        } else {
+            StringWriter embed = new StringWriter();
 
-        // 生成attributes
-        // embed.write(this.buildAttrs(node, context, 0));
+            // 让父级去渲染 block body。
+            super.render(context, embed);
 
-        // embed.write(">");
-
-        // 让父级去渲染 block body。
-        super.render(context, embed);
-
-        // embed.write("</style>");
-
-        fisResource.addCSSEmbed(embed.toString());
+            fisResource.addCSSEmbed(embed.toString());
+        }
 
         return true;
     }
