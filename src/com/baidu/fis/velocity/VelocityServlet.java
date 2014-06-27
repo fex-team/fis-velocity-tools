@@ -4,20 +4,18 @@ import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
 import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.velocity.runtime.RuntimeSingleton;
+import org.apache.velocity.runtime.RuntimeConstants;
 
 
 @SuppressWarnings("deprecated")
@@ -77,14 +75,16 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
             URL url = request.getServletContext().getResource(jsonPath);
 
             if (url != null) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        url.openStream()));
+                String enc = RuntimeSingleton.getString(RuntimeConstants.INPUT_ENCODING);
+                BufferedReader in = new BufferedReader(new UnicodeReader(
+                        url.openStream(), enc));
                 String data = "";
                 String inputLine;
                 while ((inputLine = in.readLine()) != null){
                     data += inputLine;
                 }
                 in.close();
+
                 HashMap<String, JSONObject> obj = JSONObject.parseObject(data, HashMap.class);
                 Iterator<Map.Entry<String, JSONObject>> iterator = obj.entrySet().iterator();
                 Map.Entry<String, JSONObject> entry;

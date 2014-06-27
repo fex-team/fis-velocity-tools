@@ -3,6 +3,7 @@ package com.baidu.fis.velocity;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.resource.ContentResource;
@@ -24,6 +25,7 @@ public class Resource {
     protected Boolean debug = false;
     protected String mapDir = null;
     protected String framework = null;
+    protected String encoding = "";
 
     // 存 map.json 数据， key 为 namespace, value 为 json 数据
     protected Map<String, JSONObject> map;
@@ -88,6 +90,8 @@ public class Resource {
         // 用来指定map文件存放目录。
         mapDir = rs.getString("fis.mapDir", "WEB-INF/config");
         debug = rs.getBoolean("fis.debug", false);
+
+        encoding = (String) rs.getProperty(RuntimeConstants.INPUT_ENCODING);
     }
 
     public String getMapDir() {
@@ -345,7 +349,7 @@ public class Resource {
                 // 通过 velocity 的资源加载器读取内容。
                 // 实在是没找到读取 servlet context 的方法，导致定位不到文件。
                 // 所以还是用 velocity 的 RuntimeServices 吧
-                ContentResource file = rs.getContent(filename);
+                ContentResource file = rs.getContent(filename, encoding);
                 this.map.put(ns, JSONObject.parseObject(file.getData().toString()));
 
             } catch ( ResourceNotFoundException error ) {
