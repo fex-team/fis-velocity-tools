@@ -22,7 +22,7 @@ public class Resource {
     public static final String STYLE_PLACEHOLDER = "<!--FIS_STYLE_PLACEHOLDER-->";
     public static final String SCRIPT_PLACEHOLDER = "<!--FIS_SCRIPT_PLACEHOLDER-->";
 
-    protected Boolean debug = false;
+    public Boolean debug = false;
     protected String mapDir = null;
     protected String framework = null;
     protected String encoding = "";
@@ -111,7 +111,7 @@ public class Resource {
     }
 
     public void addJS(String id) {
-       if (id.contains(":") && !id.startsWith("http")) {
+       if (id.contains(":") && !id.contains(":/") && !id.contains(":\\")) {
            this.addResource(id);
        } else {
            String type = "js";
@@ -138,7 +138,7 @@ public class Resource {
     }
 
     public void addCSS(String id) {
-        if (id.contains(":") && !id.startsWith("http")) {
+        if (id.contains(":") && !id.contains(":/") && !id.contains(":\\")) {
             this.addResource(id);
         } else {
             String type = "css";
@@ -357,7 +357,13 @@ public class Resource {
             }
         }
 
-        return this.map.get(ns);
+        JSONObject ret = this.map.get(ns);
+
+        if (ret == null) {
+            throw new IllegalArgumentException("missing map json of [" + id + "]");
+        }
+
+        return ret;
     }
 
     /**

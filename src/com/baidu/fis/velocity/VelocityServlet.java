@@ -4,10 +4,13 @@ import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
 
@@ -124,5 +127,32 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected void error( HttpServletRequest request, HttpServletResponse response, Exception cause )
+            throws ServletException, IOException
+    {
+        StringBuffer html = new StringBuffer();
+        html.append("<html>");
+        html.append("<title>Error</title>");
+        html.append("<body bgcolor=\"#ffffff\">");
+        html.append("<h2>VelocityServlet: Error processing the template</h2>");
+        html.append("<pre>");
+        String why = cause.getMessage();
+        if (why != null && why.trim().length() > 0)
+        {
+            html.append(why);
+            html.append("<br>");
+        }
+
+        StringWriter sw = new StringWriter();
+        cause.printStackTrace( new PrintWriter( sw ) );
+
+        html.append("<h3>Detail:</h3>");
+        html.append( sw.toString()  );
+        html.append("</pre>");
+        html.append("</body>");
+        html.append("</html>");
+        response.getOutputStream().print( html.toString() );
     }
 }

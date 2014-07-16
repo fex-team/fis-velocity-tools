@@ -2,11 +2,9 @@ package com.baidu.fis.velocity.directive;
 
 
 import org.apache.velocity.context.InternalContextAdapter;
-import org.apache.velocity.exception.MethodInvocationException;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.exception.TemplateInitException;
+import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.RuntimeServices;
+import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.ASTprocess;
 import org.apache.velocity.runtime.parser.node.Node;
 
@@ -25,6 +23,8 @@ public class Html extends AbstractBlock {
         String framework;
         Boolean isTopNode = false;
         Writer buffer = writer;
+
+        this.avoidEmbedSelf(node);
 
         Node parent = node.jjtGetParent();
         if ((parent == null || parent instanceof ASTprocess) &&

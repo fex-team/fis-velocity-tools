@@ -5,6 +5,7 @@ import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.TemplateInitException;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.directive.Directive;
+import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.Node;
 
 /**
@@ -12,6 +13,7 @@ import org.apache.velocity.runtime.parser.node.Node;
  */
 abstract public class AbstractInline extends Directive {
     protected Resource fisResource = null;
+    protected Log log;
 
     @Override
     public int getType() {
@@ -21,6 +23,7 @@ abstract public class AbstractInline extends Directive {
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
         fisResource = Resource.getByVelocityRS(rs);
+        log = rs.getLog();
         super.init(rs, context, node);
     }
 }

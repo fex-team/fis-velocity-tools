@@ -25,7 +25,12 @@ public class Uri extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        writer.write(fisResource.getUri(node.jjtGetChild(0).value(context).toString()));
+        try {
+            writer.write(fisResource.getUri(node.jjtGetChild(0).value(context).toString()));
+        } catch (Exception err) {
+            throw new VelocityException(err.getMessage() +
+                    Log.formatFileString(this));
+        }
 
         return true;
     }

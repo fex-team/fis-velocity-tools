@@ -22,6 +22,8 @@ public class Head extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
+        this.avoidEmbedSelf(node);
+
         writer.write("<head");
 
         // 生成attributes

@@ -3,7 +3,10 @@ package com.baidu.fis.velocity.directive;
 import com.baidu.fis.velocity.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.TemplateInitException;
+import org.apache.velocity.exception.VelocityException;
 import org.apache.velocity.runtime.RuntimeServices;
+import org.apache.velocity.runtime.log.Log;
+import org.apache.velocity.runtime.parser.node.ASTDirective;
 import org.apache.velocity.runtime.parser.node.ASTprocess;
 import org.apache.velocity.runtime.parser.node.Node;
 
@@ -66,5 +69,19 @@ public abstract class AbstractBlock extends org.apache.velocity.runtime.directiv
         }
 
         return sb.toString();
+    }
+
+    protected void avoidEmbedSelf(Node node) {
+        // style 不能嵌套。
+        Node parent = node.jjtGetParent();
+        while (parent != null) {
+            if (parent instanceof ASTDirective &&
+                    ((ASTDirective)parent).getDirectiveName().equals(this.getName())) {
+                throw new VelocityException("Can\'t embed #"+ this.getName() +" in #"+ this.getName() +" directive " +
+                        Log.formatFileString(this));
+            }
+
+            parent = parent.jjtGetParent();
+        }
     }
 }

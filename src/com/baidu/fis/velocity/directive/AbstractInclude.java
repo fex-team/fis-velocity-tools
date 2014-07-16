@@ -10,6 +10,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.exception.TemplateInitException;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.directive.Parse;
+import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import java.io.IOException;
@@ -20,10 +21,12 @@ import java.io.Writer;
  */
 abstract public class AbstractInclude extends Parse {
     protected Resource fisResource = null;
+    protected Log log;
 
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
         fisResource = Resource.getByVelocityRS(rs);
+        log = rs.getLog();
         super.init(rs, context, node);
     }
 

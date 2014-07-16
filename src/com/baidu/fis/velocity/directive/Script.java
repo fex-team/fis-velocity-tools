@@ -4,6 +4,9 @@ import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.exception.VelocityException;
+import org.apache.velocity.runtime.log.Log;
+import org.apache.velocity.runtime.parser.node.ASTDirective;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import java.io.IOException;
@@ -21,6 +24,8 @@ public class Script extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
+
+        this.avoidEmbedSelf(node);
 
         // 指定了 url
         if (node.jjtGetNumChildren() > 1) {

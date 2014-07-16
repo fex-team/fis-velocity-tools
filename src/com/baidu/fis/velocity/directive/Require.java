@@ -28,8 +28,13 @@ public class Require extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        // 只需要把依赖加载上就可以了。
-        fisResource.addResource(node.jjtGetChild(0).value(context).toString());
+        try {
+            // 只需要把依赖加载上就可以了。
+            fisResource.addResource(node.jjtGetChild(0).value(context).toString());
+        } catch (Exception err) {
+            writer.write(err.getMessage() + " " + Log.formatFileString(this));
+            log.warn(err.getStackTrace());
+        }
 
         return true;
     }
