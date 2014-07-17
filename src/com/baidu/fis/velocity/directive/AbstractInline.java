@@ -22,8 +22,24 @@ abstract public class AbstractInline extends Directive {
 
     @Override
     public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
-        fisResource = Resource.getByVelocityRS(rs);
         log = rs.getLog();
         super.init(rs, context, node);
+    }
+
+    protected Resource connectFis(InternalContextAdapter context) {
+        if (fisResource == null) {
+            fisResource = Resource.connect(context, rsvc);
+            fisResource.init(rsvc);
+        }
+        return fisResource;
+    }
+
+    protected void disConnectFis(InternalContextAdapter context) {
+        if (fisResource == null) {
+            return;
+        }
+
+        fisResource.disConnect(context);
+        fisResource = null;
     }
 }

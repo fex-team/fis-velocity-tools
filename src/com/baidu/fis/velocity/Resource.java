@@ -2,6 +2,7 @@ package com.baidu.fis.velocity;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.RuntimeServices;
@@ -26,6 +27,7 @@ public class Resource {
     protected String mapDir = null;
     protected String framework = null;
     protected String encoding = "";
+    protected int client = 0;
 
     // 存 map.json 数据， key 为 namespace, value 为 json 数据
     protected Map<String, JSONObject> map;
@@ -37,25 +39,43 @@ public class Resource {
     protected Log log;
     protected RuntimeServices rs;
 
-    protected static Map<RuntimeServices, Resource> instances = new HashMap<RuntimeServices, Resource>();
-    public static Resource getByVelocityRS(RuntimeServices rs) {
-        Resource res = instances.get(rs);
+    protected static Map<InternalContextAdapter, Resource> instances = new HashMap<InternalContextAdapter, Resource>();
+    public static Resource connect(InternalContextAdapter ctx, RuntimeServices rs) {
+        Resource res = instances.get(ctx);
+
+        // System.out.println("enter");
 
         if (res==null) {
             res = new Resource();
             res.init(rs);
-            instances.put(rs, res);
+            // System.out.println("New instance" + res);
+            instances.put(ctx, res);
         }
+
+        res.client++;
+
+        // System.out.println(res.client);
 
         return res;
     }
 
-    public static void removeByVelocityRS(RuntimeServices rs) {
-        Resource res = instances.get(rs);
+    public static void disConnect(InternalContextAdapter ctx) {
+        Resource res = instances.get(ctx);
 
-        if (res!=null) {
-            res.reset();
-            instances.remove(rs);
+        if (res==null) {
+            return;
+        }
+
+        res.client--;
+
+        // System.out.println(res.client);
+
+        if (res.client == 0) {
+
+            // System.out.println("destroy");
+
+            res.destroy();
+            instances.remove(ctx);
         }
     }
 
@@ -73,7 +93,11 @@ public class Resource {
         this.collection.clear();
         this.embed.clear();
         this.framework = null;
-        // this.rs = null;
+        this.rs = null;
+    }
+
+    public void destroy() {
+        this.reset();
     }
 
     public void init(RuntimeServices rs) {
@@ -297,7 +321,7 @@ public class Resource {
         ArrayList<String> arr = collection.get("js");
         Map<String, Map> defferMap = this.buildDefferMap();
 
-        Boolean needModJs = framework != null && (!arr.isEmpty() || !defferMap.isEmpty());
+        Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || !defferMap.isEmpty());
         String modJs = "";
 
         if (needModJs) {
@@ -460,11 +484,14 @@ public class Resource {
     }
 
     public String filterContent(String input) {
-        input = input.replace(Resource.STYLE_PLACEHOLDER, renderCSS());
-        input = input.replace(Resource.SCRIPT_PLACEHOLDER, renderJS());
 
-        // 重要：必须得重置，否则会出现资源重复。
-        reset();
+        if (input.contains(Resource.SCRIPT_PLACEHOLDER)) {
+            input = input.replace(Resource.SCRIPT_PLACEHOLDER, renderJS());
+        }
+
+        if (input.contains(Resource.STYLE_PLACEHOLDER)) {
+            input = input.replace(Resource.STYLE_PLACEHOLDER, renderCSS());
+        }
 
         return input;
     }

@@ -28,6 +28,8 @@ public class Require extends AbstractInline {
                     Log.formatFileString(this));
         }
 
+        connectFis(context);
+
         try {
             // 只需要把依赖加载上就可以了。
             fisResource.addResource(node.jjtGetChild(0).value(context).toString());
@@ -35,6 +37,8 @@ public class Require extends AbstractInline {
             writer.write(err.getMessage() + " " + Log.formatFileString(this));
             log.warn(err.getStackTrace());
         }
+
+        disConnectFis(context);
 
         return true;
     }

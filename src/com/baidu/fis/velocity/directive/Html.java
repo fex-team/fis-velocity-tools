@@ -3,8 +3,6 @@ package com.baidu.fis.velocity.directive;
 
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
-import org.apache.velocity.runtime.RuntimeServices;
-import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.ASTprocess;
 import org.apache.velocity.runtime.parser.node.Node;
 
@@ -20,6 +18,8 @@ public class Html extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
+        connectFis(context);
+
         String framework;
         Boolean isTopNode = false;
         Writer buffer = writer;
@@ -34,7 +34,6 @@ public class Html extends AbstractBlock {
 
         if (isTopNode) {
             buffer = new StringWriter();
-            fisResource.reset();
         }
 
         buffer.write("<html");
@@ -60,6 +59,8 @@ public class Html extends AbstractBlock {
         if (isTopNode) {
             writer.write(fisResource.filterContent(buffer.toString()));
         }
+
+        disConnectFis(context);
 
         return true;
     }

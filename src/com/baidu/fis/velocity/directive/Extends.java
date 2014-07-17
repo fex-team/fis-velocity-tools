@@ -31,6 +31,7 @@ public class Extends extends AbstractInclude {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
+        connectFis(context);
 
         Boolean isTopNode = false;
         Writer buffer = writer;
@@ -50,8 +51,9 @@ public class Extends extends AbstractInclude {
         // 只有当它为顶级 node 的时候才这么做，当然不能是被extends时。
         if (isTopNode) {
             writer.write(fisResource.filterContent(buffer.toString()));
-            fisResource.reset();
         }
+
+        disConnectFis(context);
 
         return true;
     }

@@ -19,13 +19,23 @@ import java.io.Writer;
  * Created by 2betop on 5/4/14.
  */
 public abstract class AbstractBlock extends org.apache.velocity.runtime.directive.Block {
+    protected Resource fisResource;
 
-    protected Resource fisResource = null;
+    protected Resource connectFis(InternalContextAdapter context) {
+        if (fisResource == null) {
+            fisResource = Resource.connect(context, rsvc);
+            fisResource.init(rsvc);
+        }
+        return fisResource;
+    }
 
-    @Override
-    public void init(RuntimeServices rs, InternalContextAdapter context, Node node) throws TemplateInitException {
-        fisResource = Resource.getByVelocityRS(rs);
-        super.init(rs, context, node);
+    protected void disConnectFis(InternalContextAdapter context) {
+        if (fisResource == null) {
+            return;
+        }
+
+        fisResource.disConnect(context);
+        fisResource = null;
     }
 
     protected String buildAttrs(Node node, InternalContextAdapter context, int start) {
