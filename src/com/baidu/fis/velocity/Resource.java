@@ -23,14 +23,11 @@ public class Resource {
     public static final String STYLE_PLACEHOLDER = "<!--FIS_STYLE_PLACEHOLDER-->";
     public static final String SCRIPT_PLACEHOLDER = "<!--FIS_SCRIPT_PLACEHOLDER-->";
 
-    public Boolean debug = false;
-    protected String mapDir = null;
     protected String framework = null;
     protected String encoding = "";
     protected int client = 0;
 
-    // 存 map.json 数据， key 为 namespace, value 为 json 数据
-    protected Map<String, JSONObject> map;
+    protected MapJson map = null;
     protected Map<String, Boolean> loaded;
     protected Map<String, ArrayList<String>> collection;
     protected Map<String, StringBuilder> embed;
@@ -81,14 +78,13 @@ public class Resource {
 
 
     public Resource() {
-        this.map = new HashMap<String, JSONObject>();
         this.loaded = new HashMap<String, Boolean>();
         this.collection = new HashMap<String, ArrayList<String>>();
         this.embed = new HashMap<String, StringBuilder>();
+        this.map = new MapJson();
     }
 
     public void reset() {
-        this.map.clear();
         this.loaded.clear();
         this.collection.clear();
         this.embed.clear();
@@ -110,20 +106,7 @@ public class Resource {
         this.rs = rs;
         log = rs.getLog();
 
-        // 从velocity.properties里面读取fis.mapDir。
-        // 用来指定map文件存放目录。
-        mapDir = rs.getString("fis.mapDir", "WEB-INF/config");
-        debug = rs.getBoolean("fis.debug", false);
-
         encoding = (String) rs.getProperty(RuntimeConstants.INPUT_ENCODING);
-    }
-
-    public String getMapDir() {
-        return mapDir;
-    }
-
-    public void setMapDir(String mapDir) {
-        this.mapDir = mapDir;
     }
 
     public String getFramework() {
@@ -193,7 +176,8 @@ public class Resource {
     }
 
     public void addResource(String id, Boolean deffer) {
-        JSONObject map, node, info;
+        JSONObject info, node;
+        String uri;
 
         // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
         // 如果之前是同步的这次异步添加则忽略掉。都同步添加过了，不需要异步再添加一次。
@@ -203,11 +187,7 @@ public class Resource {
             return;
         }
 
-        map = this.getMap(id);
-        node = map.getJSONObject("res");
-        info = node.getJSONObject(id);
-
-        String uri;
+        info = map.getNode(id);
 
         if (info == null) {
             throw new IllegalArgumentException("missing resource [" + id + "]");
@@ -215,9 +195,8 @@ public class Resource {
 
         String pkg = (String) info.get("pkg");
 
-        if (!debug && pkg != null) {
-            node = map.getJSONObject("pkg");
-            info = node.getJSONObject(pkg);
+        if (!Settings.getBoolean("debug", false) && pkg != null) {
+            info = map.getNode(pkg, "pkg");
             uri = info.getString("uri");
 
             if (info.containsKey("has")) {
@@ -272,29 +251,14 @@ public class Resource {
         list.add(uri);
     }
 
-    protected JSONObject getNode(String id) {
-        JSONObject map, node, info;
-
-        map = this.getMap(id);
-        node = map.getJSONObject("res");
-        info = node.getJSONObject(id);
-
-        if (info == null) {
-            throw new IllegalArgumentException("missing resource [" + id + "]");
-        }
-
-        String pkg = (String) info.get("pkg");
-
-        if (!debug && pkg != null) {
-            node = map.getJSONObject("pkg");
-            info = node.getJSONObject(pkg);
-        }
-
-        return info;
-    }
-
     public String getUri(String id) {
-        return getNode(id).getString("uri");
+        JSONObject node = map.getNode(id);
+
+        if (node == null) {
+            return null;
+        }
+
+        return node.getString("uri");
     }
 
     public String renderCSS() {
@@ -353,44 +317,6 @@ public class Resource {
     }
 
     /**
-     * 根据资源的 namespace 读取对应的 fis map 产出表。
-     *
-     * @param id
-     */
-    protected JSONObject getMap(String id) {
-        String ns = "__global__";
-        int pos = id.indexOf(":");
-
-        if (pos != -1) {
-            ns = id.substring(0, pos);
-        }
-
-        if (!this.map.containsKey(ns)) {
-            String filename = mapDir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
-
-            try {
-
-                // 通过 velocity 的资源加载器读取内容。
-                // 实在是没找到读取 servlet context 的方法，导致定位不到文件。
-                // 所以还是用 velocity 的 RuntimeServices 吧
-                ContentResource file = rs.getContent(filename, encoding);
-                this.map.put(ns, JSONObject.parseObject(file.getData().toString()));
-
-            } catch ( ResourceNotFoundException error ) {
-                log.error(error.getMessage());
-            }
-        }
-
-        JSONObject ret = this.map.get(ns);
-
-        if (ret == null) {
-            throw new IllegalArgumentException("missing map json of [" + id + "]");
-        }
-
-        return ret;
-    }
-
-    /**
      * 生成异步JS资源表。
      * @return
      */
@@ -400,7 +326,7 @@ public class Resource {
         Map<String, JSONObject> pkgMap = new HashMap<String, JSONObject>();
 
         ArrayList<String> list = collection.get("jsDeffer");
-        JSONObject map, node, info;
+        JSONObject info, node;
 
         if (list != null) {
 
@@ -411,24 +337,21 @@ public class Resource {
                     continue;
                 }
 
-                map = this.getMap(id);
-                node = map.getJSONObject("res");
-                info = node.getJSONObject(id);
+                info = map.getNode(id);
+
 
                 if (info == null) {
                     throw new IllegalArgumentException("missing resource [" + id + "]");
                 }
 
                 // 先加 res
-                node = map.getJSONObject("res");
-                info = node.getJSONObject(id);
                 String pkg = info.getString("pkg");
 
                 JSONObject infoCopy = new JSONObject();
                 infoCopy.put("url", info.getString("uri"));
 
                 // 保留 pkg 信息
-                if (!debug && pkg != null) {
+                if (!Settings.getBoolean("debug", false) && pkg != null) {
                     infoCopy.put("pkg", pkg);
                 }
 
@@ -458,9 +381,8 @@ public class Resource {
                 }
 
                 // 再把对应的 pkg 加入。
-                if (!debug && pkg != null) {
-                    node = map.getJSONObject("pkg");
-                    info = node.getJSONObject(pkg);
+                if (!Settings.getBoolean("debug", false) && pkg != null) {
+                    info = map.getNode(pkg, "pkg");
 
                     info.put("url", info.getString("uri"));
                     info.remove("uri");

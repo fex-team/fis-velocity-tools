@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by 2betop on 5/7/14.
@@ -23,20 +25,40 @@ public class RewriteFilter implements Filter {
 
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
 
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) resp;
+
         // 先执行 rewrite.
-        if (handleRewrite((HttpServletRequest)req, (HttpServletResponse)resp)) {
+        if (handleRewrite(request, response)) {
+            return;
+        } else if (handlePreview(request, response)) {
             return;
         }
 
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) resp;
-        String path = request.getServletPath();
+        chain.doFilter(req, resp);
+    }
 
+    public void init(FilterConfig config) throws ServletException {
+
+    }
+
+    protected Boolean handlePreview(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException{
+        String path = req.getServletPath();
         URL url = req.getServletContext().getResource(path);
 
         // 找不到资源
         if (url == null) {
-            ArrayList<String> candidates = new ArrayList<String>();
+            Pattern reg = Pattern.compile("^/[^/]+/page/.*$", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = reg.matcher(path);
+            if (matcher.find()) {
+                if (!path.endsWith(".vm")) {
+                    path += ".vm";
+                    req.getRequestDispatcher(path).forward(req, resp);
+                    return true;
+                }
+            }
+
+            /*ArrayList<String> candidates = new ArrayList<String>();
 
             // 如果不是.vm 结尾则尝试加 .vm
             if (!path.endsWith(".vm")) {
@@ -59,21 +81,16 @@ public class RewriteFilter implements Filter {
 
                 if (url != null) {
                     // System.out.println("Forward from " + path + " to " + candidate);
-                    request.getRequestDispatcher(candidate).forward(req, resp);
-                    return;
+                    req.getRequestDispatcher(candidate).forward(req, resp);
+                    return true;
                 }
-            }
+            }*/
         } else if (path.endsWith(".json")) {
 
             // todo use a mime-type map for more types.
-            response.addHeader("Content-Type", "application/json");
+            resp.addHeader("Content-Type", "application/json");
         }
-
-        chain.doFilter(req, resp);
-    }
-
-    public void init(FilterConfig config) throws ServletException {
-
+        return false;
     }
 
     // 读取 server.conf 进行转发

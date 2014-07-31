@@ -1,9 +1,11 @@
 package com.baidu.fis.velocity;
 
 import org.apache.velocity.Template;
+import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +17,8 @@ import java.net.URL;
 import java.util.*;
 
 import java.io.BufferedReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.velocity.runtime.RuntimeSingleton;
@@ -24,6 +28,13 @@ import org.apache.velocity.runtime.RuntimeConstants;
 @SuppressWarnings("deprecated")
 public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 {
+
+    @Override
+    protected void initVelocity(ServletConfig config) throws ServletException {
+        Velocity.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
+        super.initVelocity(config);
+    }
+
     /**
      * @param ctx
      */
@@ -31,8 +42,24 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
     @SuppressWarnings("deprecated")
     protected Template handleRequest(Context ctx) throws Exception {
         HttpServletRequest req = (HttpServletRequest)ctx.get(REQUEST);
+        String path = req.getServletPath();
 
-        return getTemplate(req.getServletPath());
+        Pattern reg = Pattern.compile("^/([^/]+)/page/(.*)$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = reg.matcher(path);
+
+        if (matcher.find()) {
+            String ns = matcher.group(1);
+            String file = matcher.group(2);
+            MapJson map = new MapJson();
+
+            JSONObject info = map.getNode(ns + ":page/" + file);
+
+            if (info!=null) {
+                path = info.getString("uri");
+            }
+        }
+
+        return getTemplate(path);
     }
 
     /**
@@ -46,7 +73,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 
         p.load(getServletContext().getResourceAsStream("WEB-INF/velocity.properties"));
 
-        p.setProperty("file.resource.loader.path", getServletContext().getRealPath("./") + "//");
+        // p.setProperty("file.resource.loader.path", getServletContext().getRealPath("./") + "//");
 
         return p;
     }
