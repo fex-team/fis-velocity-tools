@@ -51,12 +51,16 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         if (matcher.find()) {
             String ns = matcher.group(1);
             String file = matcher.group(2);
-            MapJson map = new MapJson();
+            try {
+                MapJson map = new MapJson();
 
-            JSONObject info = map.getNode(ns + ":page/" + file);
+                JSONObject info = map.getNode(ns + ":page/" + file);
 
-            if (info!=null) {
-                path = info.getString("uri");
+                if (info!=null) {
+                    path = info.getString("uri");
+                }
+            } catch (Exception err) {
+
             }
         }
 
@@ -94,12 +98,6 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         String path = request.getServletPath();
         String jsonPath = path.replaceAll("\\..+$", ".json");
 
-        // 只给 templates 目录下面的 vm 文件自动关联 jsp 文件。
-        if (!jsonPath.startsWith("/templates/")) {
-            return;
-        }
-
-        jsonPath = jsonPath.replaceAll("^/templates", "");
         jsonPath = "/test" + jsonPath;
 
         try {
