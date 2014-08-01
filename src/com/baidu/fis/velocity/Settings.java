@@ -1,18 +1,28 @@
 package com.baidu.fis.velocity;
 
-import java.io.IOException;
+import com.sun.xml.internal.xsom.impl.scd.Iterators;
+
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
-/**
- * Created by 2betop on 7/30/14.
- */
 public class Settings {
 
-    protected static Properties data = null;
+    protected static Properties data = new Properties();
+
+    protected static Map<String, Object> map = new HashMap<String, Object>();
+
+    public static void setApplicationAttribute(String key, Object val) {
+        map.put(key, val);
+    }
+
+    public static Object getApplicationAttribute(String key) {
+        return map.get(key);
+    }
 
     // 路径是相对与 WEB-INF 目录的。
-    protected static String path = "/../fis.properties";
+    public static String DEFAULT_PATH = "/WEB-INF/fis.properties";
 
     public static Boolean getBoolean(String key, Boolean def) {
         Boolean val = getBoolean(key);
@@ -40,23 +50,14 @@ public class Settings {
     }
 
     public static String getString(String key) {
-        if (data == null) {
-            load();
-        }
-
         return data.getProperty(key);
     }
 
-    protected static void load() {
-        InputStream input = Settings.class.getResourceAsStream(path);
-        data = new Properties();
-
-        if (input!=null) {
-            try {
-                data.load(input);
-            } catch (Exception err) {
-                System.out.println(err.getMessage());
-            }
+    protected static void load(InputStream input) {
+        try {
+            data.load(input);
+        } catch (Exception err) {
+            System.out.println(err.getMessage());
         }
     }
 }

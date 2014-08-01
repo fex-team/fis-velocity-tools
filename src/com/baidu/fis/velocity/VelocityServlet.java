@@ -32,6 +32,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
     @Override
     protected void initVelocity(ServletConfig config) throws ServletException {
         Velocity.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
+        Settings.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
         super.initVelocity(config);
     }
 
@@ -70,7 +71,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
     protected Properties loadConfiguration(ServletConfig config) throws IOException {
 
         Properties p = super.loadConfiguration(config);
-
+        Settings.load(this.getServletContext().getResourceAsStream(Settings.DEFAULT_PATH));
         p.load(getServletContext().getResourceAsStream("WEB-INF/velocity.properties"));
         p.setProperty("file.resource.loader.class", "com.baidu.fis.velocity.WebappResourceLoader");
         p.setProperty("file.resource.loader.path", Settings.getString("velocity.path", "."));

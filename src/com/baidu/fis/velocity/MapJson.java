@@ -2,6 +2,7 @@ package com.baidu.fis.velocity;
 
 import com.alibaba.fastjson.JSONObject;
 
+import javax.servlet.ServletContext;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -58,10 +59,11 @@ public class MapJson {
         }
 
         if (!this.map.containsKey(ns)) {
-            String filename = "/../../" + dir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
+            String filename = dir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
 
             try {
-                InputStream input = this.getClass().getResourceAsStream(filename);
+                ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
+                InputStream input = ctx.getResourceAsStream(filename);
                 String enc = "UTF-8";
                 BufferedReader in = new BufferedReader(new UnicodeReader(input, enc));
                 String data = "";
