@@ -72,8 +72,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         Properties p = super.loadConfiguration(config);
 
         p.load(getServletContext().getResourceAsStream("WEB-INF/velocity.properties"));
-
-        // p.setProperty("file.resource.loader.path", getServletContext().getRealPath("./") + "//");
+        p.setProperty("file.resource.loader.path", getServletContext().getRealPath("/") + Settings.getString("velocity.path", "."));
 
         return p;
     }
