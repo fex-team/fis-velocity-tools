@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class MapJson {
 
-    protected String dir = "WEB-INF/map";
+    protected String dir = "WEB-INF/config";
     protected Map<String, JSONObject> map;
 
     public MapJson() {
