@@ -131,9 +131,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
         String path = request.getServletPath();
 
-        String jspPath = path.replaceAll("\\..+$", ".jsp");
-        jspPath = jspPath.replaceAll("^/templates", "");
-        jspPath = "/test" + jspPath;
+        String jspPath = "/test" + path.replaceAll("\\..+$", ".jsp");
 
         try {
             URL url = request.getServletContext().getResource(jspPath);
