@@ -53,7 +53,7 @@ public class Settings {
         return data.getProperty(key);
     }
 
-    protected static void load(InputStream input) {
+    public static void load(InputStream input) {
         try {
             data.load(input);
         } catch (Exception err) {
