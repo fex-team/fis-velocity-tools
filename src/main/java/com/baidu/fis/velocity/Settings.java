@@ -1,7 +1,5 @@
 package com.baidu.fis.velocity;
 
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
