@@ -2,10 +2,6 @@ package com.baidu.fis.velocity.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.velocity.context.InternalContextAdapter;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.RuntimeServices;
-import org.apache.velocity.runtime.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,89 +18,17 @@ public class Resource {
     public static final String SCRIPT_PLACEHOLDER = "<!--FIS_SCRIPT_PLACEHOLDER-->";
 
     protected String framework = null;
-    protected String encoding = "";
-    protected int client = 0;
-
     protected MapJson map = null;
     protected Map<String, Boolean> loaded;
     protected Map<String, ArrayList<String>> collection;
     protected Map<String, StringBuilder> embed;
-
-
-    protected Log log;
-    protected RuntimeServices rs;
-
-    protected static Map<InternalContextAdapter, Resource> instances = new HashMap<InternalContextAdapter, Resource>();
-    public static Resource connect(InternalContextAdapter ctx, RuntimeServices rs) {
-        Resource res = instances.get(ctx);
-
-        // System.out.println("enter");
-
-        if (res==null) {
-            res = new Resource();
-            res.init(rs);
-            // System.out.println("New instance" + res);
-            instances.put(ctx, res);
-        }
-
-        res.client++;
-
-        // System.out.println(res.client);
-
-        return res;
-    }
-
-    public static void disConnect(InternalContextAdapter ctx) {
-        Resource res = instances.get(ctx);
-
-        if (res==null) {
-            return;
-        }
-
-        res.client--;
-
-        // System.out.println(res.client);
-
-        if (res.client == 0) {
-
-            // System.out.println("destroy");
-
-            res.destroy();
-            instances.remove(ctx);
-        }
-    }
-
+    public int refs = 0;
 
     public Resource() {
         this.loaded = new HashMap<String, Boolean>();
         this.collection = new HashMap<String, ArrayList<String>>();
         this.embed = new HashMap<String, StringBuilder>();
         this.map = new MapJson();
-    }
-
-    public void reset() {
-        this.loaded.clear();
-        this.collection.clear();
-        this.embed.clear();
-        this.framework = null;
-        this.rs = null;
-    }
-
-    public void destroy() {
-        this.reset();
-    }
-
-    public void init(RuntimeServices rs) {
-
-        // 避免重复初始化
-        if (this.rs != null) {
-            return;
-        }
-
-        this.rs = rs;
-        log = rs.getLog();
-
-        encoding = (String) rs.getProperty(RuntimeConstants.INPUT_ENCODING);
     }
 
     public String getFramework() {
@@ -291,7 +215,7 @@ public class Resource {
             sb.append("<script type=\"text/javascript\" src=\"" + modJs + "\"></script>");
         }
 
-        if (!defferMap.isEmpty()){
+        if (!defferMap.isEmpty() && Settings.getBoolean("sourceMap", true)){
             sb.append("<script type=\"text/javascript\">require.resourceMap(" + JSONObject.toJSON(defferMap) + ");</script>");
         }
 

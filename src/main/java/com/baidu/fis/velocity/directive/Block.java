@@ -9,7 +9,6 @@ import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 
@@ -17,33 +16,73 @@ import java.util.*;
  * Created by 2betop on 5/7/14.
  */
 public class Block extends AbstractBlock {
-    protected static Map<String, Map<String, Node>> blocks = new HashMap<String, Map<String, Node>>();
-    protected static Stack<String> templates = new Stack<String>();
+    private static final String TEMPLATE_KEY = "templates-stack";
+    private static final String BLOCK_KEY = "blocks-stack";
 
-    public static void pushTemplate(String template) {
+    public static void pushTemplate(InternalContextAdapter ctx, String template) {
+        Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
+
+        if (templates == null) {
+            templates = new Stack<String>();
+            ctx.put(TEMPLATE_KEY, templates);
+        }
+
         templates.push(template);
     }
 
-    public static String popTemplate() {
-        if (templates.isEmpty()) {
-            return "";
+    public static String popTemplate(InternalContextAdapter ctx) {
+        Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
+        String template = "";
+
+        if (templates == null || templates.isEmpty()) {
+            return template;
         }
-        return templates.pop();
+
+        template = templates.pop();
+
+        // self clean up.
+        if (templates.isEmpty()) {
+            ctx.remove(TEMPLATE_KEY);
+        }
+
+        return template;
     }
 
-    public static String getCurrentTemplate() {
-        if (templates.isEmpty()) {
+    public static String getCurrentTemplate(InternalContextAdapter ctx) {
+        Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
+
+        if (templates == null || templates.isEmpty()) {
             return "";
         }
+
         return templates.peek();
     }
 
-    public static void registerBlocks(String templateName, Map<String, Node> map) {
+    public static void registerBlocks(InternalContextAdapter ctx, String templateName, Map<String, Node> map) {
+        Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
+
+        if (blocks == null) {
+            blocks = new HashMap<String, Map<String, Node>>();
+            ctx.put(BLOCK_KEY, blocks);
+        }
+
         blocks.put(templateName, map);
     }
 
-    public static void unRegisterBlocks(String templateName) {
+    public static void unRegisterBlocks(InternalContextAdapter ctx, String templateName) {
+
+        Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
+
+        if (blocks == null) {
+            return;
+        }
+
         blocks.remove(templateName);
+
+        // self clean up.
+        if (blocks.isEmpty()) {
+            ctx.remove(BLOCK_KEY);
+        }
     }
 
 
@@ -68,7 +107,13 @@ public class Block extends AbstractBlock {
         }
 
 
-        String templateName = getCurrentTemplate();
+        String templateName = getCurrentTemplate(context);
+        Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)context.get(BLOCK_KEY);
+
+        if (blocks == null) {
+            return true;
+        }
+
         Map<String, Node> map = blocks.get(templateName);
         Boolean overrated = false;
         if (map != null) {
@@ -77,9 +122,9 @@ public class Block extends AbstractBlock {
             if (extend != null) {
                 overrated = true;
                 map.remove(id);
-                popTemplate();
+                popTemplate(context);
                 extend.render(context, writer);
-                pushTemplate(templateName);
+                pushTemplate(context, templateName);
             }
         }
 

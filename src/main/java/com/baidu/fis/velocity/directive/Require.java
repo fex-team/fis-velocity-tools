@@ -1,5 +1,7 @@
 package com.baidu.fis.velocity.directive;
 
+import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.velocity.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.log.Log;
@@ -28,7 +30,7 @@ public class Require extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        connectFis(context);
+        Resource fisResource = ResourceManager.ref(context);
 
         try {
             // 只需要把依赖加载上就可以了。
@@ -38,7 +40,7 @@ public class Require extends AbstractInline {
             log.warn(err.getStackTrace());
         }
 
-        disConnectFis(context);
+        ResourceManager.unRef(context);
 
         return true;
     }

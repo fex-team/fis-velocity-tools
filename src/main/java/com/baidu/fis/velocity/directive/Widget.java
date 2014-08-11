@@ -1,5 +1,7 @@
 package com.baidu.fis.velocity.directive;
 
+import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.velocity.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -29,7 +31,7 @@ public class Widget extends AbstractInclude {
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
-        connectFis(context);
+        Resource fisResource = ResourceManager.ref(context);
 
         try {
             // 添加资源 Like Require
@@ -41,8 +43,7 @@ public class Widget extends AbstractInclude {
         }
 
         super.render(context, writer, node);
-
-        disConnectFis(context);
+        ResourceManager.unRef(context);
         return true;
     }
 }

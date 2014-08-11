@@ -1,6 +1,8 @@
 package com.baidu.fis.velocity.directive;
 
 
+import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.velocity.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.parser.node.ASTprocess;
@@ -18,7 +20,7 @@ public class Html extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        connectFis(context);
+        Resource fisResource = ResourceManager.ref(context);
 
         String framework;
         Boolean isTopNode = false;
@@ -60,7 +62,7 @@ public class Html extends AbstractBlock {
             writer.write(fisResource.filterContent(buffer.toString()));
         }
 
-        disConnectFis(context);
+        ResourceManager.unRef(context);
 
         return true;
     }

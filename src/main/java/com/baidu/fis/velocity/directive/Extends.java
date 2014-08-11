@@ -1,5 +1,7 @@
 package com.baidu.fis.velocity.directive;
 
+import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.velocity.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.log.Log;
@@ -17,7 +19,7 @@ import java.util.*;
  */
 public class Extends extends AbstractInclude {
 
-    protected Map<String, Node> map;
+    private static final String BLOCKS_MAP_KEY = "blocks-map-key";
 
     @Override
     public String getName() {
@@ -31,7 +33,7 @@ public class Extends extends AbstractInclude {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        connectFis(context);
+        Resource fisResource = ResourceManager.ref(context);
 
         Boolean isTopNode = false;
         Writer buffer = writer;
@@ -53,19 +55,20 @@ public class Extends extends AbstractInclude {
             writer.write(fisResource.filterContent(buffer.toString()));
         }
 
-        disConnectFis(context);
+        ResourceManager.unRef(context);
 
         return true;
     }
 
     @Override
     protected void preRender(InternalContextAdapter context) {
+        Map<String, Node> map = (Map<String, Node>)context.get(BLOCKS_MAP_KEY);
 
-        if (this.map != null && !this.map.isEmpty()) {
+        if (map != null && !map.isEmpty()) {
             List macroLibraries = context.getMacroLibraries();
             String templateName = macroLibraries.get(macroLibraries.size() - 1).toString();
-            Block.pushTemplate(templateName);
-            Block.registerBlocks(templateName, this.map);
+            Block.pushTemplate(context, templateName);
+            Block.registerBlocks(context, templateName, map);
         }
 
         super.preRender(context);
@@ -73,8 +76,8 @@ public class Extends extends AbstractInclude {
 
     @Override
     protected void postRender(InternalContextAdapter context) {
-        String templateName = Block.popTemplate();
-        Block.unRegisterBlocks(templateName);
+        String templateName = Block.popTemplate(context);
+        Block.unRegisterBlocks(context, templateName);
         super.postRender(context);
     }
 
@@ -114,7 +117,7 @@ public class Extends extends AbstractInclude {
             children.add(child);
         }
 
-        this.map = map;
+        context.put(BLOCKS_MAP_KEY, map);
         Collection<Node> blocks = new ArrayList<Node>(map.values());
 
         super.render(context, writer, node);
@@ -128,7 +131,7 @@ public class Extends extends AbstractInclude {
 
         blocks.clear();
         map.clear();
-        this.map = null;
+        context.remove(BLOCKS_MAP_KEY);
 
         // 把 rest 的 Node 渲染了
         for (Node child:children) {

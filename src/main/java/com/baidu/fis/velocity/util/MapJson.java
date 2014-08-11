@@ -1,7 +1,6 @@
 package com.baidu.fis.velocity.util;
 
 import com.alibaba.fastjson.JSONObject;
-
 import javax.servlet.ServletContext;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -60,11 +59,16 @@ public class MapJson {
 
         if (!this.map.containsKey(ns)) {
             String filename = dir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
+            ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
+
+            if (ctx == null) {
+                System.out.println("Please set the servlet context through Setting.setApplicationAttribute");
+                throw new IllegalArgumentException("miss calling Setting.setApplicationAttribute");
+            }
 
             try {
-                ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
                 InputStream input = ctx.getResourceAsStream(filename);
-                String enc = "UTF-8";
+                String enc = Settings.getString("encoding", "UTF-8");
                 BufferedReader in = new BufferedReader(new UnicodeReader(input, enc));
                 String data = "";
                 String inputLine;
@@ -72,11 +76,10 @@ public class MapJson {
                     data += inputLine;
                 }
                 in.close();
-
                 this.map.put(ns, JSONObject.parseObject(data));
 
             } catch ( Exception error ) {
-                System.out.print(error.getMessage());
+                System.out.println(error.getStackTrace());
             }
         }
 

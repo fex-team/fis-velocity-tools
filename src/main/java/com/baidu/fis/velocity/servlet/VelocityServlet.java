@@ -5,7 +5,6 @@ import com.baidu.fis.velocity.util.Settings;
 import com.baidu.fis.velocity.util.ResponseWrapper;
 import com.baidu.fis.velocity.util.UnicodeReader;
 import org.apache.velocity.Template;
-import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
 
 import javax.servlet.ServletConfig;
@@ -33,13 +32,6 @@ import org.apache.velocity.runtime.RuntimeConstants;
 public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 {
 
-    @Override
-    protected void initVelocity(ServletConfig config) throws ServletException {
-        Velocity.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
-        Settings.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
-        super.initVelocity(config);
-    }
-
     /**
      * @param ctx
      */
@@ -57,7 +49,6 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
             String file = matcher.group(2);
             try {
                 MapJson map = new MapJson();
-
                 JSONObject info = map.getNode(ns + ":page/" + file);
 
                 if (info!=null) {
@@ -79,10 +70,14 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
     protected Properties loadConfiguration(ServletConfig config) throws IOException {
 
         Properties p = super.loadConfiguration(config);
+
+
+        Settings.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
         Settings.load(this.getServletContext().getResourceAsStream(Settings.DEFAULT_PATH));
+
         p.load(getServletContext().getResourceAsStream("WEB-INF/velocity.properties"));
-        p.setProperty("file.resource.loader.class", "com.baidu.fis.velocity.util.WebappResourceLoader");
-        p.setProperty("file.resource.loader.path", Settings.getString("velocity.path", "."));
+        p.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+        p.setProperty("file.resource.loader.path", getServletContext().getRealPath(Settings.getString("velocity.path", ".")));
 
         return p;
     }

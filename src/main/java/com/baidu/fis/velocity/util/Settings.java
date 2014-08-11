@@ -19,7 +19,6 @@ public class Settings {
         return map.get(key);
     }
 
-    // 路径是相对与 WEB-INF 目录的。
     public static String DEFAULT_PATH = "/WEB-INF/fis.properties";
 
     public static Boolean getBoolean(String key, Boolean def) {
@@ -52,10 +51,14 @@ public class Settings {
     }
 
     public static void load(InputStream input) {
+        if (input == null) {
+            return;
+        }
+
         try {
             data.load(input);
         } catch (Exception err) {
-            System.out.println(err.getMessage());
+            System.out.println(err.getStackTrace());
         }
     }
 }
