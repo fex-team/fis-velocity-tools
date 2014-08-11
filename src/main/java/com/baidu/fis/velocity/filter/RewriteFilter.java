@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.filter;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

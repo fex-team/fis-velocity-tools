@@ -1,6 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.Resource;
+import com.baidu.fis.velocity.util.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.TemplateInitException;
 import org.apache.velocity.runtime.RuntimeServices;

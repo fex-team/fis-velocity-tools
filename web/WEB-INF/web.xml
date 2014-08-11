@@ -5,7 +5,7 @@
          version="3.1">
     <filter>
         <filter-name>RewriteFilter</filter-name>
-        <filter-class>com.baidu.fis.velocity.RewriteFilter</filter-class>
+        <filter-class>com.baidu.fis.velocity.filter.RewriteFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>RewriteFilter</filter-name>
@@ -14,9 +14,23 @@
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     <servlet>
-        <servlet-name>velocity</servlet-name>
-        <servlet-class>com.baidu.fis.velocity.VelocityServlet</servlet-class>
+        <servlet-name>appServlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/servlet-context.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
+    <servlet>
+        <servlet-name>velocity</servlet-name>
+        <servlet-class>com.baidu.fis.velocity.servlet.VelocityServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>appServlet</servlet-name>
+        <url-pattern>/spring/*</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>velocity</servlet-name>
         <url-pattern>*.vm</url-pattern>

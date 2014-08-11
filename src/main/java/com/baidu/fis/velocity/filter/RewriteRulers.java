@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.filter;
 
 import java.io.*;
 import java.nio.charset.Charset;

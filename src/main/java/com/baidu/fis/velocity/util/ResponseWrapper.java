@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.util;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;

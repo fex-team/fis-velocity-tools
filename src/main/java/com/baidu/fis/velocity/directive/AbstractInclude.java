@@ -1,6 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.Resource;
+import com.baidu.fis.velocity.util.Resource;
 import com.baidu.fis.velocity.event.IncludeFisSource;
 import org.apache.velocity.app.event.EventCartridge;
 import org.apache.velocity.context.InternalContextAdapter;

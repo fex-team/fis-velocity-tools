@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.servlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

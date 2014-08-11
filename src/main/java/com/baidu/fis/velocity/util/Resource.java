@@ -1,13 +1,11 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.velocity.context.InternalContextAdapter;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.Log;
-import org.apache.velocity.runtime.resource.ContentResource;
 
 import java.util.ArrayList;
 import java.util.HashMap;

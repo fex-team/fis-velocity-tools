@@ -1,18 +1,11 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.Resource;
+import com.baidu.fis.velocity.util.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
-import org.apache.velocity.exception.TemplateInitException;
 import org.apache.velocity.exception.VelocityException;
-import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.ASTDirective;
-import org.apache.velocity.runtime.parser.node.ASTprocess;
 import org.apache.velocity.runtime.parser.node.Node;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 
 /**
  * 提取一些公共的方法

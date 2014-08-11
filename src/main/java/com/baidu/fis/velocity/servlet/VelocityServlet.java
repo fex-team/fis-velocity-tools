@@ -1,5 +1,9 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.servlet;
 
+import com.baidu.fis.velocity.util.MapJson;
+import com.baidu.fis.velocity.util.Settings;
+import com.baidu.fis.velocity.util.ResponseWrapper;
+import com.baidu.fis.velocity.util.UnicodeReader;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
@@ -77,7 +81,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         Properties p = super.loadConfiguration(config);
         Settings.load(this.getServletContext().getResourceAsStream(Settings.DEFAULT_PATH));
         p.load(getServletContext().getResourceAsStream("WEB-INF/velocity.properties"));
-        p.setProperty("file.resource.loader.class", "com.baidu.fis.velocity.WebappResourceLoader");
+        p.setProperty("file.resource.loader.class", "com.baidu.fis.velocity.util.WebappResourceLoader");
         p.setProperty("file.resource.loader.path", Settings.getString("velocity.path", "."));
 
         return p;
@@ -102,7 +106,6 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 
         try {
             URL url = request.getServletContext().getResource(jsonPath);
-
             if (url != null) {
                 String enc = RuntimeSingleton.getString(RuntimeConstants.INPUT_ENCODING);
                 BufferedReader in = new BufferedReader(new UnicodeReader(

@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity;
+package com.baidu.fis.velocity.util;
 
 import java.io.InputStream;
 import java.util.HashMap;
