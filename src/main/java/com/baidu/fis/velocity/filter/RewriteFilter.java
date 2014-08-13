@@ -106,9 +106,9 @@ public class RewriteFilter implements Filter {
 
         if (ruler!=null) {
             if (ruler.type == RewriteRulers.Ruler.TYPE_REDIRECT) {
-                resp.sendRedirect(ruler.target);
+                resp.sendRedirect(ruler.dest);
             } else if(ruler.type == RewriteRulers.Ruler.TYPE_REWRITE) {
-                req.getRequestDispatcher(ruler.target).forward(req, resp);
+                req.getRequestDispatcher(ruler.dest).forward(req, resp);
             }
             return true;
         }

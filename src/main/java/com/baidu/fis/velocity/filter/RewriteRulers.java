@@ -18,6 +18,7 @@ public class RewriteRulers {
         public int type = 0;
         public String pattern;
         public String target;
+        public String dest;
     }
 
     protected ArrayList<Ruler> rulers = new ArrayList<Ruler>();
@@ -75,6 +76,7 @@ public class RewriteRulers {
         for (Ruler ruler:rulers) {
 
             if (path.matches(ruler.pattern)) {
+                ruler.dest = path.replaceAll(ruler.pattern, ruler.target);
                 return ruler;
             }
         }
