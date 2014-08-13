@@ -94,6 +94,12 @@ public class RewriteFilter implements Filter {
 
     // 读取 server.conf 进行转发
     protected Boolean handleRewrite(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException{
+
+        // 避免循环 rewrite
+        if (req.getAttribute("origin") != null) {
+            return false;
+        }
+
         RewriteRulers parser = new RewriteRulers();
 
         InputStream stream = req.getServletContext().getResourceAsStream(RewriteRulers.DEFAULT_PATH);
@@ -108,6 +114,7 @@ public class RewriteFilter implements Filter {
             if (ruler.type == RewriteRulers.Ruler.TYPE_REDIRECT) {
                 resp.sendRedirect(ruler.dest);
             } else if(ruler.type == RewriteRulers.Ruler.TYPE_REWRITE) {
+                req.setAttribute("origin", req.getRequestURL());
                 req.getRequestDispatcher(ruler.dest).forward(req, resp);
             }
             return true;
