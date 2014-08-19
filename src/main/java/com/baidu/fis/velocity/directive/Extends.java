@@ -120,6 +120,14 @@ public class Extends extends AbstractInclude {
         context.put(BLOCKS_MAP_KEY, map);
         Collection<Node> blocks = new ArrayList<Node>(map.values());
 
+        if (target.contains(":") && !target.contains(":/") && !target.contains(":\\")) {
+            Resource fisResource = ResourceManager.ref(context);
+
+            fisResource.addResource(target);
+
+            ResourceManager.unRef(context);
+        }
+
         super.render(context, writer, node);
 
         // 把覆盖过的删除了。
