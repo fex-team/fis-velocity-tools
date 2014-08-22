@@ -61,8 +61,6 @@ public class MapJson {
             String filename = dir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
             ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
 
-            System.out.println(dir);
-
             if (ctx == null) {
                 System.out.println("Please set the servlet context through Setting.setApplicationAttribute");
                 throw new IllegalArgumentException("miss calling Setting.setApplicationAttribute");
