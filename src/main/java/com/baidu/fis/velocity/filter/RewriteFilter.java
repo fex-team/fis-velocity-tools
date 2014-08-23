@@ -114,7 +114,7 @@ public class RewriteFilter implements Filter {
             if (ruler.type == RewriteRulers.Ruler.TYPE_REDIRECT) {
                 resp.sendRedirect(ruler.dest);
             } else if(ruler.type == RewriteRulers.Ruler.TYPE_REWRITE) {
-                req.setAttribute("origin", req.getRequestURL());
+                req.setAttribute("origin", req.getRequestURI());
                 req.getRequestDispatcher(ruler.dest).forward(req, resp);
             }
             return true;
