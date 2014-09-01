@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class RewriteRulers {
 
-    final public static String DEFAULT_PATH = "WEB-INF/server.conf";
+    final public static String DEFAULT_PATH = "/WEB-INF/server.conf";
 
     protected static class Ruler {
         final public static int TYPE_REWRITE = 0;

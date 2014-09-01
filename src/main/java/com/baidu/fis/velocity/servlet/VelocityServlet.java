@@ -75,7 +75,7 @@ public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
         Settings.setApplicationAttribute(ServletContext.class.getName(), this.getServletContext());
         Settings.load(this.getServletContext().getResourceAsStream(Settings.DEFAULT_PATH));
 
-        p.load(getServletContext().getResourceAsStream("WEB-INF/velocity.properties"));
+        p.load(getServletContext().getResourceAsStream("/WEB-INF/velocity.properties"));
         p.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
         p.setProperty("file.resource.loader.path", getServletContext().getRealPath(Settings.getString("velocity.path", "/WEB-INF/views")));
 
