@@ -188,15 +188,13 @@ public class Widget extends AbstractInclude {
                 Object obj = this.wrapValue(value, context);
 
                 if (obj != null && obj instanceof Map) {
-                    Map<String, ?>map = (Map<String, ?>) obj;
+                    Map<String, ?> map = (Map<String, ?>) obj;
                     Set<String> keys = map.keySet();
 
                     for(String key:keys) {
-                        System.out.println(key + ":" + map.get(key));
-                        ctx.put(key, map.get(key));
+                        ctx.localPut(key, map.get(key));
                     }
                 }
-
             } else if (value.startsWith("var:") && value.contains("=")) {
                 value = value.substring(4);
                 int idx = value.indexOf("=");
