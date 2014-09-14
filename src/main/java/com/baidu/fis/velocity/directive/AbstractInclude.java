@@ -35,18 +35,17 @@ abstract public class AbstractInclude extends Parse {
         Resource fisResource = ResourceManager.ref(context);
 
         //  支持 include fis id.
-        EventCartridge ec = new EventCartridge();
         IncludeFisSource eh = new IncludeFisSource();
         eh.setFisResource(fisResource);
 
-        ec.addEventHandler(eh);
-        context.attachEventCartridge(ec);
+
+        rsvc.getApplicationEventCartridge().addEventHandler(eh);
 
 
         Boolean result = super.render(context, writer, node);
 
         eh.setFisResource(null);
-        context.attachEventCartridge(new EventCartridge());
+        rsvc.getApplicationEventCartridge().removeEventHandler(eh);
         ResourceManager.unRef(context);
 
         return result;

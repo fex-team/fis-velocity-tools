@@ -15,7 +15,7 @@
     </filter-mapping>
     <servlet>
         <servlet-name>velocity</servlet-name>
-        <servlet-class>com.baidu.fis.velocity.servlet.VelocityServlet</servlet-class>
+        <servlet-class>com.baidu.fis.velocity.servlet.Preview</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>velocity</servlet-name>
