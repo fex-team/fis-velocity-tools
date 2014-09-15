@@ -2,7 +2,10 @@ package com.baidu.fis.velocity.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,12 +26,26 @@ public class Resource {
     protected Map<String, ArrayList<String>> collection;
     protected Map<String, StringBuilder> embed;
     public int refs = 0;
+    public Boolean debug = false;
 
     public Resource() {
         this.loaded = new HashMap<String, Boolean>();
         this.collection = new HashMap<String, ArrayList<String>>();
         this.embed = new HashMap<String, StringBuilder>();
         this.map = new MapJson();
+
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+
+                    .getRequestAttributes()).getRequest();
+
+            if (request.getParameter("debug") != null) {
+                debug = true;
+            }
+        } catch (Exception err) {
+            // do nothing.
+            debug = Settings.getBoolean("debug", false);
+        }
     }
 
     public String getFramework() {
@@ -117,7 +134,7 @@ public class Resource {
 
         String pkg = (String) info.get("pkg");
 
-        if (!Settings.getBoolean("debug", false) && pkg != null) {
+        if (!debug && pkg != null) {
             info = map.getNode(pkg, "pkg");
             uri = info.getString("uri");
 
@@ -273,7 +290,7 @@ public class Resource {
                 infoCopy.put("url", info.getString("uri"));
 
                 // 保留 pkg 信息
-                if (!Settings.getBoolean("debug", false) && pkg != null) {
+                if (!debug && pkg != null) {
                     infoCopy.put("pkg", pkg);
                 }
 
@@ -303,7 +320,7 @@ public class Resource {
                 }
 
                 // 再把对应的 pkg 加入。
-                if (!Settings.getBoolean("debug", false) && pkg != null) {
+                if (!debug && pkg != null) {
                     info = map.getNode(pkg, "pkg");
 
                     info.put("url", info.getString("uri"));

@@ -78,6 +78,10 @@ public class Preview extends VelocityViewServlet {
     }
 
     protected void fillContext(Context context, HttpServletRequest request, HttpServletResponse response) {
+        if (request.getParameter("debug") != null) {
+            Settings.put("debug", "true");
+        }
+
         attachJson(context, request);
         includeJsp(context, request, response);
 

@@ -22,13 +22,13 @@ public class Settings {
     public static String DEFAULT_PATH = "/WEB-INF/fis.properties";
 
     public static Boolean getBoolean(String key, Boolean def) {
-        Boolean val = getBoolean(key);
+        String val = getString(key);
 
         if (val==null) {
             return def;
         }
 
-        return val;
+        return getBoolean(key);
     }
 
     public static Boolean getBoolean(String key) {
@@ -60,5 +60,9 @@ public class Settings {
         } catch (Exception err) {
             System.out.println(err.getStackTrace());
         }
+    }
+
+    public static void put(String key, String val) {
+        data.setProperty(key, val);
     }
 }

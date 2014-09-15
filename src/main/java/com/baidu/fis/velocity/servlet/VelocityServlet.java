@@ -27,8 +27,10 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.RuntimeConstants;
 
-
-@SuppressWarnings("deprecated")
+/**
+ * use Preview Servlet instead.
+ * @deprecated
+ */
 public class VelocityServlet extends org.apache.velocity.servlet.VelocityServlet
 {
 

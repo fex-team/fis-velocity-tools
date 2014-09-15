@@ -50,7 +50,6 @@ public class Html extends AbstractBlock {
             writer.write(this.buildAttrs(node, context, 1));
         }
 
-        System.out.println(context);
 
         buffer.write(">");
 
