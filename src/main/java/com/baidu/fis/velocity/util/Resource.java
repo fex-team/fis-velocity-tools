@@ -35,9 +35,7 @@ public class Resource {
         this.map = new MapJson();
 
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-
-                    .getRequestAttributes()).getRequest();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
             if (request.getParameter("debug") != null) {
                 debug = true;

@@ -21,6 +21,15 @@
         <servlet-name>velocity</servlet-name>
         <url-pattern>*.vm</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>upload</servlet-name>
+        <servlet-class>com.baidu.fis.velocity.servlet.Upload</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>upload</servlet-name>
+        <url-pattern>/upload</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.vm</welcome-file>
     </welcome-file-list>

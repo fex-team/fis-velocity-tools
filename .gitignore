@@ -4,5 +4,10 @@
 /build/
 /dist
 /web/
-/src/main/webapp/
+/src/main/webapp/test
+/src/main/webapp/static
+/src/main/webapp/map
+/src/main/webapp/WEB-INF/views/*/**
+/src/main/webapp/WEB-INF/server.conf
+/src/main/webapp/WEB-INF/fis.properties
 /target/

@@ -1,6 +1,8 @@
 package com.baidu.fis.velocity.servlet;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,20 +15,28 @@ import java.io.*;
  *
  * ！！！注意：还没有完工！！！！！
  */
-public class UploadServlet extends HttpServlet {
+@MultipartConfig
+public class Upload extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             Part filePart = request.getPart("file");
             String to = request.getParameter("to");
 
-            System.out.println(request.getParameter("abc"));
-            System.out.println(request.getParameter("to"));
-
             File file = new File(to);
 
             if (file.isDirectory()) {
-                throw new IllegalArgumentException("Can't upload to a folder.");
-            } else if (!file.canWrite()) {
+                throw new IllegalArgumentException("Can't upload to a folder `" + to + "`");
+            }
+
+            if (file.exists()) {
+                file.delete();
+                file.createNewFile();
+            } else {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            if (!file.canWrite()) {
                 throw new IllegalArgumentException("Permission denied.");
             }
 
@@ -40,9 +50,11 @@ public class UploadServlet extends HttpServlet {
             }
             src.close();
             dst.close();
+
+            response.getWriter().write("0");
         } catch ( Exception e) {
-            response.sendError(500, e.getMessage());
-            // "500 Internal Server Error"
+            System.out.print(e.getMessage());
+            response.getWriter().write("1");
         }
     }
 
