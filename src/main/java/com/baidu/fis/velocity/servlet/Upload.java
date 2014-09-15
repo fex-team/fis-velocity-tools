@@ -9,12 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.*;
 
-/**
- * Created by 2betop on 5/30/14.
- * 用来配合 fis deploy 工作。
- *
- * ！！！注意：还没有完工！！！！！
- */
 @MultipartConfig
 public class Upload extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
