@@ -141,7 +141,8 @@ public class Preview extends VelocityViewServlet {
         try {
             URL url = request.getServletContext().getResource(jsonPath);
             if (url != null) {
-                String enc = RuntimeSingleton.getString(RuntimeConstants.INPUT_ENCODING);
+                String enc = Settings.getString("encoding", "UTF-8");
+
                 BufferedReader in = new BufferedReader(new UnicodeReader(
                         url.openStream(), enc));
                 String data = "";

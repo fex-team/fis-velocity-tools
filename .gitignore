@@ -10,4 +10,5 @@
 /src/main/webapp/WEB-INF/views/*/**
 /src/main/webapp/WEB-INF/server.conf
 /src/main/webapp/WEB-INF/fis.properties
+/src/main/webapp/WEB-INF/config
 /target/
