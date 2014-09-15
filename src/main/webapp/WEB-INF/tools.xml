@@ -15,6 +15,7 @@
         <tool class="org.apache.velocity.tools.generic.ListTool"/>
         <tool class="org.apache.velocity.tools.generic.ResourceTool"/>
         <tool class="org.apache.velocity.tools.generic.SortTool"/>
+        <tool class="org.apache.velocity.tools.generic.DateTool"/>
 
         <tool class="com.baidu.fis.velocity.tools.JelloTool" key="jello" />
     </toolbox>
