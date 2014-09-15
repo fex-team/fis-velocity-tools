@@ -1,6 +1,7 @@
 package com.baidu.fis.velocity.servlet;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.fis.velocity.util.MapJson;
 import com.baidu.fis.velocity.util.ResponseWrapper;
 import com.baidu.fis.velocity.util.Settings;
 import com.baidu.fis.velocity.util.UnicodeReader;
@@ -9,6 +10,7 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.RuntimeSingleton;
+import org.apache.velocity.tools.view.ServletUtils;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 
 import javax.servlet.ServletConfig;
@@ -23,6 +25,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Preview extends VelocityViewServlet {
 
@@ -32,6 +36,42 @@ public class Preview extends VelocityViewServlet {
         Settings.setApplicationAttribute(ServletContext.class.getName(), context);
         Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
         super.init(config);
+    }
+
+    /**
+     * <p>This was a common extension point, but now it is usually
+     * simpler to override {@link #fillContext} to add custom things
+     * to the {@link org.apache.velocity.context.Context} or override a {@link #getTemplate}
+     * method to change how {@link org.apache.velocity.Template}s are retrieved.
+     * This is only recommended for more complicated use-cases.</p>
+     *
+     * @param request  client request
+     * @param response client response
+     * @param ctx      VelocityContext to fill
+     * @return Velocity Template object or null
+     */
+    @Override
+    protected Template handleRequest(HttpServletRequest request, HttpServletResponse response, Context ctx) {
+        String path = ServletUtils.getPath(request);
+        Pattern reg = Pattern.compile("^/([^/]+)/page/(.*)$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = reg.matcher(path);
+
+        if (matcher.find()) {
+            String ns = matcher.group(1);
+            String file = matcher.group(2);
+            try {
+                MapJson map = new MapJson();
+                JSONObject info = map.getNode(ns + ":page/" + file);
+
+                if (info!=null) {
+                    path = info.getString("uri");
+                }
+            } catch (Exception err) {
+
+            }
+        }
+
+        return getTemplate(path);
     }
 
     /**
@@ -80,6 +120,8 @@ public class Preview extends VelocityViewServlet {
     protected void fillContext(Context context, HttpServletRequest request, HttpServletResponse response) {
         if (request.getParameter("debug") != null) {
             Settings.put("debug", "true");
+        } else {
+            Settings.put("debug", "false");
         }
 
         attachJson(context, request);
