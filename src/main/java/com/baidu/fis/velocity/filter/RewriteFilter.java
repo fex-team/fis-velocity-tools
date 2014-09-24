@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +27,7 @@ public class RewriteFilter implements Filter {
     public static class RewriteRulers {
 
         final public static String DEFAULT_PATH = "/WEB-INF/server.conf";
+        final public static String DEFAULT_DIR = "/WEB-INF/";
 
         protected static class Ruler {
             final public static int TYPE_REWRITE = 0;
@@ -36,6 +37,16 @@ public class RewriteFilter implements Filter {
             public String pattern;
             public String target;
             public String dest;
+
+            @Override
+            public String toString() {
+                return "Ruler{" +
+                        "type=" + type +
+                        ", pattern='" + pattern + '\'' +
+                        ", target='" + target + '\'' +
+                        ", dest='" + dest + '\'' +
+                        '}';
+            }
         }
 
         protected ArrayList<Ruler> rulers = new ArrayList<Ruler>();
@@ -101,6 +112,12 @@ public class RewriteFilter implements Filter {
             return null;
         }
 
+        @Override
+        public String toString() {
+            return "RewriteRulers{" +
+                    "rulers=" + rulers +
+                    '}';
+        }
     }
 
     public void destroy() {
@@ -131,7 +148,7 @@ public class RewriteFilter implements Filter {
 
         // 找不到资源
         if (url == null) {
-            Pattern reg = Pattern.compile("^/[^/]+/page/.*$", Pattern.CASE_INSENSITIVE);
+            Pattern reg = Pattern.compile("^/(?:[^/]+/)?page/.*$", Pattern.CASE_INSENSITIVE);
             Matcher matcher = reg.matcher(path);
             if (matcher.find()) {
                 if (!path.endsWith(".vm")) {
@@ -156,10 +173,34 @@ public class RewriteFilter implements Filter {
 
         RewriteRulers parser = new RewriteRulers();
 
-        InputStream stream = req.getServletContext().getResourceAsStream(RewriteRulers.DEFAULT_PATH);
+        ArrayList<String> confs = new ArrayList<String>();
 
-        if (stream!=null) {
-            parser.load(stream);
+        final ArrayList<String> orders = new ArrayList<String>();
+        orders.add(RewriteRulers.DEFAULT_DIR + "servercommon.conf");
+        orders.add(RewriteRulers.DEFAULT_PATH);
+
+        Set<String> files = req.getServletContext().getResourcePaths(RewriteRulers.DEFAULT_DIR);
+        if (files != null) {
+            for (String file:files) {
+                if (file.endsWith(".conf") && file.contains("/server")) {
+                    confs.add(file);
+                }
+            }
+        }
+
+        Collections.sort(confs, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return orders.indexOf(o2) - orders.indexOf(o1);
+            }
+        });
+
+        for(String path:confs) {
+            InputStream stream = req.getServletContext().getResourceAsStream(path);
+
+            if (stream!=null) {
+                parser.load(stream);
+            }
         }
 
         RewriteRulers.Ruler ruler = parser.getRuler(req.getRequestURI());

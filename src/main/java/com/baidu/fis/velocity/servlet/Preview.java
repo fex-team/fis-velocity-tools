@@ -53,21 +53,22 @@ public class Preview extends VelocityViewServlet {
     @Override
     protected Template handleRequest(HttpServletRequest request, HttpServletResponse response, Context ctx) {
         String path = ServletUtils.getPath(request);
-        Pattern reg = Pattern.compile("^/([^/]+)/page/(.*)$", Pattern.CASE_INSENSITIVE);
+        Pattern reg = Pattern.compile("^/(?:([^/]+)/)?page/(.*)$", Pattern.CASE_INSENSITIVE);
         Matcher matcher = reg.matcher(path);
 
         if (matcher.find()) {
             String ns = matcher.group(1);
             String file = matcher.group(2);
+
             try {
                 MapJson map = new MapJson();
-                JSONObject info = map.getNode(ns + ":page/" + file);
+                JSONObject info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
 
                 if (info!=null) {
                     path = info.getString("uri");
                 }
             } catch (Exception err) {
-
+                System.out.println(err.getMessage());
             }
         }
 
@@ -130,7 +131,7 @@ public class Preview extends VelocityViewServlet {
         super.fillContext(context, request);
     }
 
-
+    @SuppressWarnings("unchecked")
     protected void attachJson(Context context, HttpServletRequest request) {
 
         String path = request.getServletPath();
@@ -162,6 +163,7 @@ public class Preview extends VelocityViewServlet {
                 }
             }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -182,6 +184,7 @@ public class Preview extends VelocityViewServlet {
             }
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
     }

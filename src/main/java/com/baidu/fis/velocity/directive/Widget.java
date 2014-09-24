@@ -24,9 +24,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 
-/**
- * Created by 2betop on 5/4/14.
- */
 public class Widget extends AbstractInclude {
 
     protected static class WidgetContext extends ChainedInternalContextAdapter {
@@ -88,6 +85,7 @@ public class Widget extends AbstractInclude {
         /**
          * @see org.apache.velocity.context.Context#getKeys()
          */
+        @SuppressWarnings("unchecked")
         public Object[] getKeys()
         {
             if (localContext != null)
@@ -153,6 +151,7 @@ public class Widget extends AbstractInclude {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
         Resource fisResource = ResourceManager.ref(context);
@@ -188,7 +187,7 @@ public class Widget extends AbstractInclude {
                 Object obj = this.wrapValue(value, context);
 
                 if (obj != null && obj instanceof Map) {
-                    Map<String, ?> map = (Map<String, ?>) obj;
+                    Map<String, Object> map = (Map<String, Object>) obj;
                     Set<String> keys = map.keySet();
 
                     for(String key:keys) {
@@ -232,24 +231,24 @@ public class Widget extends AbstractInclude {
             try {
                 nodeTree = rsvc.parse(new StringReader(value), templateName, false);
                 nodeTree.init(ctx, rsvc);
-            } catch (Exception err) {
-                System.out.println(err.getStackTrace());
-            }
 
-            // 如果只有一个节点，且是 reference, 则尝试去获取这个变量的值。
-            if (nodeTree.jjtGetNumChildren() == 1 && nodeTree.jjtGetChild(0).getType() == ParserTreeConstants.JJTREFERENCE) {
-                Node right = nodeTree.jjtGetChild(0);
-                ret = right.value(ctx);
-            } else {
-                StringWriter buff = new StringWriter();
+                // 如果只有一个节点，且是 reference, 则尝试去获取这个变量的值。
+                if (nodeTree.jjtGetNumChildren() == 1 && nodeTree.jjtGetChild(0).getType() == ParserTreeConstants.JJTREFERENCE) {
+                    Node right = nodeTree.jjtGetChild(0);
+                    ret = right.value(ctx);
+                } else {
+                    StringWriter buff = new StringWriter();
 
-                try {
-                    nodeTree.render(ctx, buff);
-                } catch (Exception err) {
-                    System.out.println(err.getStackTrace());
+                    try {
+                        nodeTree.render(ctx, buff);
+                    } catch (Exception err) {
+                        System.out.println(err.getMessage());
+                    }
+
+                    ret = buff.toString();
                 }
-
-                ret = buff.toString();
+            } catch (Exception err) {
+                System.out.println(err.getMessage());
             }
         }
 

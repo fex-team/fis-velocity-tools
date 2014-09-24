@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by 2betop on 4/29/14.
@@ -149,23 +150,27 @@ public class Resource {
         }
 
 
-        // 如果有异步依赖，则添加异步依赖
-        if (info.containsKey("extras")) {
-            node = info.getJSONObject("extras");
-            if (node.containsKey("async")) {
-                JSONArray async = node.getJSONArray("async");
-                for (Object dep : async) {
-                    this.addResource(dep.toString(), true);
+        try {
+            // 如果有异步依赖，则添加异步依赖
+            if (info.containsKey("extras")) {
+                node = info.getJSONObject("extras");
+                if (node.containsKey("async")) {
+                    JSONArray async = node.getJSONArray("async");
+                    for (Object dep : async) {
+                        this.addResource(dep.toString(), true);
+                    }
                 }
             }
-        }
 
-        // 如果有同步依赖，则把同步依赖也添加进来。
-        if (info.containsKey("deps")) {
-            JSONArray deps = info.getJSONArray("deps");
-            for (Object dep : deps) {
-                this.addResource(dep.toString(), deffer);
+            // 如果有同步依赖，则把同步依赖也添加进来。
+            if (info.containsKey("deps")) {
+                JSONArray deps = info.getJSONArray("deps");
+                for (Object dep : deps) {
+                    this.addResource(dep.toString(), deffer);
+                }
             }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
 
         String type = info.get("type").toString();
@@ -220,9 +225,8 @@ public class Resource {
     public String renderJS() {
         StringBuffer sb = new StringBuffer();
         ArrayList<String> arr = collection.get("js");
-        Map<String, Map> defferMap = this.buildDefferMap();
 
-        Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || !defferMap.isEmpty());
+        Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || collection.get("jsDeffer") != null);
         String modJs = "";
 
         if (needModJs) {
@@ -230,8 +234,17 @@ public class Resource {
             sb.append("<script type=\"text/javascript\" src=\"" + modJs + "\"></script>");
         }
 
-        if (!defferMap.isEmpty() && Settings.getBoolean("sourceMap", true)){
-            sb.append("<script type=\"text/javascript\">require.resourceMap(" + JSONObject.toJSON(defferMap) + ");</script>");
+        if (collection.get("jsDeffer") != null) {
+            Boolean useAmd = !(framework != null && framework.endsWith("mod.js"));
+
+            if (!useAmd && Settings.getBoolean("sourceMap", true)) {
+                Map<String, Map> defferMap = this.buildDefferMap();
+                sb.append("<script type=\"text/javascript\">require.resourceMap(" + JSONObject.toJSON(defferMap) + ");</script>");
+            } else {
+                // 输出 amd 方式 require.config({paths: {}});
+                Map<String, String> paths = this.buildAmdPaths();
+                sb.append("<script type=\"text/javascript\">require.config({paths:" + JSONObject.toJSON(paths) + "});</script>");
+            }
         }
 
         if (arr != null) {
@@ -263,7 +276,7 @@ public class Resource {
         Map<String, JSONObject> pkgMap = new HashMap<String, JSONObject>();
 
         ArrayList<String> list = collection.get("jsDeffer");
-        JSONObject info, node;
+        JSONObject info;
 
         if (list != null) {
 
@@ -340,6 +353,43 @@ public class Resource {
         }
 
         return defferMap;
+    }
+
+    public Map<String, String> buildAmdPaths() {
+        Map<String, String> paths = new HashMap<String, String>();
+        JSONObject info;
+
+        for (String id : loaded.keySet()) {
+            if (loaded.get(id) == null || !loaded.get(id)) {
+                continue;
+            }
+
+            // 异步依赖
+            info = map.getNode(id);
+
+            if (!info.getString("type").equals("js")) {
+                continue;
+            }
+
+
+            if (info.containsKey("extras")) {
+                String uri = info.getString("uri");
+
+                    if (!debug && info.containsKey("pkg")) {
+                        JSONObject pkg = map.getNode(info.getString("pkg"), "pkg");
+                        uri = pkg.getString("uri");
+                    }
+
+                if (uri.endsWith(".js")) {
+                    uri = uri.substring(0, uri.length() - 3);
+                }
+
+                paths.put(info.getJSONObject("extras").getString("moduleId"), uri);
+            }
+
+        }
+
+        return paths;
     }
 
     public String filterContent(String input) {
