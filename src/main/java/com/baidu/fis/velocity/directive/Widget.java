@@ -226,10 +226,9 @@ public class Widget extends AbstractInclude {
              * The new string needs to be parsed since the text has been dynamically generated.
              */
             String templateName = ctx.getCurrentTemplateName();
-            SimpleNode nodeTree = null;
 
             try {
-                nodeTree = rsvc.parse(new StringReader(value), templateName, false);
+                SimpleNode nodeTree = rsvc.parse(new StringReader(value), templateName, false);
                 nodeTree.init(ctx, rsvc);
 
                 // 如果只有一个节点，且是 reference, 则尝试去获取这个变量的值。
