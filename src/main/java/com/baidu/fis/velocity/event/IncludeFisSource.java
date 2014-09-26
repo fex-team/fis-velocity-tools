@@ -25,7 +25,7 @@ public class IncludeFisSource implements org.apache.velocity.app.event.IncludeEv
         try {
             uri = fisResource.getUri(includeResourcePath);
         } catch (Exception err) {
-            System.out.println(err.getMessage());
+            // System.out.println(err.getMessage());
         }
 
         if (uri != null) {
