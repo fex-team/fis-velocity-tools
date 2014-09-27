@@ -58,6 +58,10 @@ public class Block extends AbstractBlock {
         return templates.peek();
     }
 
+    public static Stack<String> getTempplateStack(InternalContextAdapter ctx) {
+        return (Stack<String>)ctx.get(TEMPLATE_KEY);
+    }
+
     public static void registerBlocks(InternalContextAdapter ctx, String templateName, Map<String, Node> map) {
         Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
 
@@ -107,24 +111,45 @@ public class Block extends AbstractBlock {
         }
 
 
-        String templateName = getCurrentTemplate(context);
-        Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)context.get(BLOCK_KEY);
 
-        if (blocks == null) {
-            return true;
-        }
-
-        Map<String, Node> map = blocks.get(templateName);
+        // 是否被覆盖
         Boolean overrated = false;
-        if (map != null) {
+        Stack<String> templates = getTempplateStack(context);
 
-            Node extend = map.get(id);
+        if (templates!=null) {
+            Stack<String> buffer = new Stack<String>();
+            Node extend = null;
+
+            while (!templates.isEmpty()) {
+                String templateName = templates.pop();
+                buffer.push(templateName);
+
+                Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)context.get(BLOCK_KEY);
+                if (blocks == null) {
+                    continue;
+                }
+
+                Map<String, Node> map = blocks.get(templateName);
+                if (map != null) {
+
+                    if (map.get(id) != null && map.get(id) != node) {
+                        overrated = true;
+                        extend = map.get(id);
+                        break;
+                    }
+                }
+            }
+
             if (extend != null) {
-                overrated = true;
-                map.remove(id);
-                popTemplate(context);
-                extend.render(context, writer);
-                pushTemplate(context, templateName);
+                try {
+                    extend.render(context, writer);
+                } catch (Exception err) {
+                    // todo
+                }
+            }
+
+            while (!buffer.isEmpty()) {
+                templates.push(buffer.pop());
             }
         }
 

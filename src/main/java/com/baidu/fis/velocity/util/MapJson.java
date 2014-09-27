@@ -79,7 +79,7 @@ public class MapJson {
                 this.map.put(ns, JSONObject.parseObject(data));
 
             } catch ( Exception error ) {
-                System.out.println(error.getStackTrace());
+                // System.out.println(error.getStackTrace());
             }
         }
 

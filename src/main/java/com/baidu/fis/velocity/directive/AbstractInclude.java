@@ -42,6 +42,13 @@ abstract public class AbstractInclude extends Parse {
         rsvc.getApplicationEventCartridge().addEventHandler(eh);
 
 
+        try {
+            // 添加资源 Like Require
+            fisResource.addResource(node.jjtGetChild(0).value(context).toString());
+        } catch (Exception err) {
+            // do nothings
+        }
+
         Boolean result = super.render(context, writer, node);
 
         eh.setFisResource(null);

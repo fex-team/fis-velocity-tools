@@ -108,36 +108,29 @@ public class Extends extends AbstractInclude {
 
             // 找出 content 节点
             if (child instanceof ASTDirective &&
-                    ((ASTDirective)child).getDirectiveName().equals("block")) {
+                    ((ASTDirective)child).getDirectiveName().equals("block") && child.jjtGetNumChildren() > 0) {
                 blockId = child.jjtGetChild(0).value(context).toString();
 
                 map.put(blockId, child);
+                continue;
             }
 
             children.add(child);
         }
 
         context.put(BLOCKS_MAP_KEY, map);
-        Collection<Node> blocks = new ArrayList<Node>(map.values());
-
-        if (target.contains(":") && !target.contains(":/") && !target.contains(":\\")) {
-            Resource fisResource = ResourceManager.ref(context);
-
-            fisResource.addResource(target);
-
-            ResourceManager.unRef(context);
-        }
+        // Collection<Node> blocks = new ArrayList<Node>(map.values());
 
         super.render(context, writer, node);
 
         // 把覆盖过的删除了。
-        for(Node block:blocks) {
-            if (!map.containsValue(block)) {
-                children.remove(block);
-            }
-        }
-
-        blocks.clear();
+//        for(Node block:blocks) {
+//            if (!map.containsValue(block)) {
+//                children.remove(block);
+//            }
+//        }
+//
+//        blocks.clear();
         map.clear();
         context.remove(BLOCKS_MAP_KEY);
 
