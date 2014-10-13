@@ -5,6 +5,7 @@ import com.baidu.fis.velocity.util.MapJson;
 import com.baidu.fis.velocity.util.ResponseWrapper;
 import com.baidu.fis.velocity.util.Settings;
 import com.baidu.fis.velocity.util.UnicodeReader;
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -135,57 +136,78 @@ public class Preview extends VelocityViewServlet {
     protected void attachJson(Context context, HttpServletRequest request) {
 
         String path = request.getServletPath();
-        String jsonPath = path.replaceAll("\\..+$", ".json");
+        String[] parts = path.replaceAll("\\..+$", "").split("/+");
+        String prefix = "/test";
 
-        jsonPath = "/test" + jsonPath;
+        JSONObject jsonData = new JSONObject();
+        for (String part:parts) {
+            String jsonPath = prefix + "/" + part + ".json";
 
-        try {
-            URL url = request.getServletContext().getResource(jsonPath);
-            if (url != null) {
-                String enc = Settings.getString("encoding", "UTF-8");
+            try {
+                URL url = request.getServletContext().getResource(jsonPath);
+                if (url != null) {
+                    String enc = Settings.getString("encoding", "UTF-8");
 
-                BufferedReader in = new BufferedReader(new UnicodeReader(
-                        url.openStream(), enc));
-                String data = "";
-                String inputLine;
-                while ((inputLine = in.readLine()) != null){
-                    data += inputLine;
+                    BufferedReader in = new BufferedReader(new UnicodeReader(
+                            url.openStream(), enc));
+                    String data = "";
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null){
+                        data += inputLine;
+                    }
+                    in.close();
+
+                    JSONObject obj = JSONObject.parseObject(data);
+                    this.extendJson(jsonData, obj);
                 }
-                in.close();
-
-                HashMap<String, JSONObject> obj = JSONObject.parseObject(data, HashMap.class);
-                Iterator<Map.Entry<String, JSONObject>> iterator = obj.entrySet().iterator();
-                Map.Entry<String, JSONObject> entry;
-
-                while( iterator.hasNext()) {
-                    entry = iterator.next();
-                    context.put(entry.getKey(), entry.getValue());
-                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+
+            prefix += "/" + part;
+        }
+
+        for (String key:jsonData.keySet()) {
+            context.put(key, jsonData.get(key));
+        }
+    }
+
+    protected void extendJson(JSONObject source, JSONObject target) {
+
+        if (source == null || target == null) {
+            return;
+        }
+
+        for (String key:target.keySet()) {
+            Object value = target.get(key);
+            if (source.containsKey(key) && source.get(key) instanceof JSONObject && value instanceof JSONObject) {
+                this.extendJson(source.getJSONObject(key), target.getJSONObject(key));
+            } else {
+                source.put(key, value);
+            }
         }
     }
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
         String path = request.getServletPath();
+        String[] parts = path.replaceAll("\\..+$", "").split("/+");
+        String prefix = "/test";
 
-        String jspPath = "/test" + path.replaceAll("\\..+$", ".jsp");
+        for (String part:parts) {
+            String jspPath = prefix + "/" + part + ".jsp";
 
-        try {
-            URL url = request.getServletContext().getResource(jspPath);
-
-            if (url != null) {
-                ServletResponseWrapper resp = new ResponseWrapper(response);
-
-                request.setAttribute("context", context);
-                request.getRequestDispatcher(jspPath).include(request, resp);
+            try {
+                URL url = request.getServletContext().getResource(jspPath);
+                if (url != null) {
+                    ServletResponseWrapper resp = new ResponseWrapper(response);
+                    request.setAttribute("context", context);
+                    request.getRequestDispatcher(jspPath).include(request, resp);
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            prefix += "/" + part;
         }
     }
 }
