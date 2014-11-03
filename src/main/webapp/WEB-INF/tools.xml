@@ -7,7 +7,7 @@
         <tool class="org.apache.velocity.tools.generic.DisplayTool"/>
         <tool class="org.apache.velocity.tools.generic.MathTool"/>
         <tool class="org.apache.velocity.tools.generic.NumberTool"/>
-        <tool class="org.apache.velocity.tools.generic.ComparisonDateTool"/>
+        <tool class="org.apache.velocity.tools.generic.ComparisonDateTool" format="yyyy-MM-dd" depth="1" skip="month,week,millisecond" bundle="org.apache.velocity.tools.generic.times"/>
         <tool class="org.apache.velocity.tools.generic.ClassTool"/>
         <tool class="org.apache.velocity.tools.generic.ConversionTool"/>
         <tool class="org.apache.velocity.tools.generic.EscapeTool"/>
