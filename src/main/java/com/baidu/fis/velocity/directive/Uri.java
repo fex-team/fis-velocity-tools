@@ -10,9 +10,6 @@ import org.apache.velocity.runtime.parser.node.Node;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- * Created by 2betop on 5/4/14.
- */
 public class Uri extends AbstractInline {
     @Override
     public String getName() {
@@ -27,7 +24,7 @@ public class Uri extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        Resource fisResource = ResourceManager.ref(context);
+        Resource fisResource = ResourceManager.getByContext(context);
 
         try {
             writer.write(fisResource.getUri(node.jjtGetChild(0).value(context).toString()));
@@ -36,7 +33,7 @@ public class Uri extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
         return true;
     }
 }

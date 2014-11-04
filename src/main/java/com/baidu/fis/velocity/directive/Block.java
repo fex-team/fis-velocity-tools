@@ -12,13 +12,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-/**
- * Created by 2betop on 5/7/14.
- */
 public class Block extends AbstractBlock {
-    private static final String TEMPLATE_KEY = "templates-stack";
-    private static final String BLOCK_KEY = "blocks-stack";
+    private static final String TEMPLATE_KEY = AbstractBlock.class.getName() + "templates-stack";
+    private static final String BLOCK_KEY = AbstractBlock.class.getName() + "blocks-stack";
 
+    @SuppressWarnings("unchecked")
     public static void pushTemplate(InternalContextAdapter ctx, String template) {
         Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
 
@@ -30,6 +28,7 @@ public class Block extends AbstractBlock {
         templates.push(template);
     }
 
+    @SuppressWarnings("unchecked")
     public static String popTemplate(InternalContextAdapter ctx) {
         Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
         String template = "";
@@ -48,20 +47,12 @@ public class Block extends AbstractBlock {
         return template;
     }
 
-    public static String getCurrentTemplate(InternalContextAdapter ctx) {
-        Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
-
-        if (templates == null || templates.isEmpty()) {
-            return "";
-        }
-
-        return templates.peek();
-    }
-
+    @SuppressWarnings("unchecked")
     public static Stack<String> getTempplateStack(InternalContextAdapter ctx) {
         return (Stack<String>)ctx.get(TEMPLATE_KEY);
     }
 
+    @SuppressWarnings("unchecked")
     public static void registerBlocks(InternalContextAdapter ctx, String templateName, Map<String, Node> map) {
         Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
 
@@ -73,6 +64,7 @@ public class Block extends AbstractBlock {
         blocks.put(templateName, map);
     }
 
+    @SuppressWarnings("unchecked")
     public static void unRegisterBlocks(InternalContextAdapter ctx, String templateName) {
 
         Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
@@ -89,13 +81,13 @@ public class Block extends AbstractBlock {
         }
     }
 
-
     @Override
     public String getName() {
         return "block";
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
         if ( node.jjtGetNumChildren() == 0 )

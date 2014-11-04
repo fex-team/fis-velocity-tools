@@ -12,9 +12,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-/**
- * Created by 2betop on 5/4/14.
- */
 public class Script extends AbstractBlock {
     @Override
     public String getName() {
@@ -25,7 +22,7 @@ public class Script extends AbstractBlock {
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
         this.avoidEmbedSelf(node);
-        Resource fisResource = ResourceManager.ref(context);
+        Resource fisResource = ResourceManager.getByContext(context);
 
         // 指定了 url
         if (node.jjtGetNumChildren() > 1) {
@@ -40,7 +37,7 @@ public class Script extends AbstractBlock {
             fisResource.addJSEmbed(embed.toString());
         }
 
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
         return true;
     }
 }

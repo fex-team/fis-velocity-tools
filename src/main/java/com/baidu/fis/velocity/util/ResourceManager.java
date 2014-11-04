@@ -13,7 +13,7 @@ public class ResourceManager {
 
     private static final String KEY = Resource.class.toString();
 
-    public static Resource ref(InternalContextAdapter ctx) {
+    public static Resource getByContext(InternalContextAdapter ctx) {
         Resource resource = (Resource)ctx.get(KEY);
 
         if (resource == null) {
@@ -26,15 +26,15 @@ public class ResourceManager {
         return resource;
     }
 
-    public static void unRef(InternalContextAdapter ctx) {
-        Resource resource = (Resource)ctx.get(KEY);
-
-        if (resource == null) {
-            return;
-        }
-
-        if (--resource.refs == 0) {
-            ctx.remove(KEY);
-        }
-    }
+//    public static void unRef(InternalContextAdapter ctx) {
+//        Resource resource = (Resource)ctx.get(KEY);
+//
+//        if (resource == null) {
+//            return;
+//        }
+//
+//        if (--resource.refs == 0) {
+//            ctx.remove(KEY);
+//        }
+//    }
 }

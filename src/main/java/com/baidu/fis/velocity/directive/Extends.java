@@ -14,12 +14,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 
-/**
- * Created by 2betop on 5/7/14.
- */
 public class Extends extends AbstractInclude {
 
-    private static final String BLOCKS_MAP_KEY = "blocks-map-key";
+    private static final String BLOCKS_MAP_KEY = AbstractInclude.class.getName() + "blocks-map-key";
 
     @Override
     public String getName() {
@@ -33,7 +30,7 @@ public class Extends extends AbstractInclude {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        Resource fisResource = ResourceManager.ref(context);
+        Resource fisResource = ResourceManager.getByContext(context);
 
         Boolean isTopNode = false;
         Writer buffer = writer;
@@ -55,12 +52,13 @@ public class Extends extends AbstractInclude {
             writer.write(fisResource.filterContent(buffer.toString()));
         }
 
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
 
         return true;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void preRender(InternalContextAdapter context) {
         Map<String, Node> map = (Map<String, Node>)context.get(BLOCKS_MAP_KEY);
 

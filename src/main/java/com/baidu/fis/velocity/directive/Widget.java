@@ -7,12 +7,10 @@ import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.log.Log;
-import org.apache.velocity.runtime.parser.ParserTreeConstants;
 import org.apache.velocity.runtime.parser.node.Node;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
 
 public class Widget extends AbstractInclude {
 
@@ -31,7 +29,7 @@ public class Widget extends AbstractInclude {
     @SuppressWarnings("unchecked")
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
-        Resource fisResource = ResourceManager.ref(context);
+        Resource fisResource = ResourceManager.getByContext(context);
 
         try {
             // 添加资源 Like Require
@@ -43,7 +41,7 @@ public class Widget extends AbstractInclude {
         }
 
         super.render(context, writer, node);
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
         return true;
     }
 

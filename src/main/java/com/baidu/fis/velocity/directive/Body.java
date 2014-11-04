@@ -10,9 +10,6 @@ import org.apache.velocity.runtime.parser.node.Node;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- * Created by 2betop on 5/4/14.
- */
 public class Body extends AbstractBlock {
 
     @Override

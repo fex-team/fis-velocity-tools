@@ -1,6 +1,5 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.util.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.VelocityException;
 import org.apache.velocity.runtime.log.Log;
@@ -46,9 +45,12 @@ public abstract class AbstractBlock extends org.apache.velocity.runtime.directiv
             item = node.jjtGetChild(i + start);
 
             if ((i % 2) > 0) {
-                sb.append("=\"" + item.value(context).toString().replace("\"", "&quot;") + "\"");
+                sb.append("=\"");
+                sb.append(item.value(context).toString().replace("\"", "&quot;"));
+                sb.append("\"");
             } else {
-                sb.append(" " + item.value(context).toString());
+                sb.append(" ");
+                sb.append(item.value(context).toString());
             }
         }
 

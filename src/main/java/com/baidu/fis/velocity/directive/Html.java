@@ -20,7 +20,7 @@ public class Html extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        Resource fisResource = ResourceManager.ref(context);
+        Resource fisResource = ResourceManager.getByContext(context);
 
         String framework;
         Boolean isTopNode = false;
@@ -63,7 +63,7 @@ public class Html extends AbstractBlock {
             writer.write(fisResource.filterContent(buffer.toString()));
         }
 
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
 
         return true;
     }

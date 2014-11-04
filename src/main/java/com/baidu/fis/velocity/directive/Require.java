@@ -10,9 +10,6 @@ import org.apache.velocity.runtime.parser.node.Node;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- * Created by 2betop on 5/4/14.
- */
 public class Require extends AbstractInline {
 
 
@@ -30,7 +27,7 @@ public class Require extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        Resource fisResource = ResourceManager.ref(context);
+        Resource fisResource = ResourceManager.getByContext(context);
 
         try {
             // 只需要把依赖加载上就可以了。
@@ -40,7 +37,7 @@ public class Require extends AbstractInline {
             log.warn(err.getStackTrace());
         }
 
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
 
         return true;
     }

@@ -9,6 +9,7 @@ import org.apache.velocity.app.event.EventCartridge;
 import org.apache.velocity.context.ChainedInternalContextAdapter;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.context.InternalContextAdapter;
+import org.apache.velocity.context.InternalEventContext;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -28,14 +29,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by 2betop on 5/21/14.
- */
 abstract public class AbstractInclude extends Parse {
-    protected static class WidgetContext extends ChainedInternalContextAdapter {
-        Context localContext;
+    protected static class FisLocalContext extends ChainedInternalContextAdapter {
+        private Context localContext;
+        private EventCartridge eventCartridge = null;
 
-        public WidgetContext(InternalContextAdapter inner) {
+        public FisLocalContext(InternalContextAdapter inner) {
             super(inner);
             localContext = new VelocityContext();
         }
@@ -142,6 +141,28 @@ abstract public class AbstractInclude extends Parse {
             }
             return super.localPut(key, value);
         }
+
+        @Override
+        public EventCartridge attachEventCartridge(EventCartridge ec) {
+            Context context = this.innerContext.getInternalUserContext();
+
+            if ( !(context instanceof InternalEventContext) ) {
+                EventCartridge tmp = eventCartridge;
+                eventCartridge = ec;
+                return tmp;
+            }
+
+            return super.attachEventCartridge(ec);
+        }
+
+        @Override
+        public EventCartridge getEventCartridge() {
+            if (eventCartridge!=null) {
+                return eventCartridge;
+            }
+
+            return super.getEventCartridge();
+        }
     }
 
     protected Log log;
@@ -153,17 +174,10 @@ abstract public class AbstractInclude extends Parse {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
-        Resource fisResource = ResourceManager.ref(context);
-
-        //  支持 include fis id.
-        IncludeFisSource eh = new IncludeFisSource();
-        eh.setFisResource(fisResource);
-
-
-        rsvc.getApplicationEventCartridge().addEventHandler(eh);
-
+        Resource fisResource = ResourceManager.getByContext(context);
 
         try {
             // 添加资源 Like Require
@@ -172,7 +186,14 @@ abstract public class AbstractInclude extends Parse {
             // do nothings
         }
 
-        WidgetContext ctx = new WidgetContext(context);
+        FisLocalContext ctx = new FisLocalContext(context);
+        //  支持 include fis id.
+        IncludeFisSource eh = new IncludeFisSource();
+        eh.setFisResource(fisResource);
+
+        EventCartridge ec = new EventCartridge();
+        ec.addIncludeEventHandler(eh);
+        ctx.attachEventCartridge(ec);
 
         for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             Node arg = node.jjtGetChild(i);
@@ -217,8 +238,7 @@ abstract public class AbstractInclude extends Parse {
         Boolean result = super.render(ctx, writer, node);
 
         eh.setFisResource(null);
-        rsvc.getApplicationEventCartridge().removeEventHandler(eh);
-        ResourceManager.unRef(context);
+//        ResourceManager.unRef(context);
 
         return result;
     }
