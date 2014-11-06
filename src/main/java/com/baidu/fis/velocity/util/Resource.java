@@ -26,7 +26,7 @@ public class Resource {
     protected Map<String, ArrayList<String>> collection;
     protected Map<String, StringBuilder> embed;
     public int refs = 0;
-    public Boolean debug = false;
+    public Boolean ignorePkg = false;
 
     public Resource() {
         this.loaded = new HashMap<String, Boolean>();
@@ -38,11 +38,11 @@ public class Resource {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
             if (request.getParameter("debug") != null) {
-                debug = true;
+                ignorePkg = true;
             }
         } catch (Exception err) {
             // do nothing.
-            debug = Settings.getBoolean("debug", false);
+            ignorePkg = Settings.getBoolean("debug", false);
         }
     }
 
@@ -108,11 +108,15 @@ public class Resource {
         sb.append(content);
     }
 
-    public void addResource(String id){
-        this.addResource(id, false);
+    public String addResource(String id){
+        return this.addResource(id, false, false);
     }
 
-    public void addResource(String id, Boolean deffer) {
+    public String addResource(String id, Boolean deffer) {
+        return this.addResource(id, deffer, false);
+    }
+
+    public String addResource(String id, Boolean deffer, Boolean drop) {
         JSONObject info, node;
         String uri;
 
@@ -121,7 +125,7 @@ public class Resource {
         // 注意：null 不能直接用来和 false\true 比较，否则报错。
         if ( loaded.get(id) != null && loaded.get(id) == deffer ||
                 deffer && loaded.get(id) != null && !loaded.get(id) ) {
-            return;
+            return getUri(id, true);
         }
 
         info = map.getNode(id);
@@ -132,7 +136,7 @@ public class Resource {
 
         String pkg = (String) info.get("pkg");
 
-        if (!debug && pkg != null) {
+        if (!ignorePkg && pkg != null) {
             info = map.getNode(pkg, "pkg");
             uri = info.getString("uri");
 
@@ -189,14 +193,30 @@ public class Resource {
             collection.put(type, list);
         }
 
-        list.add(uri);
+        if (!drop) {
+            list.add(uri);
+        }
+
+        return uri;
     }
 
     public String getUri(String id) {
+        return getUri(id, false);
+    }
+
+    public String getUri(String id, Boolean usePkg) {
         JSONObject node = map.getNode(id);
 
         if (node == null) {
             return null;
+        }
+
+        if (usePkg && !ignorePkg) {
+            String pkg = (String) node.get("pkg");
+
+            if (pkg != null) {
+                node = map.getNode(pkg, "pkg");
+            }
         }
 
         return node.getString("uri");
@@ -208,29 +228,35 @@ public class Resource {
 
         if (arr != null) {
             for (String uri : arr) {
-                sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + uri + "\"/>");
+                sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+                sb.append(uri);
+                sb.append("\"/>");
             }
         }
 
         StringBuilder embedCSS = embed.get("css");
 
         if (embedCSS != null) {
-            sb.append("<style type=\"text/css\">" + embedCSS.toString() + "</style>");
+            sb.append("<style type=\"text/css\">");
+            sb.append(embedCSS.toString());
+            sb.append("</style>");
         }
 
         return sb.toString();
     }
 
     public String renderJS() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         ArrayList<String> arr = collection.get("js");
 
         Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || collection.get("jsDeffer") != null);
         String modJs = "";
 
         if (needModJs) {
-            modJs = getUri(framework);
-            sb.append("<script type=\"text/javascript\" src=\"" + modJs + "\"></script>");
+            modJs = addResource(framework, false, true);
+            sb.append("<script type=\"text/javascript\" src=\"");
+            sb.append(modJs);
+            sb.append("\"></script>");
         }
 
         if (collection.get("jsDeffer") != null) {
@@ -238,11 +264,15 @@ public class Resource {
 
             if (!useAmd && Settings.getBoolean("sourceMap", true)) {
                 Map<String, Map> defferMap = this.buildDefferMap();
-                sb.append("<script type=\"text/javascript\">require.resourceMap(" + JSONObject.toJSON(defferMap) + ");</script>");
+                sb.append("<script type=\"text/javascript\">require.resourceMap(");
+                sb.append(JSONObject.toJSON(defferMap));
+                sb.append(");</script>");
             } else {
                 // 输出 amd 方式 require.config({paths: {}});
                 Map<String, String> paths = this.buildAmdPaths();
-                sb.append("<script type=\"text/javascript\">require.config({paths:" + JSONObject.toJSON(paths) + "});</script>");
+                sb.append("<script type=\"text/javascript\">require.config({paths:");
+                sb.append(JSONObject.toJSON(paths));
+                sb.append("});</script>");
             }
         }
 
@@ -251,7 +281,9 @@ public class Resource {
                 if (uri.equals(modJs)) {
                     continue;
                 }
-                sb.append("<script type=\"text/javascript\" src=\"" + uri + "\"></script>");
+                sb.append("<script type=\"text/javascript\" src=\"");
+                sb.append(uri);
+                sb.append("\"></script>");
             }
         }
 
@@ -259,7 +291,9 @@ public class Resource {
         StringBuilder embedJS = embed.get("js");
 
         if (embedJS != null) {
-            sb.append("<script type=\"text/javascript\">" + embedJS.toString() + "</script>");
+            sb.append("<script type=\"text/javascript\">");
+            sb.append(embedJS.toString());
+            sb.append("</script>");
         }
 
         return sb.toString();
@@ -300,7 +334,7 @@ public class Resource {
                 infoCopy.put("url", info.getString("uri"));
 
                 // 保留 pkg 信息
-                if (!debug && pkg != null) {
+                if (!ignorePkg && pkg != null) {
                     infoCopy.put("pkg", pkg);
                 }
 
@@ -330,7 +364,7 @@ public class Resource {
                 }
 
                 // 再把对应的 pkg 加入。
-                if (!debug && pkg != null) {
+                if (!ignorePkg && pkg != null) {
                     info = map.getNode(pkg, "pkg");
 
                     info.put("url", info.getString("uri"));
@@ -374,7 +408,7 @@ public class Resource {
             if (info.containsKey("extras")) {
                 String uri = info.getString("uri");
 
-                    if (!debug && info.containsKey("pkg")) {
+                    if (!ignorePkg && info.containsKey("pkg")) {
                         JSONObject pkg = map.getNode(info.getString("pkg"), "pkg");
                         uri = pkg.getString("uri");
                     }
@@ -383,7 +417,9 @@ public class Resource {
                     uri = uri.substring(0, uri.length() - 3);
                 }
 
-                paths.put(info.getJSONObject("extras").getString("moduleId"), uri);
+                if (info.getJSONObject("extras").containsKey("moduleId")) {
+                    paths.put(info.getJSONObject("extras").getString("moduleId"), uri);
+                }
             }
 
         }
