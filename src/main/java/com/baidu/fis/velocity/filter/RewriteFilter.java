@@ -156,7 +156,7 @@ public class RewriteFilter implements Filter {
         URL url = req.getServletContext().getResource(path);
 
         // 找不到资源
-        if (url == null) {
+        if (url == null && !path.endsWith(".vm")) {
 
             Pattern reg = Pattern.compile("^/(?:([^/]+)/)?page/(.*)$", Pattern.CASE_INSENSITIVE);
             Matcher matcher = reg.matcher(path);
@@ -165,35 +165,29 @@ public class RewriteFilter implements Filter {
                 String ns = matcher.group(1);
                 String file = matcher.group(2);
 
-                try {
+                JSONObject info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
 
-                    JSONObject info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
+                // 在 map.json 里面找到了
+                if (info!=null) {
+                    String resolved = info.getString("uri");
 
-                    // 在 map.json 里面找到了
-                    if (info!=null) {
-                        String resolved = info.getString("uri");
-
-                        // 如果是 vm 文件，servlet 里面会自己找到文件。
-                        if (resolved.endsWith(".vm")) {
-                            req.getRequestDispatcher(path).forward(req, resp);
-                        } else {
-                            resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
-                            req.getRequestDispatcher(resolved).forward(req, resp);
-                        }
-
-                        return true;
-                    } else {
-                        // 一般没加 .vm 后缀的路径是找不到的。
-                        if (!path.endsWith(".vm")) {
-                            path += ".vm";
-                        }
-
+                    // 如果是 vm 文件，servlet 里面会自己找到文件。
+                    if (resolved.endsWith(".vm")) {
                         req.getRequestDispatcher(path).forward(req, resp);
-                        return true;
+                    } else {
+                        resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
+                        req.getRequestDispatcher(resolved).forward(req, resp);
                     }
 
-                } catch (Exception err) {
-                    System.out.println(err.getMessage());
+                    return true;
+                } else {
+                    // 一般没加 .vm 后缀的路径是找不到的。
+                    if (!path.endsWith(".vm")) {
+                        path += ".vm";
+                    }
+
+                    req.getRequestDispatcher(path).forward(req, resp);
+                    return true;
                 }
             }
         } else if (path.endsWith(".json")) {
