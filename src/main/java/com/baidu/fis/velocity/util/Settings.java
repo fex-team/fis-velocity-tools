@@ -58,7 +58,7 @@ public class Settings {
         try {
             data.load(input);
         } catch (Exception err) {
-            System.out.println(err.getStackTrace());
+            System.out.println(err.getMessage());
         }
     }
 

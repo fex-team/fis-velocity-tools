@@ -5,17 +5,13 @@ import com.baidu.fis.velocity.util.MapJson;
 import com.baidu.fis.velocity.util.ResponseWrapper;
 import com.baidu.fis.velocity.util.Settings;
 import com.baidu.fis.velocity.util.UnicodeReader;
-import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.tools.view.ServletUtils;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
@@ -23,9 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,9 +26,6 @@ public class Preview extends VelocityViewServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        ServletContext context = config.getServletContext();
-        Settings.setApplicationAttribute(ServletContext.class.getName(), context);
-        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
         super.init(config);
     }
 

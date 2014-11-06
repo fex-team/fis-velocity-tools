@@ -1,5 +1,9 @@
 package com.baidu.fis.velocity.filter;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baidu.fis.velocity.util.MapJson;
+import com.baidu.fis.velocity.util.Settings;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -120,6 +124,14 @@ public class RewriteFilter implements Filter {
         }
     }
 
+    private MapJson map = null;
+
+    public void init(FilterConfig config) throws ServletException {
+        ServletContext context = config.getServletContext();
+        Settings.setApplicationAttribute(ServletContext.class.getName(), context);
+        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
+        map = new MapJson();
+    }
     public void destroy() {
     }
 
@@ -138,9 +150,6 @@ public class RewriteFilter implements Filter {
         chain.doFilter(req, resp);
     }
 
-    public void init(FilterConfig config) throws ServletException {
-
-    }
 
     protected Boolean handlePreview(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException{
         String path = req.getServletPath();
@@ -148,13 +157,43 @@ public class RewriteFilter implements Filter {
 
         // 找不到资源
         if (url == null) {
-            Pattern reg = Pattern.compile("^/(?:[^/]+/)?page/.*$", Pattern.CASE_INSENSITIVE);
+
+            Pattern reg = Pattern.compile("^/(?:([^/]+)/)?page/(.*)$", Pattern.CASE_INSENSITIVE);
             Matcher matcher = reg.matcher(path);
+
             if (matcher.find()) {
-                if (!path.endsWith(".vm")) {
-                    path += ".vm";
-                    req.getRequestDispatcher(path).forward(req, resp);
-                    return true;
+                String ns = matcher.group(1);
+                String file = matcher.group(2);
+
+                try {
+
+                    JSONObject info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
+
+                    // 在 map.json 里面找到了
+                    if (info!=null) {
+                        String resolved = info.getString("uri");
+
+                        // 如果是 vm 文件，servlet 里面会自己找到文件。
+                        if (resolved.endsWith(".vm")) {
+                            req.getRequestDispatcher(path).forward(req, resp);
+                        } else {
+                            resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
+                            req.getRequestDispatcher(resolved).forward(req, resp);
+                        }
+
+                        return true;
+                    } else {
+                        // 一般没加 .vm 后缀的路径是找不到的。
+                        if (!path.endsWith(".vm")) {
+                            path += ".vm";
+                        }
+
+                        req.getRequestDispatcher(path).forward(req, resp);
+                        return true;
+                    }
+
+                } catch (Exception err) {
+                    System.out.println(err.getMessage());
                 }
             }
         } else if (path.endsWith(".json")) {
