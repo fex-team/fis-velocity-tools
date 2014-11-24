@@ -165,7 +165,13 @@ public class RewriteFilter implements Filter {
                 String ns = matcher.group(1);
                 String file = matcher.group(2);
 
-                JSONObject info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
+                JSONObject info = null;
+
+                try {
+                    info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
+                } catch (Exception ex) {
+                    // I don't care!
+                }
 
                 // 在 map.json 里面找到了
                 if (info!=null) {
