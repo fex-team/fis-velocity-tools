@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Created by 2betop on 4/29/14.
@@ -17,21 +18,75 @@ import java.util.Map;
  */
 public class Resource {
 
+    protected static class Res {
+        private String value;
+        private String prefix;
+        private String affix;
+
+        public Res(String value) {
+            init(value, null, null);
+        }
+
+        public Res(String value, String prefix) {
+            init(value, prefix, null);
+        }
+
+        public Res(String value, String prefix, String affix) {
+            init(value, prefix, affix);
+        }
+
+        public void init(String url, String prefix, String affix) {
+            this.value = url;
+            this.prefix = prefix;
+            this.affix = affix;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+
+        public void setPrefix(String prefix) {
+            this.prefix = prefix;
+        }
+
+        public String getAffix() {
+            return affix;
+        }
+
+        public void setAffix(String affix) {
+            this.affix = affix;
+        }
+
+        public int myCode() {
+            int result = prefix != null ? prefix.hashCode() : 0;
+            result = 31 * result + (affix != null ? affix.hashCode() : 0);
+            return result;
+        }
+    }
+
     public static final String STYLE_PLACEHOLDER = "<!--FIS_STYLE_PLACEHOLDER-->";
     public static final String SCRIPT_PLACEHOLDER = "<!--FIS_SCRIPT_PLACEHOLDER-->";
 
     protected String framework = null;
     protected MapJson map = null;
     protected Map<String, Boolean> loaded;
-    protected Map<String, ArrayList<String>> collection;
-    protected Map<String, StringBuilder> embed;
+    protected Map<String, ArrayList<Res>> collection;
+    protected Map<String, ArrayList<Res>> embed;
     public int refs = 0;
     public Boolean ignorePkg = false;
 
     public Resource() {
         this.loaded = new HashMap<String, Boolean>();
-        this.collection = new HashMap<String, ArrayList<String>>();
-        this.embed = new HashMap<String, StringBuilder>();
+        this.collection = new HashMap<String, ArrayList<Res>>();
+        this.embed = new HashMap<String, ArrayList<Res>>();
         this.map = new MapJson();
 
         try {
@@ -55,68 +110,108 @@ public class Resource {
     }
 
     public void addJS(String id) {
+        addJS(id, null, null);
+    }
+
+    public void addJS(String id, String prefix) {
+        addJS(id, prefix, null);
+    }
+
+    public void addJS(String id, String prefix, String affix) {
        if (id.contains(":") && !id.contains(":/") && !id.contains(":\\")) {
            this.addResource(id);
        } else {
            String type = "js";
-           ArrayList<String> list = collection.get(type);
+           ArrayList<Res> list = collection.get(type);
 
            if (list == null) {
-               list = new ArrayList<String>();
+               list = new ArrayList<Res>();
                collection.put(type, list);
            }
 
-           list.add(id);
+           list.add(new Res(id, prefix, affix));
        }
     }
 
     public void addJSEmbed(String content) {
-        StringBuilder sb = embed.get("js");
+        addJSEmbed(content, null, null);
+    }
 
-        if (sb == null) {
-            sb = new StringBuilder();
-            embed.put("js", sb);
+    public void addJSEmbed(String content, String prefix) {
+        addJSEmbed(content, prefix, null);
+    }
+
+    public void addJSEmbed(String content, String prefix, String affix) {
+        ArrayList<Res> list = embed.get("js");
+
+        if (list == null) {
+            list = new ArrayList<Res>();
+            embed.put("js", list);
         }
 
-        sb.append(content);
+        list.add(new Res(content, prefix, affix));
     }
 
     public void addCSS(String id) {
+        addCSS(id, null, null);
+    }
+
+    public void addCSS(String id, String prefix) {
+        addCSS(id, prefix, null);
+    }
+
+    public void addCSS(String id, String prefix, String affix) {
         if (id.contains(":") && !id.contains(":/") && !id.contains(":\\")) {
             this.addResource(id);
         } else {
             String type = "css";
-            ArrayList<String> list = collection.get(type);
+            ArrayList<Res> list = collection.get(type);
 
             if (list == null) {
-                list = new ArrayList<String>();
+                list = new ArrayList<Res>();
                 collection.put(type, list);
             }
 
-            list.add(id);
+            list.add(new Res(id, prefix, affix));
         }
     }
 
     public void addCSSEmbed(String content) {
-        StringBuilder sb = embed.get("css");
+        addCSSEmbed(content, null, null);
+    }
 
-        if (sb == null) {
-            sb = new StringBuilder();
-            embed.put("css", sb);
+    public void addCSSEmbed(String content, String prefix) {
+        addCSSEmbed(content, prefix, null);
+    }
+
+    public void addCSSEmbed(String content, String prefix, String affix) {
+        ArrayList<Res> list = embed.get("css");
+
+        if (list == null) {
+            list = new ArrayList<Res>();
+            embed.put("css", list);
         }
 
-        sb.append(content);
+        list.add(new Res(content, prefix, affix));
     }
 
     public String addResource(String id){
-        return this.addResource(id, false, false);
+        return this.addResource(id, false, false, null, null);
     }
 
     public String addResource(String id, Boolean deffer) {
-        return this.addResource(id, deffer, false);
+        return this.addResource(id, deffer, false, null, null);
     }
 
     public String addResource(String id, Boolean deffer, Boolean drop) {
+        return this.addResource(id, deffer, drop, null, null);
+    }
+
+    public String addResource(String id, Boolean deffer, Boolean drop, String prefix) {
+        return this.addResource(id, deffer, drop, prefix, null);
+    }
+
+    public String addResource(String id, Boolean deffer, Boolean drop, String prefix, String affix) {
         JSONObject info, node;
         String uri;
 
@@ -186,15 +281,15 @@ public class Resource {
             uri = id;
         }
 
-        ArrayList<String> list = collection.get(type);
+        ArrayList<Res> list = collection.get(type);
 
         if (list == null) {
-            list = new ArrayList<String>();
+            list = new ArrayList<Res>();
             collection.put(type, list);
         }
 
         if (!drop) {
-            list.add(uri);
+            list.add(new Res(uri, prefix, affix));
         }
 
         return uri;
@@ -224,22 +319,58 @@ public class Resource {
 
     public String renderCSS() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<String> arr = collection.get("css");
+        ArrayList<Res> arr = collection.get("css");
 
         if (arr != null) {
-            for (String uri : arr) {
+            for (Res res : arr) {
+                if (res.prefix != null) {
+                    sb.append(res.prefix);
+                }
+
                 sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-                sb.append(uri);
+                sb.append(res.value);
                 sb.append("\"/>");
+
+                if (res.affix != null) {
+                    sb.append(res.affix);
+                }
             }
         }
 
-        StringBuilder embedCSS = embed.get("css");
+        ArrayList<Res> list = embed.get("css");
 
-        if (embedCSS != null) {
-            sb.append("<style type=\"text/css\">");
-            sb.append(embedCSS.toString());
-            sb.append("</style>");
+        if (list != null && !list.isEmpty()) {
+            Stack<StringBuilder> group = new Stack<StringBuilder>();
+            Res lastRes = null;
+
+            for (Res item:list) {
+                if (lastRes == null || item.myCode() != lastRes.myCode()) {
+                    if (lastRes != null) {
+                        group.lastElement().append("</style>");
+                        if (lastRes.affix != null) {
+                            group.lastElement().append(lastRes.affix);
+                        }
+                    }
+
+                    group.add(new StringBuilder());
+                    if (item.prefix != null) {
+                        group.lastElement().append(item.prefix);
+                    }
+                    group.lastElement().append("<style type=\"text/css\">");
+                }
+
+                group.lastElement().append(item.value);
+                lastRes = item;
+            }
+
+            group.lastElement().append("</style>");
+            if (lastRes != null && lastRes.affix != null) {
+                group.lastElement().append(lastRes.affix);
+            }
+
+            for (StringBuilder item:group) {
+                sb.append(item);
+            }
         }
 
         return sb.toString();
@@ -247,7 +378,7 @@ public class Resource {
 
     public String renderJS() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<String> arr = collection.get("js");
+        ArrayList<Res> arr = collection.get("js");
 
         Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || collection.get("jsDeffer") != null);
         String modJs = "";
@@ -277,23 +408,57 @@ public class Resource {
         }
 
         if (arr != null) {
-            for (String uri : arr) {
-                if (uri.equals(modJs)) {
+            for (Res res : arr) {
+                if (res.value.equals(modJs)) {
                     continue;
                 }
+                if (res.prefix != null) {
+                    sb.append(res.prefix);
+                }
                 sb.append("<script type=\"text/javascript\" src=\"");
-                sb.append(uri);
+                sb.append(res.value);
                 sb.append("\"></script>");
+                if (res.affix != null) {
+                    sb.append(res.affix);
+                }
             }
         }
 
         // 输出 embed js
-        StringBuilder embedJS = embed.get("js");
+        ArrayList<Res> list = embed.get("js");
 
-        if (embedJS != null) {
-            sb.append("<script type=\"text/javascript\">");
-            sb.append(embedJS.toString());
-            sb.append("</script>");
+        if (list != null && !list.isEmpty()) {
+            Stack<StringBuilder> group = new Stack<StringBuilder>();
+            Res lastRes = null;
+
+            for (Res item:list) {
+                if (lastRes == null || item.myCode() != lastRes.myCode()) {
+                    if (lastRes != null) {
+                        group.lastElement().append("</script>");
+                        if (lastRes.affix != null) {
+                            group.lastElement().append(lastRes.affix);
+                        }
+                    }
+
+                    group.add(new StringBuilder());
+                    if (item.prefix != null) {
+                        group.lastElement().append(item.prefix);
+                    }
+                    group.lastElement().append("<script type=\"text/javascript\">");
+                }
+
+                group.lastElement().append(";").append(item.value);
+                lastRes = item;
+            }
+
+            group.lastElement().append("</script>");
+            if (lastRes != null && lastRes.affix != null) {
+                group.lastElement().append(lastRes.affix);
+            }
+
+            for (StringBuilder item:group) {
+                sb.append(item);
+            }
         }
 
         return sb.toString();
@@ -308,23 +473,23 @@ public class Resource {
         Map<String, JSONObject> res = new HashMap<String, JSONObject>();
         Map<String, JSONObject> pkgMap = new HashMap<String, JSONObject>();
 
-        ArrayList<String> list = collection.get("jsDeffer");
+        ArrayList<Res> list = collection.get("jsDeffer");
         JSONObject info;
 
         if (list != null) {
 
-            for (String id : list) {
+            for (Res item : list) {
 
                 // 已经同步加载，则忽略。
-                if (loaded.get(id) != null && !loaded.get(id)) {
+                if (loaded.get(item.value) != null && !loaded.get(item.value)) {
                     continue;
                 }
 
-                info = map.getNode(id);
+                info = map.getNode(item.value);
 
 
                 if (info == null) {
-                    throw new IllegalArgumentException("missing resource [" + id + "]");
+                    throw new IllegalArgumentException("missing resource [" + item.value + "]");
                 }
 
                 // 先加 res
@@ -373,7 +538,7 @@ public class Resource {
                     pkgMap.put(pkg, info);
                 }
 
-                res.put(id, infoCopy);
+                res.put(item.value, infoCopy);
             }
         }
 

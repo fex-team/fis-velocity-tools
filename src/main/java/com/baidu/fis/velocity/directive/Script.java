@@ -24,17 +24,37 @@ public class Script extends AbstractBlock {
         this.avoidEmbedSelf(node);
         Resource fisResource = ResourceManager.getByContext(context);
 
-        // 指定了 url
-        if (node.jjtGetNumChildren() > 1) {
-            String uri = node.jjtGetChild(0).value(context).toString();
-            fisResource.addJS(uri);
-        } else {
+        String prefix = null;
+        String affix = null;
+
+        // js embed
+        if (node.jjtGetChild(node.jjtGetNumChildren() -1).jjtGetNumChildren() > 0) {
+            if (node.jjtGetNumChildren() > 1) {
+                prefix = node.jjtGetChild(0).value(context).toString();
+            }
+
+            if (node.jjtGetNumChildren() > 2) {
+                affix = node.jjtGetChild(1).value(context).toString();
+            }
+
             StringWriter embed = new StringWriter();
 
             // 让父级去渲染 block body。
             super.render(context, embed);
 
-            fisResource.addJSEmbed(embed.toString());
+            fisResource.addJSEmbed(embed.toString(), prefix, affix);
+        } else {
+            String uri = node.jjtGetChild(0).value(context).toString();
+
+            if (node.jjtGetNumChildren() > 2) {
+                prefix = node.jjtGetChild(1).value(context).toString();
+            }
+
+            if (node.jjtGetNumChildren() > 3) {
+                affix = node.jjtGetChild(2).value(context).toString();
+            }
+
+            fisResource.addJS(uri, prefix, affix);
         }
 
 //        ResourceManager.unRef(context);

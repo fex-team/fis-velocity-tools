@@ -21,17 +21,28 @@ public class Require extends AbstractInline {
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
+        String prefix = null;
+        String affix = null;
+
         if ( node.jjtGetNumChildren() == 0 )
         {
             throw new VelocityException("#require(): argument missing at " +
                     Log.formatFileString(this));
         }
 
+        if (node.jjtGetNumChildren() >1) {
+            prefix = node.jjtGetChild(1).value(context).toString();
+        }
+
+        if (node.jjtGetNumChildren() >2) {
+            affix = node.jjtGetChild(2).value(context).toString();
+        }
+
         Resource fisResource = ResourceManager.getByContext(context);
 
         try {
             // 只需要把依赖加载上就可以了。
-            fisResource.addResource(node.jjtGetChild(0).value(context).toString());
+            fisResource.addResource(node.jjtGetChild(0).value(context).toString(), false, false, prefix, affix);
         } catch (Exception err) {
             writer.write(err.getMessage() + " " + Log.formatFileString(this));
             log.warn(err.getStackTrace());
