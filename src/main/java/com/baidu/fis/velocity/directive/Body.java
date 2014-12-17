@@ -32,6 +32,8 @@ public class Body extends AbstractBlock {
         super.render(context, writer);
 
         // 在头部把所有的样式输出。
+        writer.write(Resource.FRAMEWORK_PLACEHOLDER);
+        writer.write(Resource.FRAMEWORK_CONFIG);
         writer.write(Resource.SCRIPT_PLACEHOLDER);
 
         writer.write("</body>");

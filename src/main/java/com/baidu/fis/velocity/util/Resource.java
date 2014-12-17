@@ -74,6 +74,8 @@ public class Resource {
 
     public static final String STYLE_PLACEHOLDER = "<!--FIS_STYLE_PLACEHOLDER-->";
     public static final String SCRIPT_PLACEHOLDER = "<!--FIS_SCRIPT_PLACEHOLDER-->";
+    public static final String FRAMEWORK_PLACEHOLDER = "<!--FIS_FRAMEWORK_PLACEHOLDER-->";
+    public static final String FRAMEWORK_CONFIG = "<!--FIS_FRAMEWORK_CONFIG-->";
 
     protected String framework = null;
     protected MapJson map = null;
@@ -376,12 +378,12 @@ public class Resource {
         return sb.toString();
     }
 
-    public String renderJS() {
+    protected String modJs = "";
+    public String renderFrameWork() {
         StringBuilder sb = new StringBuilder();
         ArrayList<Res> arr = collection.get("js");
 
         Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || collection.get("jsDeffer") != null);
-        String modJs = "";
 
         if (needModJs) {
             modJs = addResource(framework, false, true);
@@ -389,6 +391,12 @@ public class Resource {
             sb.append(modJs);
             sb.append("\"></script>");
         }
+
+        return sb.toString();
+    }
+
+    public String renderFrameworkConfig() {
+        StringBuilder sb = new StringBuilder();
 
         if (collection.get("jsDeffer") != null) {
             Boolean useAmd = !(framework != null && framework.endsWith("mod.js"));
@@ -406,6 +414,13 @@ public class Resource {
                 sb.append("});</script>");
             }
         }
+
+        return sb.toString();
+    }
+
+    public String renderJS() {
+        StringBuilder sb = new StringBuilder();
+        ArrayList<Res> arr = collection.get("js");
 
         if (arr != null) {
             for (Res res : arr) {
@@ -593,6 +608,14 @@ public class Resource {
     }
 
     public String filterContent(String input) {
+
+        if (input.contains(Resource.FRAMEWORK_PLACEHOLDER)) {
+            input = input.replace(Resource.FRAMEWORK_PLACEHOLDER, renderFrameWork());
+        }
+
+        if (input.contains(Resource.FRAMEWORK_CONFIG)) {
+            input = input.replace(Resource.FRAMEWORK_CONFIG, renderFrameworkConfig());
+        }
 
         if (input.contains(Resource.SCRIPT_PLACEHOLDER)) {
             input = input.replace(Resource.SCRIPT_PLACEHOLDER, renderJS());
