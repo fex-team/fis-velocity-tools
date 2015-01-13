@@ -1,8 +1,8 @@
-package com.baidu.fis.velocity.filter;
+package com.baidu.fis.filter;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baidu.fis.velocity.util.MapJson;
-import com.baidu.fis.velocity.util.Settings;
+import com.baidu.fis.util.MapJson;
+import com.baidu.fis.util.Settings;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -156,9 +156,8 @@ public class RewriteFilter implements Filter {
         URL url = req.getServletContext().getResource(path);
 
         // 找不到资源
-        if (url == null && !path.endsWith(".vm")) {
-
-            Pattern reg = Pattern.compile("^/(?:([^/]+)/)?page/(.*)$", Pattern.CASE_INSENSITIVE);
+        if (url == null) {
+            Pattern reg = Pattern.compile("^/(?:([^/]+)/)?(.*)$", Pattern.CASE_INSENSITIVE);
             Matcher matcher = reg.matcher(path);
 
             if (matcher.find()) {
@@ -166,34 +165,30 @@ public class RewriteFilter implements Filter {
                 String file = matcher.group(2);
 
                 JSONObject info = null;
+                String[] tryFiles = {"", ".html", ".jsp", ".vm"};
 
-                try {
-                    info = ns != null ? map.getNode(ns + ":page/" + file) : map.getNode("page/" + file);
-                } catch (Exception ex) {
-                    // I don't care!
+                for (String tryFile:tryFiles) {
+                    info = ns != null ? map.getNode( ns + "/" + file + tryFile) : null;
+
+                    if (info!=null) {
+                        break;
+                    }
+
+                    info = ns != null ? map.getNode(ns + ":" + file + tryFile) : map.getNode("" + file + tryFile);
+
+                    if (info!=null) {
+                        break;
+                    }
                 }
 
                 // 在 map.json 里面找到了
                 if (info!=null) {
                     String resolved = info.getString("uri");
-
-                    // 如果是 vm 文件，servlet 里面会自己找到文件。
-                    if (resolved.endsWith(".vm")) {
-                        req.getRequestDispatcher(path).forward(req, resp);
-                    } else {
-                        resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
-                        req.getRequestDispatcher(resolved).forward(req, resp);
-                    }
-
+                    resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
+                    req.getRequestDispatcher(resolved).forward(req, resp);
                     return true;
                 } else {
-                    // 一般没加 .vm 后缀的路径是找不到的。
-                    if (!path.endsWith(".vm")) {
-                        path += ".vm";
-                    }
-
-                    req.getRequestDispatcher(path).forward(req, resp);
-                    return true;
+                    return false;
                 }
             }
         } else if (path.endsWith(".json")) {
@@ -204,11 +199,6 @@ public class RewriteFilter implements Filter {
 
     // 读取 server.conf 进行转发
     protected Boolean handleRewrite(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException{
-
-        // 避免循环 rewrite
-        if (req.getAttribute("origin") != null) {
-            return false;
-        }
 
         RewriteRulers parser = new RewriteRulers();
 
@@ -248,7 +238,6 @@ public class RewriteFilter implements Filter {
             if (ruler.type == RewriteRulers.Ruler.TYPE_REDIRECT) {
                 resp.sendRedirect(ruler.dest);
             } else if(ruler.type == RewriteRulers.Ruler.TYPE_REWRITE) {
-                req.setAttribute("origin", req.getRequestURI());
                 req.getRequestDispatcher(ruler.dest).forward(req, resp);
             }
             return true;

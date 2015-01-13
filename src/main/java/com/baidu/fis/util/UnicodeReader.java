@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity.util;
+package com.baidu.fis.util;
 
 /**
  version: 1.1 / 2007-01-25

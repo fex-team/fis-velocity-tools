@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity.util;
+package com.baidu.fis.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -197,6 +197,11 @@ public class Resource {
         list.add(new Res(content, prefix, affix));
     }
 
+    public Boolean contains(String id) {
+        JSONObject info = map.getMap(id);
+        return info != null && info.containsKey("res") && info.getJSONObject("res").containsKey(id);
+    }
+
     public String addResource(String id){
         return this.addResource(id, false, false, null, null);
     }
@@ -217,6 +222,10 @@ public class Resource {
         JSONObject info, node;
         String uri;
 
+        if (!contains(id)) {
+            return id;
+        }
+
         // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
         // 如果之前是同步的这次异步添加则忽略掉。都同步添加过了，不需要异步再添加一次。
         // 注意：null 不能直接用来和 false\true 比较，否则报错。
@@ -226,11 +235,6 @@ public class Resource {
         }
 
         info = map.getNode(id);
-
-        if (info == null) {
-            throw new IllegalArgumentException("missing resource [" + id + "]");
-        }
-
         String pkg = (String) info.get("pkg");
 
         if (!ignorePkg && pkg != null) {

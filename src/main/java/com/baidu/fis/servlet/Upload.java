@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity.servlet;
+package com.baidu.fis.servlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;

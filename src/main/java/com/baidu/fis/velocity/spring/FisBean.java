@@ -1,6 +1,6 @@
 package com.baidu.fis.velocity.spring;
 
-import com.baidu.fis.velocity.util.Settings;
+import com.baidu.fis.util.Settings;
 import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;

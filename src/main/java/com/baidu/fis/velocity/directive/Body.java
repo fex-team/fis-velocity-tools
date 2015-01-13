@@ -1,6 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
-import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.util.Resource;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;

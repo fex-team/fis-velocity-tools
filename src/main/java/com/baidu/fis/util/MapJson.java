@@ -1,4 +1,4 @@
-package com.baidu.fis.velocity.util;
+package com.baidu.fis.util;
 
 import com.alibaba.fastjson.JSONObject;
 import javax.servlet.ServletContext;
@@ -7,9 +7,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by 2betop on 7/30/14.
- */
 public class MapJson {
 
     protected String dir = "/WEB-INF/config";
@@ -83,13 +80,15 @@ public class MapJson {
             }
         }
 
-        JSONObject ret = this.map.get(ns);
+        return this.map.get(ns);
 
-        if (ret == null) {
-            throw new IllegalArgumentException("missing map json of [" + id + "]");
-        }
-
-        return ret;
+//        JSONObject ret = this.map.get(ns);
+//
+//        if (ret == null) {
+//            throw new IllegalArgumentException("missing map json of [" + id + "]");
+//        }
+//
+//        return ret;
     }
 
     private static MapJson instance = null;

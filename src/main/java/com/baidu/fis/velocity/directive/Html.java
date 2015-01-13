@@ -1,8 +1,8 @@
 package com.baidu.fis.velocity.directive;
 
 
-import com.baidu.fis.velocity.util.Resource;
-import com.baidu.fis.velocity.util.ResourceManager;
+import com.baidu.fis.util.Resource;
+import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.parser.node.ASTprocess;

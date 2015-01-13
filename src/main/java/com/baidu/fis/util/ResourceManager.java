@@ -1,10 +1,7 @@
-package com.baidu.fis.velocity.util;
+package com.baidu.fis.util;
 
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.velocity.context.InternalContextAdapter;
-
-import java.util.Map;
 
 /**
  * Created by 2betop on 8/11/14.

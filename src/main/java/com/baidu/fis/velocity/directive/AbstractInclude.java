@@ -1,9 +1,9 @@
 package com.baidu.fis.velocity.directive;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.util.Resource;
 import com.baidu.fis.velocity.event.IncludeFisSource;
-import com.baidu.fis.velocity.util.ResourceManager;
+import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.event.EventCartridge;
 import org.apache.velocity.context.ChainedInternalContextAdapter;

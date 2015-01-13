@@ -1,6 +1,5 @@
-package com.baidu.fis.velocity.util;
+package com.baidu.fis.util;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;

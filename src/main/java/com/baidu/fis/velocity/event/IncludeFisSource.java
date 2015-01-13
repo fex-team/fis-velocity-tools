@@ -1,6 +1,6 @@
 package com.baidu.fis.velocity.event;
 
-import com.baidu.fis.velocity.util.Resource;
+import com.baidu.fis.util.Resource;
 
 /**
  * Created by 2betop on 5/8/14.
