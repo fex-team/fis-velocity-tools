@@ -2,9 +2,6 @@ package com.baidu.fis.velocity.event;
 
 import com.baidu.fis.util.Resource;
 
-/**
- * Created by 2betop on 5/8/14.
- */
 public class IncludeFisSource implements org.apache.velocity.app.event.IncludeEventHandler {
 
     protected Resource fisResource = null;

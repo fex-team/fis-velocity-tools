@@ -49,7 +49,7 @@
     <jsp-config>
         <taglib>
             <taglib-uri>/fis</taglib-uri>
-            <taglib-location>/WEB-INF/fis.tdl</taglib-location>
+            <taglib-location>/WEB-INF/fis.tld</taglib-location>
         </taglib>
     </jsp-config>
 </web-app>

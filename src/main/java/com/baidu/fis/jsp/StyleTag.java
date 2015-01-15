@@ -8,47 +8,41 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class ScriptTag extends SimpleTagSupport {
-    private String src = null;
+/**
+ * Created by 2betop on 15/1/16.
+ */
+public class StyleTag extends SimpleTagSupport {
+    private String href = null;
 
-    public void setName(String name) {
-        this.src = name;
-    }
-
-    public String getName() {
-        return src;
-    }
 
     private String prefix;
     private String affix;
 
-    public String getPrefix() {
-        return prefix;
-    }
-
     public void setPrefix(String prefix) {
         this.prefix = prefix;
-    }
-
-    public String getAffix() {
-        return affix;
     }
 
     public void setAffix(String affix) {
         this.affix = affix;
     }
 
+    public void setHref(String href) {
+        this.href = href;
+    }
+
     @Override
     public void doTag() throws JspException, IOException {
         Resource resource = Util.getResource(getJspContext());
 
-        if (src == null) {
+        if (href == null) {
             Writer buffer = new StringWriter();
             getJspBody().invoke(buffer);
 
-            resource.addJSEmbed(buffer.toString(), prefix, affix);
+            resource.addCSSEmbed(buffer.toString(), prefix, affix);
         } else {
-            resource.addJS(src, prefix, affix);
+            resource.addCSS(href, prefix, affix);
         }
     }
 }
+
+

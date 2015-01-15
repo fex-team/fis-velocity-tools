@@ -1,26 +1,12 @@
 package com.baidu.fis.velocity.servlet;
 
-import com.alibaba.fastjson.JSONObject;
-import com.baidu.fis.util.MapJson;
-import com.baidu.fis.util.ResponseWrapper;
 import com.baidu.fis.util.Settings;
-import com.baidu.fis.util.UnicodeReader;
 import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.view.ServletUtils;
 import org.apache.velocity.tools.view.VelocityViewServlet;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Preview extends VelocityViewServlet {
 

@@ -5,9 +5,6 @@ import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;
 
-/**
- * Created by 2betop on 8/11/14.
- */
 public class FisBean implements ServletContextAware {
 
     @Override

@@ -132,9 +132,11 @@ public class Extends extends AbstractInclude {
         map.clear();
         context.remove(BLOCKS_MAP_KEY);
 
+        StringWriter useless = new StringWriter();
+
         // 把 rest 的 Node 渲染了
         for (Node child:children) {
-            child.render(context, writer);
+            child.render(context, useless);
         }
     }
 }

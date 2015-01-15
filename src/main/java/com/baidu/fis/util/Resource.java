@@ -301,6 +301,10 @@ public class Resource {
         return uri;
     }
 
+    public Boolean exists(String id) {
+        return getUri(id) != null;
+    }
+
     public String getUri(String id) {
         return getUri(id, false);
     }

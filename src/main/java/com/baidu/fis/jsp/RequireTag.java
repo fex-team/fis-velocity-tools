@@ -1,31 +1,50 @@
 package com.baidu.fis.jsp;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.tagext.TagSupport;
+import com.baidu.fis.util.Resource;
 
-public class RequireTag extends TagSupport {
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+import java.io.IOException;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8694856279353734532L;
-	
-	private String id;
-	
-	public int doStartTag() {
-		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
-		Resource resource = (Resource) request.getAttribute(Resource.CONTEXT_ATTR_NAME);
-		try {
-			resource.require(this.id);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return SKIP_BODY;
-	}
+public class RequireTag extends SimpleTagSupport {
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    private String name = null;
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    private String prefix;
+    private String affix;
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getAffix() {
+        return affix;
+    }
+
+    public void setAffix(String affix) {
+        this.affix = affix;
+    }
+
+    @Override
+    public void doTag() throws JspException, IOException {
+        Resource resource = Util.getResource(getJspContext());
+
+        if (resource.exists(name)) {
+            resource.addResource(name, false, false, prefix, affix);
+        } else {
+            throw new RuntimeException("Resource not found: " + name);
+        }
+    }
 }

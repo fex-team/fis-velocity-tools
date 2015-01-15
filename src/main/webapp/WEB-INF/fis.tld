@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib
+    version="2.0"
+    xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">
+    <tlib-version>1.1</tlib-version>
+    <short-name>fis</short-name>
+    <uri>/fis</uri>
+
+    <tag>
+        <name>filter</name>
+        <tag-class>com.baidu.fis.jsp.FilterTag</tag-class>
+        <body-content>JSP</body-content>
+    </tag>
+
+    <tag>
+        <name>html</name>
+        <tag-class>com.baidu.fis.jsp.HtmlTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>framework</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <dynamic-attributes>true</dynamic-attributes>
+    </tag>
+
+    <tag>
+        <name>head</name>
+        <tag-class>com.baidu.fis.jsp.HeadTag</tag-class>
+        <body-content>JSP</body-content>
+        <dynamic-attributes>true</dynamic-attributes>
+    </tag>
+
+    <tag>
+        <name>body</name>
+        <tag-class>com.baidu.fis.jsp.BodyTag</tag-class>
+        <body-content>JSP</body-content>
+        <dynamic-attributes>true</dynamic-attributes>
+    </tag>
+    
+    <tag>
+        <name>uri</name>
+        <tag-class>com.baidu.fis.jsp.UriTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+    
+    <tag>
+        <name>extends</name>
+        <tag-class>com.baidu.fis.jsp.ExtendsTag</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <dynamic-attributes>true</dynamic-attributes>
+    </tag>
+
+    <tag>
+        <name>block</name>
+        <tag-class>com.baidu.fis.jsp.BlockTag</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>parent</name>
+        <tag-class>com.baidu.fis.jsp.ParentTag</tag-class>
+        <body-content>empty</body-content>
+    </tag>
+
+    <tag>
+        <name>widget</name>
+        <tag-class>com.baidu.fis.jsp.WidgetTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <dynamic-attributes>true</dynamic-attributes>
+    </tag>
+
+    <tag>
+        <name>require</name>
+        <tag-class>com.baidu.fis.jsp.RequireTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>prefix</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>affix</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>script</name>
+        <tag-class>com.baidu.fis.jsp.ScriptTag</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>src</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>prefix</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>affix</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>style</name>
+        <tag-class>com.baidu.fis.jsp.StyleTag</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>href</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>prefix</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>affix</name>
+            <required>false</required>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+</taglib>

@@ -1,32 +1,25 @@
 package com.baidu.fis.jsp;
 
 import com.baidu.fis.util.Resource;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.servlet.jsp.tagext.DynamicAttributes;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
+/**
+ * Created by 2betop on 15/1/15.
+ */
+public class HeadTag extends BodyTagSupport implements DynamicAttributes {
 
     private Map<String, Object> attrs = new HashMap<String, Object>();
 
     @Override
     public void setDynamicAttribute(String s, String s2, Object o) throws JspException {
         attrs.put(s2, o);
-    }
-
-    private String framework;
-
-    public String getFramework() {
-        return framework;
-    }
-
-    public void setFramework(String framework) {
-        this.framework = framework;
     }
 
     /**
@@ -37,26 +30,22 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
      */
     @Override
     public int doStartTag() throws JspException {
-        if (this.framework != null) {
-            Util.getResource(pageContext).setFramework(this.framework);
-        }
-
         JspWriter out = pageContext.getOut();
 
         try {
-            out.write("<html");
+            out.append("<head");
 
             for (String key:attrs.keySet()) {
                 Object value = attrs.get(key);
 
-                out.write(" ");
-                out.write(key);
-                out.write("=\"");
-                out.write(value.toString().replace("\"", "&quote;"));
-                out.write("\"");
+                out.append(" ");
+                out.append(key);
+                out.append("=\"");
+                out.append(value.toString().replace("\"", "&quote;"));
+                out.append("\"");
             }
 
-            out.write(">");
+            out.append(">");
         } catch (IOException ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
@@ -72,19 +61,12 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
      */
     @Override
     public int doEndTag() throws JspException {
+        JspWriter out = pageContext.getOut();
 
         try {
-            BodyContent body = this.getBodyContent();
-            String html = body.getString() + "</html>";
-            Resource resource = Util.getResource(pageContext);
-
-//            if (Util.currentExtendTag(pageContext) == null) {
-                html = resource.filterContent(html);
-//            }
-
-            JspWriter out = pageContext.getOut();
-
-            out.write(html);
+            out.write(getBodyContent().getString());
+            out.write(Resource.STYLE_PLACEHOLDER);
+            out.write("</head>");
         } catch (IOException ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
@@ -98,7 +80,6 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
     @Override
     public void release() {
         attrs.clear();
-        framework = null;
         super.release();
     }
 }
