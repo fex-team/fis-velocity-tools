@@ -184,7 +184,13 @@ public class RewriteFilter implements Filter {
                 // 在 map.json 里面找到了
                 if (info!=null) {
                     String resolved = info.getString("uri");
-                    resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
+
+                    if (resolved.endsWith(".jsp")) {
+                        resolved = Settings.getString("jspDir", "/WEB-INF/views") + resolved;
+                    } else {
+                        resolved = Settings.getString("views.path", "/WEB-INF/views") + resolved;
+                    }
+
                     req.getRequestDispatcher(resolved).forward(req, resp);
                     return true;
                 } else {

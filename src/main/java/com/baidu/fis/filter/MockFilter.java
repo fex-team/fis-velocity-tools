@@ -182,6 +182,10 @@ public class MockFilter implements Filter {
 
         String path = request.getServletPath();
 
+        if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
+            path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
+        }
+
         if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
             path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
         }
@@ -240,6 +244,10 @@ public class MockFilter implements Filter {
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
         String path = request.getServletPath();
+
+        if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
+            path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
+        }
 
         if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
             path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
