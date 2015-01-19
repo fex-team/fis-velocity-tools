@@ -1,7 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
 import com.baidu.fis.util.Resource;
-import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.log.Log;
@@ -38,7 +37,7 @@ public class Require extends AbstractInline {
             affix = node.jjtGetChild(2).value(context).toString();
         }
 
-        Resource fisResource = ResourceManager.getByContext(context);
+        Resource fisResource = Util.getResource(context);
 
         try {
             // 只需要把依赖加载上就可以了。

@@ -13,73 +13,6 @@ import java.io.Writer;
 import java.util.*;
 
 public class Block extends AbstractBlock {
-    private static final String TEMPLATE_KEY = AbstractBlock.class.getName() + "templates-stack";
-    private static final String BLOCK_KEY = AbstractBlock.class.getName() + "blocks-stack";
-
-    @SuppressWarnings("unchecked")
-    public static void pushTemplate(InternalContextAdapter ctx, String template) {
-        Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
-
-        if (templates == null) {
-            templates = new Stack<String>();
-            ctx.put(TEMPLATE_KEY, templates);
-        }
-
-        templates.push(template);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static String popTemplate(InternalContextAdapter ctx) {
-        Stack<String> templates = (Stack<String>)ctx.get(TEMPLATE_KEY);
-        String template = "";
-
-        if (templates == null || templates.isEmpty()) {
-            return template;
-        }
-
-        template = templates.pop();
-
-        // self clean up.
-        if (templates.isEmpty()) {
-            ctx.remove(TEMPLATE_KEY);
-        }
-
-        return template;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Stack<String> getTempplateStack(InternalContextAdapter ctx) {
-        return (Stack<String>)ctx.get(TEMPLATE_KEY);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void registerBlocks(InternalContextAdapter ctx, String templateName, Map<String, Node> map) {
-        Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
-
-        if (blocks == null) {
-            blocks = new HashMap<String, Map<String, Node>>();
-            ctx.put(BLOCK_KEY, blocks);
-        }
-
-        blocks.put(templateName, map);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void unRegisterBlocks(InternalContextAdapter ctx, String templateName) {
-
-        Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)ctx.get(BLOCK_KEY);
-
-        if (blocks == null) {
-            return;
-        }
-
-        blocks.remove(templateName);
-
-        // self clean up.
-        if (blocks.isEmpty()) {
-            ctx.remove(BLOCK_KEY);
-        }
-    }
 
     @Override
     public String getName() {
@@ -102,53 +35,20 @@ public class Block extends AbstractBlock {
             throw new VelocityException("#block(): the first argument is empty ");
         }
 
+        Node blockNode = node;
 
+        Util.ExtendInfo extendInfo = Util.currentExtendInfo(context, node.getTemplateName());
 
-        // 是否被覆盖
-        Boolean overrated = false;
-        Stack<String> templates = getTempplateStack(context);
-
-        if (templates!=null) {
-            Stack<String> buffer = new Stack<String>();
-            Node extend = null;
-
-            while (!templates.isEmpty()) {
-                String templateName = templates.pop();
-                buffer.push(templateName);
-
-                Map<String, Map<String, Node>> blocks = (Map<String, Map<String, Node>>)context.get(BLOCK_KEY);
-                if (blocks == null) {
-                    continue;
-                }
-
-                Map<String, Node> map = blocks.get(templateName);
-                if (map != null) {
-
-                    if (map.get(id) != null && map.get(id) != node) {
-                        overrated = true;
-                        extend = map.get(id);
-                        break;
-                    }
-                }
+        while (extendInfo != null) {
+            if (extendInfo.getBlock(id) != null) {
+                Util.setBlockParent(context, extendInfo.getBlock(id), blockNode);
+                blockNode = extendInfo.getBlock(id);
             }
 
-            if (extend != null) {
-                try {
-                    extend.render(context, writer);
-                } catch (Exception err) {
-                    // todo
-                }
-            }
-
-            while (!buffer.isEmpty()) {
-                templates.push(buffer.pop());
-            }
+            extendInfo = extendInfo.getParent();
         }
 
-        if (!overrated) {
-            Node block = node.jjtGetChild(node.jjtGetNumChildren() - 1);
-            block.render(context, writer);
-        }
+        blockNode.jjtGetChild(blockNode.jjtGetNumChildren() - 1).render(context, writer);
 
         return true;
     }

@@ -1,7 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
 import com.baidu.fis.util.Resource;
-import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.log.Log;
@@ -16,7 +15,7 @@ import java.util.*;
 
 public class Extends extends AbstractInclude {
 
-    private static final String BLOCKS_MAP_KEY = AbstractInclude.class.getName() + "blocks-map-key";
+    final static String KEY = Extends.class.getName();
 
     @Override
     public String getName() {
@@ -30,7 +29,7 @@ public class Extends extends AbstractInclude {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        Resource fisResource = ResourceManager.getByContext(context);
+        Resource fisResource = Util.getResource(context);
 
         Boolean isTopNode = false;
         Writer buffer = writer;
@@ -52,31 +51,7 @@ public class Extends extends AbstractInclude {
             writer.write(fisResource.filterContent(buffer.toString()));
         }
 
-//        ResourceManager.unRef(context);
-
         return true;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void preRender(InternalContextAdapter context) {
-        Map<String, Node> map = (Map<String, Node>)context.get(BLOCKS_MAP_KEY);
-
-        if (map != null && !map.isEmpty()) {
-            List macroLibraries = context.getMacroLibraries();
-            String templateName = macroLibraries.get(macroLibraries.size() - 1).toString();
-            Block.pushTemplate(context, templateName);
-            Block.registerBlocks(context, templateName, map);
-        }
-
-        super.preRender(context);
-    }
-
-    @Override
-    protected void postRender(InternalContextAdapter context) {
-        String templateName = Block.popTemplate(context);
-        Block.unRegisterBlocks(context, templateName);
-        super.postRender(context);
     }
 
     protected void doRender(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
@@ -97,8 +72,8 @@ public class Extends extends AbstractInclude {
 
 
         Node content = node.jjtGetChild(node.jjtGetNumChildren() - 1);
-        Map<String, Node> map = new HashMap<String, Node>();
         ArrayList<Node> children = new ArrayList<Node>();
+        Util.ExtendInfo info = new Util.ExtendInfo(node);
 
         for (int i = 0, len = content.jjtGetNumChildren(); i < len; i++) {
             Node child = content.jjtGetChild(i);
@@ -109,28 +84,20 @@ public class Extends extends AbstractInclude {
                     ((ASTDirective)child).getDirectiveName().equals("block") && child.jjtGetNumChildren() > 0) {
                 blockId = child.jjtGetChild(0).value(context).toString();
 
-                map.put(blockId, child);
+                info.putBlock(blockId, child);
                 continue;
             }
 
             children.add(child);
         }
 
-        context.put(BLOCKS_MAP_KEY, map);
-        // Collection<Node> blocks = new ArrayList<Node>(map.values());
 
+        if (Util.currentExtendInfo(context, node.getTemplateName()) != null) {
+            info.setParent(Util.currentExtendInfo(context, node.getTemplateName()));
+        }
+
+        context.put(KEY, info);
         super.render(context, writer, node);
-
-        // 把覆盖过的删除了。
-//        for(Node block:blocks) {
-//            if (!map.containsValue(block)) {
-//                children.remove(block);
-//            }
-//        }
-//
-//        blocks.clear();
-        map.clear();
-        context.remove(BLOCKS_MAP_KEY);
 
         StringWriter useless = new StringWriter();
 
@@ -138,5 +105,22 @@ public class Extends extends AbstractInclude {
         for (Node child:children) {
             child.render(context, useless);
         }
+    }
+
+    /**
+     * This creates and places the scope control for this directive
+     * into the context (if scope provision is turned on).
+     *
+     * @param context
+     */
+    @Override
+    protected void preRender(InternalContextAdapter context) {
+
+        List macroLibraries = context.getMacroLibraries();
+        String templateName = macroLibraries.get(macroLibraries.size() - 1).toString();
+
+        Util.assignExtendInfo(context, templateName, (Util.ExtendInfo)context.get(KEY));
+
+        super.preRender(context);
     }
 }

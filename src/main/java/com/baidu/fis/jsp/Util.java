@@ -72,6 +72,7 @@ public class Util {
 //    }
 
     final static String EXTENDS_KEY = ExtendsTag.class.getName();
+    @SuppressWarnings("unchecked")
     public static void pushExtendsTag(JspContext context, ExtendsTag tag) {
         Stack<ExtendsTag> tags = (Stack<ExtendsTag>)context.getAttribute(EXTENDS_KEY, PageContext.REQUEST_SCOPE);
 
@@ -83,6 +84,7 @@ public class Util {
         tags.push(tag);
     }
 
+    @SuppressWarnings("unchecked")
     public static void popExtendTag(JspContext context) {
         Stack<ExtendsTag> tags = (Stack<ExtendsTag>)context.getAttribute(EXTENDS_KEY, PageContext.REQUEST_SCOPE);
 
@@ -91,6 +93,7 @@ public class Util {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static ExtendsTag currentExtendTag(JspContext context) {
         Stack<ExtendsTag> tags = (Stack<ExtendsTag>)context.getAttribute(EXTENDS_KEY, PageContext.REQUEST_SCOPE);
 

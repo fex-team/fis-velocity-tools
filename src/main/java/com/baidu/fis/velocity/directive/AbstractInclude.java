@@ -3,7 +3,6 @@ package com.baidu.fis.velocity.directive;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.fis.util.Resource;
 import com.baidu.fis.velocity.event.IncludeFisSource;
-import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.event.EventCartridge;
 import org.apache.velocity.context.ChainedInternalContextAdapter;
@@ -177,7 +176,7 @@ abstract public class AbstractInclude extends Parse {
     @SuppressWarnings("unchecked")
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
 
-        Resource fisResource = ResourceManager.getByContext(context);
+        Resource fisResource = Util.getResource(context);
 
         try {
             // 添加资源 Like Require

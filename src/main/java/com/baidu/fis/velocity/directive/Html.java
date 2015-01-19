@@ -2,7 +2,6 @@ package com.baidu.fis.velocity.directive;
 
 
 import com.baidu.fis.util.Resource;
-import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.parser.node.ASTprocess;
@@ -20,7 +19,7 @@ public class Html extends AbstractBlock {
 
     @Override
     public boolean render(InternalContextAdapter context, Writer writer, Node node) throws IOException, ResourceNotFoundException, ParseErrorException, MethodInvocationException {
-        Resource fisResource = ResourceManager.getByContext(context);
+        Resource fisResource = Util.getResource(context);
 
         String framework;
         Boolean isTopNode = false;

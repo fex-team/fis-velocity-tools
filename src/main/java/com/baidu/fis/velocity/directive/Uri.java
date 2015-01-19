@@ -1,7 +1,6 @@
 package com.baidu.fis.velocity.directive;
 
 import com.baidu.fis.util.Resource;
-import com.baidu.fis.util.ResourceManager;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.*;
 import org.apache.velocity.runtime.log.Log;
@@ -24,7 +23,7 @@ public class Uri extends AbstractInline {
                     Log.formatFileString(this));
         }
 
-        Resource fisResource = ResourceManager.getByContext(context);
+        Resource fisResource = Util.getResource(context);
 
         try {
             writer.write(fisResource.getUri(node.jjtGetChild(0).value(context).toString()));
