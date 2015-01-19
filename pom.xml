@@ -9,7 +9,7 @@
     <url>https://github.com/fex-team/fis-velocity-tools</url>
 
     <properties>
-        <servlet.version>3.1.0</servlet.version>
+        <servlet.version>2.5</servlet.version>
         <slf4j.version>1.7.7</slf4j.version>
         <fastjson.version>1.1.41</fastjson.version>
         <velocity.version>1.7</velocity.version>
@@ -21,7 +21,7 @@
 
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <artifactId>servlet-api</artifactId>
             <version>${servlet.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -75,6 +75,20 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
+        </dependency>
+
+        <!--文件上传相关-->
+        <!-- jello deploy 时有用-->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
 
     </dependencies>

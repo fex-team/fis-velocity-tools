@@ -28,12 +28,15 @@ public class Util {
     }
 
     final static String SEVLETCONTEXT_KEY = ServletContext.class.getName();
+    static Boolean flag = false;
     public static void initFis(JspContext context) {
-        if (Settings.getApplicationAttribute(SEVLETCONTEXT_KEY) == null) {
+        if (!flag && Settings.getApplicationAttribute(SEVLETCONTEXT_KEY) == null) {
             ServletContext servletContext = ((PageContext)context).getServletContext();
             Settings.setApplicationAttribute(SEVLETCONTEXT_KEY, servletContext);
             Settings.load(servletContext.getResourceAsStream(Settings.DEFAULT_PATH));
         }
+
+        flag = true;
     }
 
 //    final static String TEMPLATES_STACK_KEY = Util.class.getName() + "_TEMPLATES_STACK";

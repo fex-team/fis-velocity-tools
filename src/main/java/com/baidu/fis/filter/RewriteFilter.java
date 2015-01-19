@@ -153,7 +153,7 @@ public class RewriteFilter implements Filter {
 
     protected Boolean handlePreview(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException{
         String path = req.getServletPath();
-        URL url = req.getServletContext().getResource(path);
+        URL url = req.getSession().getServletContext().getResource(path);
 
         // 找不到资源
         if (url == null) {
@@ -165,7 +165,7 @@ public class RewriteFilter implements Filter {
                 String file = matcher.group(2);
 
                 JSONObject info = null;
-                String[] tryFiles = {"", ".html", ".jsp", ".vm"};
+                String[] tryFiles = Settings.getString("tryFiles", ",.html,.jsp,.vm").split(",");
 
                 for (String tryFile:tryFiles) {
                     info = ns != null ? map.getNode( ns + "/" + file + tryFile) : null;
@@ -214,7 +214,7 @@ public class RewriteFilter implements Filter {
         orders.add(RewriteRulers.DEFAULT_DIR + "servercommon.conf");
         orders.add(RewriteRulers.DEFAULT_PATH);
 
-        Set<String> files = req.getServletContext().getResourcePaths(RewriteRulers.DEFAULT_DIR);
+        Set<String> files = req.getSession().getServletContext().getResourcePaths(RewriteRulers.DEFAULT_DIR);
         if (files != null) {
             for (String file:files) {
                 if (file.endsWith(".conf") && file.contains("/server")) {
@@ -231,7 +231,7 @@ public class RewriteFilter implements Filter {
         });
 
         for(String path:confs) {
-            InputStream stream = req.getServletContext().getResourceAsStream(path);
+            InputStream stream = req.getSession().getServletContext().getResourceAsStream(path);
 
             if (stream!=null) {
                 parser.load(stream);

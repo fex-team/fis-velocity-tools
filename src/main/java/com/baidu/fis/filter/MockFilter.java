@@ -147,11 +147,13 @@ public class MockFilter implements Filter {
         if (request.getAttribute(key) == null) {
             request.setAttribute(key, true);
 
-            Context ctx = new Context(request.getServletContext());
+            HttpServletRequest req = (HttpServletRequest)request;
+
+            Context ctx = new Context(req.getSession().getServletContext());
 
 
-            this.attachJson(ctx, (HttpServletRequest)request);
-            this.includeJsp(ctx, (HttpServletRequest) request, (HttpServletResponse) response);
+            this.attachJson(ctx, req);
+            this.includeJsp(ctx, req, (HttpServletResponse) response);
 
         }
 
@@ -198,7 +200,7 @@ public class MockFilter implements Filter {
             String jsonPath = prefix + "/" + part + ".json";
 
             try {
-                URL url = request.getServletContext().getResource(jsonPath);
+                URL url = request.getSession().getServletContext().getResource(jsonPath);
                 if (url != null) {
                     String enc = Settings.getString("encoding", "UTF-8");
 
@@ -260,7 +262,7 @@ public class MockFilter implements Filter {
             String jspPath = prefix + "/" + part + ".jsp";
 
             try {
-                URL url = request.getServletContext().getResource(jspPath);
+                URL url = request.getSession().getServletContext().getResource(jspPath);
                 if (url != null) {
                     ServletResponseWrapper resp = new ResponseWrapper(response);
                     request.setAttribute("context", context);
