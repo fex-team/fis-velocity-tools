@@ -7,21 +7,43 @@ import javax.servlet.ServletContext;
 
 public class FisBean implements ServletContextAware {
 
+    public FisBean() {
+    }
+
     @Override
     public void setServletContext(ServletContext servletContext) {
         Settings.setApplicationAttribute(ServletContext.class.getName(), servletContext);
         Settings.load(servletContext.getResourceAsStream(Settings.DEFAULT_PATH));
     }
 
+    private String mapLoaderType;
+    private String mapDir;
+    private String debug;
+
+    public String getMapLoaderType() {
+        return mapLoaderType;
+    }
+
     public void setMapLoaderType(String mapLoaderType) {
+        this.mapLoaderType = mapLoaderType;
         Settings.put("mapLoaderType", mapLoaderType);
     }
 
-    public void setMapDir(String dir) {
-        Settings.put("mapDir", dir);
+    public String getMapDir() {
+        return mapDir;
+    }
+
+    public void setMapDir(String mapDir) {
+        this.mapDir = mapDir;
+        Settings.put("mapDir", mapDir);
+    }
+
+    public String getDebug() {
+        return debug;
     }
 
     public void setDebug(String debug) {
+        this.debug = debug;
         Settings.put("debug", debug);
     }
 }
