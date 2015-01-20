@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,6 +86,7 @@ public class Resource {
     public int refs = 0;
     public Boolean ignorePkg = false;
 
+    // velocity 入口
     public Resource() {
         this.loaded = new HashMap<String, Boolean>();
         this.collection = new HashMap<String, ArrayList<Res>>();
@@ -101,6 +103,16 @@ public class Resource {
             // do nothing.
             ignorePkg = Settings.getBoolean("debug", false);
         }
+    }
+
+    // jsp 入口
+    public Resource(ServletRequest request) {
+        this.loaded = new HashMap<String, Boolean>();
+        this.collection = new HashMap<String, ArrayList<Res>>();
+        this.embed = new HashMap<String, ArrayList<Res>>();
+        this.map = new MapJson();
+
+        ignorePkg = request.getParameter("debug") != null;
     }
 
     public String getFramework() {

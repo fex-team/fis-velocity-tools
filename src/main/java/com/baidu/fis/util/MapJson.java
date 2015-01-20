@@ -2,24 +2,20 @@ package com.baidu.fis.util;
 
 import com.alibaba.fastjson.JSONObject;
 import javax.servlet.ServletContext;
-import java.io.BufferedReader;
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MapJson {
 
     protected String dir = "/WEB-INF/config";
+    protected String loaderType = "webapp";
     protected Map<String, JSONObject> map;
 
     public MapJson() {
         this.map = new HashMap<String, JSONObject>();
-
-        setDir(Settings.getString("mapDir", dir));
-    }
-
-    public void setDir(String dir) {
-        this.dir = dir;
+        this.dir = Settings.getString("mapDir", dir);
+        this.loaderType = Settings.getString("mapLoaderType", this.loaderType);
     }
 
     public JSONObject getNode(String key, String type) {
@@ -55,7 +51,36 @@ public class MapJson {
         }
 
         if (!this.map.containsKey(ns)) {
-            String filename = dir + "/" + (ns.equals("__global__") ? "map.json" : ns + "-map.json");
+
+            JSONObject json = this.loadJson(ns.equals("__global__") ? "map.json" : ns + "-map.json");
+
+            if (json != null) {
+                this.map.put(ns, json);
+            }
+
+
+        }
+
+        return this.map.get(ns);
+    }
+
+    protected JSONObject loadJson(String filename) {
+        InputStream input = null;
+
+        if (this.loaderType.equals("file")) {
+            File file = new File(dir, filename);
+
+            if (file.canRead()) {
+                try {
+                    input = new FileInputStream(file.getAbsolutePath());
+                } catch (FileNotFoundException ex) {
+                    input = null;
+                }
+            }
+        } else {
+            if (!dir.isEmpty()) {
+                filename = dir + "/" + filename;
+            }
             ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
 
             if (ctx == null) {
@@ -63,32 +88,38 @@ public class MapJson {
                 throw new IllegalArgumentException("miss calling Setting.setApplicationAttribute");
             }
 
-            try {
-                InputStream input = ctx.getResourceAsStream(filename);
-                String enc = Settings.getString("encoding", "UTF-8");
-                BufferedReader in = new BufferedReader(new UnicodeReader(input, enc));
-                String data = "";
-                String inputLine;
-                while ((inputLine = in.readLine()) != null){
-                    data += inputLine;
-                }
-                in.close();
-                this.map.put(ns, JSONObject.parseObject(data));
-
-            } catch ( Exception error ) {
-                // System.out.println(error.getStackTrace());
-            }
+            input = ctx.getResourceAsStream(filename);
         }
 
-        return this.map.get(ns);
+        if (input == null) {
+            return null;
+        }
 
-//        JSONObject ret = this.map.get(ns);
-//
-//        if (ret == null) {
-//            throw new IllegalArgumentException("missing map json of [" + id + "]");
-//        }
-//
-//        return ret;
+        String data = readStream(input);
+
+        if (data != null) {
+            return JSONObject.parseObject(data);
+        }
+
+        return null;
+    }
+
+    protected String readStream(InputStream input) {
+        String data = null;
+        try {
+            String enc = Settings.getString("encoding", "UTF-8");
+            BufferedReader in = new BufferedReader(new UnicodeReader(input, enc));
+            data = "";
+            String inputLine;
+            while ((inputLine = in.readLine()) != null){
+                data += inputLine;
+            }
+            in.close();
+        } catch (Exception ex) {
+            // do nothing.
+        }
+
+        return data;
     }
 
     private static MapJson instance = null;

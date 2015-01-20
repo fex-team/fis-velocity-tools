@@ -20,7 +20,7 @@ public class Util {
         if (resource == null) {
             initFis(context);
 
-            resource = new Resource();
+            resource = new Resource(((PageContext)context).getRequest());
             context.setAttribute(RESOURCE_KEY, resource, PageContext.REQUEST_SCOPE);
         }
 
