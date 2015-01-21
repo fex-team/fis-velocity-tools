@@ -20,12 +20,14 @@ public class RequireTag extends SimpleTagSupport {
 
     // alias
 
-    public void setId(String name) {
-        this.name = name;
-    }
+    private String id;
 
     public String getId() {
-        return name;
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     private String prefix;
@@ -51,10 +53,16 @@ public class RequireTag extends SimpleTagSupport {
     public void doTag() throws JspException, IOException {
         Resource resource = Util.getResource(getJspContext());
 
-        if (resource.exists(name)) {
-            resource.addResource(name, false, false, prefix, affix);
+        String res = name;
+
+        if (res == null && id != null) {
+            res = id;
+        }
+
+        if (resource.exists(res)) {
+            resource.addResource(res, false, false, prefix, affix);
         } else {
-            throw new RuntimeException("Resource not found: " + name);
+            throw new RuntimeException("Resource not found: " + res);
         }
     }
 }
