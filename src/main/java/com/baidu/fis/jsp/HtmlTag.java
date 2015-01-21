@@ -1,6 +1,8 @@
 package com.baidu.fis.jsp;
 
 import com.baidu.fis.util.Resource;
+import com.baidu.fis.util.Settings;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyContent;
@@ -29,6 +31,16 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
         this.framework = framework;
     }
 
+    private String mapDir;
+
+    public String getMapDir() {
+        return mapDir;
+    }
+
+    public void setMapDir(String mapDir) {
+        this.mapDir = mapDir;
+    }
+
     /**
      * Default processing of the start tag returning EVAL_BODY_BUFFERED.
      *
@@ -39,6 +51,10 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
     public int doStartTag() throws JspException {
         if (this.framework != null) {
             Util.getResource(pageContext).setFramework(this.framework);
+        }
+
+        if (this.mapDir != null) {
+            Settings.put("mapDir", this.mapDir);
         }
 
         JspWriter out = pageContext.getOut();

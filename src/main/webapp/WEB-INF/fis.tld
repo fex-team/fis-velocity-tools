@@ -22,6 +22,10 @@
             <name>framework</name>
             <type>java.lang.String</type>
         </attribute>
+        <attribute>
+            <name>mapDir</name>
+            <type>java.lang.String</type>
+        </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
 
@@ -157,5 +161,17 @@
             <required>false</required>
             <type>java.lang.String</type>
         </attribute>
+    </tag>
+
+    <tag>
+        <name>styles</name>
+        <tag-class>com.baidu.fis.jsp.StylesTag</tag-class>
+        <body-content>empty</body-content>
+    </tag>
+
+    <tag>
+        <name>scripts</name>
+        <tag-class>com.baidu.fis.jsp.ScriptsTag</tag-class>
+        <body-content>empty</body-content>
     </tag>
 </taglib>

@@ -32,7 +32,7 @@ public class UriTag extends SimpleTagSupport {
      */
     @Override
     public void doTag() throws JspException, IOException {
-        String uri = Util.getResource((PageContext)getJspContext()).getUri(name);
+        String uri = Util.getResource(getJspContext()).getUri(name);
         getJspContext().getOut().write(uri == null ? name : uri);
     }
 }
