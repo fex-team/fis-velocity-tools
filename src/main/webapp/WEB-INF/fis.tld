@@ -97,12 +97,12 @@
         <body-content>empty</body-content>
         <attribute>
             <name>name</name>
-            <required>true</required>
+            <required>false</required>
             <type>java.lang.String</type>
         </attribute>
         <attribute>
             <name>id</name>
-            <required>true</required>
+            <required>false</required>
             <type>java.lang.String</type>
         </attribute>
         <attribute>
