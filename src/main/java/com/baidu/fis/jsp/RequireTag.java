@@ -18,6 +18,16 @@ public class RequireTag extends SimpleTagSupport {
         return name;
     }
 
+    // alias
+
+    public void setId(String name) {
+        this.name = name;
+    }
+
+    public String getId() {
+        return name;
+    }
+
     private String prefix;
     private String affix;
 

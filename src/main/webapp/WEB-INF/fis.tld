@@ -101,6 +101,11 @@
             <type>java.lang.String</type>
         </attribute>
         <attribute>
+            <name>id</name>
+            <required>true</required>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
             <name>prefix</name>
             <required>false</required>
             <type>java.lang.String</type>
