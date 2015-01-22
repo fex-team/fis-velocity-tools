@@ -10,6 +10,7 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.DynamicAttributes;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,9 +99,8 @@ public class ExtendsTag extends SimpleTagSupport implements DynamicAttributes {
                         context.setAttribute(key, value, PageContext.REQUEST_SCOPE);
                     }
                 }
+
                 ((PageContext)context).include(path);
-            } catch (Exception e) {
-                throw e;
             } finally {
 
                 for (String key:attrs.keySet()) {

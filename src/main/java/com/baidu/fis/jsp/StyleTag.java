@@ -26,6 +26,10 @@ public class StyleTag extends SimpleTagSupport {
         this.affix = affix;
     }
 
+    public String getHref() {
+        return href;
+    }
+
     public void setHref(String href) {
         this.href = href;
     }

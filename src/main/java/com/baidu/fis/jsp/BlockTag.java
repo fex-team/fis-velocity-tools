@@ -55,7 +55,9 @@ public class BlockTag extends SimpleTagSupport {
     }
 
     public void render(Writer writer) throws IOException, JspException {
-        getJspBody().invoke(writer);
+        if (getJspBody() != null) {
+            getJspBody().invoke(writer);
+        }
     }
 
     @Override

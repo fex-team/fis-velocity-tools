@@ -168,12 +168,14 @@ public class RewriteFilter implements Filter {
                 String[] tryFiles = Settings.getString("tryFiles", ",.html,.jsp,.vm").split(",");
 
                 for (String tryFile:tryFiles) {
+                    // System.out.println(ns + "/" + file + tryFile);
                     info = ns != null ? map.getNode( ns + "/" + file + tryFile) : null;
 
                     if (info!=null) {
                         break;
                     }
 
+                    // System.out.println("" + file + tryFile);
                     info = ns != null ? map.getNode(ns + ":" + file + tryFile) : map.getNode("" + file + tryFile);
 
                     if (info!=null) {

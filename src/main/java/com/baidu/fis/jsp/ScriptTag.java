@@ -11,12 +11,12 @@ import java.io.Writer;
 public class ScriptTag extends SimpleTagSupport {
     private String src = null;
 
-    public void setName(String name) {
-        this.src = name;
+    public String getSrc() {
+        return src;
     }
 
-    public String getName() {
-        return src;
+    public void setSrc(String src) {
+        this.src = src;
     }
 
     private String prefix;

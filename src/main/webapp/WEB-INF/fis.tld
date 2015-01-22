@@ -21,10 +21,12 @@
         <attribute>
             <name>framework</name>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>mapDir</name>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
@@ -51,6 +53,7 @@
             <name>name</name>
             <required>true</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
     </tag>
     
@@ -62,6 +65,7 @@
             <name>name</name>
             <required>true</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
@@ -91,6 +95,7 @@
             <name>name</name>
             <required>true</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <dynamic-attributes>true</dynamic-attributes>
     </tag>
@@ -103,21 +108,25 @@
             <name>name</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>id</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>prefix</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>affix</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
     </tag>
 
@@ -129,16 +138,19 @@
             <name>src</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>prefix</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>affix</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
     </tag>
 
@@ -150,16 +162,19 @@
             <name>href</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>prefix</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute>
             <name>affix</name>
             <required>false</required>
             <type>java.lang.String</type>
+            <rtexprvalue>true</rtexprvalue>
         </attribute>
     </tag>
 
