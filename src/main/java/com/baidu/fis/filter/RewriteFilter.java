@@ -165,18 +165,19 @@ public class RewriteFilter implements Filter {
                 String file = matcher.group(2);
 
                 JSONObject info = null;
+                String fisId = null;
                 String[] tryFiles = Settings.getString("tryFiles", ",.html,.jsp,.vm").split(",");
 
                 for (String tryFile:tryFiles) {
                     // System.out.println(ns + "/" + file + tryFile);
-                    info = ns != null ? map.getNode( ns + "/" + file + tryFile) : null;
+                    info = ns != null ? map.getNode( (fisId = ns + "/" + file + tryFile)) : null;
 
                     if (info!=null) {
                         break;
                     }
 
                     // System.out.println("" + file + tryFile);
-                    info = ns != null ? map.getNode(ns + ":" + file + tryFile) : map.getNode("" + file + tryFile);
+                    info = ns != null ? map.getNode((fisId = ns + ":" + file + tryFile)) : map.getNode((fisId = file + tryFile));
 
                     if (info!=null) {
                         break;
@@ -185,6 +186,7 @@ public class RewriteFilter implements Filter {
 
                 // 在 map.json 里面找到了
                 if (info!=null) {
+                    req.setAttribute("requestFISID", fisId);
                     String resolved = info.getString("uri");
 
                     if (resolved.endsWith(".jsp")) {

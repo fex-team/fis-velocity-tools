@@ -182,14 +182,20 @@ public class MockFilter implements Filter {
     @SuppressWarnings("unchecked")
     protected void attachJson(Context context, HttpServletRequest request) {
 
-        String path = request.getServletPath();
+        String path = (String) request.getAttribute("requestFISID");
 
-        if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
-            path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
-        }
+        if (path != null) {
+            path = path.replace(":", "/");
+        } else {
+            path = request.getServletPath();
 
-        if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
-            path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
+                path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
+            }
+
+            if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
+                path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            }
         }
 
         String[] parts = path.replaceAll("\\..+$", "").split("/+");
@@ -245,14 +251,20 @@ public class MockFilter implements Filter {
     }
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
-        String path = request.getServletPath();
+        String path = (String) request.getAttribute("requestFISID");
 
-        if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
-            path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
-        }
+        if (path != null) {
+            path = path.replace(":", "/");
+        } else {
+            path = request.getServletPath();
 
-        if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
-            path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
+                path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
+            }
+
+            if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
+                path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            }
         }
 
         String[] parts = path.replaceAll("\\..+$", "").split("/+");
