@@ -127,15 +127,16 @@ public class RewriteFilter implements Filter {
     private MapJson map = null;
 
     public void init(FilterConfig config) throws ServletException {
-        ServletContext context = config.getServletContext();
-        Settings.setApplicationAttribute(ServletContext.class.getName(), context);
-        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
-        map = new MapJson();
     }
     public void destroy() {
     }
 
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
+
+        ServletContext context = ((HttpServletRequest)req).getSession().getServletContext();
+        Settings.setApplicationAttribute(ServletContext.class.getName(), context);
+        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
+        map = new MapJson();
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
