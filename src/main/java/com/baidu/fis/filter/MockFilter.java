@@ -151,7 +151,6 @@ public class MockFilter implements Filter {
 
             Context ctx = new Context(req.getSession().getServletContext());
 
-
             this.attachJson(ctx, req);
             this.includeJsp(ctx, req, (HttpServletResponse) response);
 

@@ -243,11 +243,14 @@ public class RewriteFilter implements Filter {
             }
         }
 
-        RewriteRulers.Ruler ruler = parser.getRuler(req.getRequestURI());
+        String contextPath = req.getContextPath();
+        String requestURI = req.getRequestURI().substring(contextPath.length());
+
+        RewriteRulers.Ruler ruler = parser.getRuler(requestURI);
 
         if (ruler!=null) {
             if (ruler.type == RewriteRulers.Ruler.TYPE_REDIRECT) {
-                resp.sendRedirect(ruler.dest);
+                resp.sendRedirect(contextPath + ruler.dest);
             } else if(ruler.type == RewriteRulers.Ruler.TYPE_REWRITE) {
                 req.getRequestDispatcher(ruler.dest).forward(req, resp);
             }
