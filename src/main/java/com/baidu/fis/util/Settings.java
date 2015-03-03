@@ -1,11 +1,23 @@
 package com.baidu.fis.util;
 
+import javax.servlet.ServletContext;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 public class Settings {
+
+    final static String Key = ServletContext.class.getName();
+
+    public static void init(ServletContext context) {
+        if (Settings.getApplicationAttribute(Key) != null) {
+            return;
+        }
+
+        Settings.setApplicationAttribute(Key, context);
+        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
+    }
 
     protected static Properties data = new Properties();
 

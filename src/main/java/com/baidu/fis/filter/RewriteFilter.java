@@ -134,8 +134,7 @@ public class RewriteFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
 
         ServletContext context = ((HttpServletRequest)req).getSession().getServletContext();
-        Settings.setApplicationAttribute(ServletContext.class.getName(), context);
-        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
+        Settings.init(context);
         map = new MapJson();
 
         HttpServletRequest request = (HttpServletRequest) req;
