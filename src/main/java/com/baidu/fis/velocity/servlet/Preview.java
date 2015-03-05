@@ -1,10 +1,15 @@
 package com.baidu.fis.velocity.servlet;
 
 import com.baidu.fis.util.Settings;
+import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.Template;
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.ServletUtils;
 import org.apache.velocity.tools.view.VelocityViewServlet;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
