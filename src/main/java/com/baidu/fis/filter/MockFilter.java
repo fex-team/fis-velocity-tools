@@ -183,7 +183,7 @@ public class MockFilter implements Filter {
     protected void attachJson(Context context, HttpServletRequest request) {
 
         ArrayList<String> tryPaths = new ArrayList<String>();
-        String path = request.getAttribute("javax.servlet.forward.request_uri").toString();
+        String path = (String)request.getAttribute("javax.servlet.forward.request_uri");
 
         if (path != null) {
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
@@ -263,7 +263,7 @@ public class MockFilter implements Filter {
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
         ArrayList<String> tryPaths = new ArrayList<String>();
-        String path = request.getAttribute("javax.servlet.forward.request_uri").toString();
+        String path = (String)request.getAttribute("javax.servlet.forward.request_uri");
 
         if (path != null) {
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
