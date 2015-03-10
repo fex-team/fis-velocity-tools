@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 
 public class MockFilter implements Filter {
@@ -181,51 +182,62 @@ public class MockFilter implements Filter {
     @SuppressWarnings("unchecked")
     protected void attachJson(Context context, HttpServletRequest request) {
 
-        String path = (String) request.getAttribute("requestFISID");
+        ArrayList<String> tryPaths = new ArrayList<String>();
+        String path = request.getAttribute("javax.servlet.forward.request_uri").toString();
 
         if (path != null) {
-            path = path.replace(":", "/");
-        } else {
-            path = request.getServletPath();
-
-            if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
-                path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
-            }
-
-            if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
-                path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
-            }
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         }
 
-        String[] parts = path.replaceAll("\\..+$", "").split("/+");
-        String prefix = "/test";
+        path = (String) request.getAttribute("requestFISID");
+
+        if (path != null) {
+            tryPaths.add(path.replace(":", "/").replaceAll("(^/|/$|\\..+$)", ""));
+        }
+
+        path = request.getServletPath();
+
+        if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
+            path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
+        } else if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
+            path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
+        }
 
         JSONObject jsonData = new JSONObject();
-        for (String part:parts) {
-            String jsonPath = prefix + "/" + part + ".json";
 
-            try {
-                URL url = request.getSession().getServletContext().getResource(jsonPath);
-                if (url != null) {
-                    String enc = Settings.getString("encoding", "UTF-8");
 
-                    BufferedReader in = new BufferedReader(new UnicodeReader(
-                            url.openStream(), enc));
-                    String data = "";
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null){
-                        data += inputLine;
+        for (String path2:tryPaths) {
+            String[] parts = path2.split("/+");
+            String prefix = "/test";
+
+            for (String part:parts) {
+                String jsonPath = prefix + "/" + part + ".json";
+
+                try {
+                    URL url = request.getSession().getServletContext().getResource(jsonPath);
+                    if (url != null) {
+                        String enc = Settings.getString("encoding", "UTF-8");
+
+                        BufferedReader in = new BufferedReader(new UnicodeReader(
+                                url.openStream(), enc));
+                        String data = "";
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null){
+                            data += inputLine;
+                        }
+                        in.close();
+
+                        JSONObject obj = JSONObject.parseObject(data);
+                        this.extendJson(jsonData, obj);
                     }
-                    in.close();
-
-                    JSONObject obj = JSONObject.parseObject(data);
-                    this.extendJson(jsonData, obj);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
                 }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
 
-            prefix += "/" + part;
+                prefix += "/" + part;
+            }
         }
 
         for (String key:jsonData.keySet()) {
@@ -250,40 +262,50 @@ public class MockFilter implements Filter {
     }
 
     protected void includeJsp(Context context, HttpServletRequest request, HttpServletResponse response){
-        String path = (String) request.getAttribute("requestFISID");
+        ArrayList<String> tryPaths = new ArrayList<String>();
+        String path = request.getAttribute("javax.servlet.forward.request_uri").toString();
 
         if (path != null) {
-            path = path.replace(":", "/");
-        } else {
-            path = request.getServletPath();
-
-            if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
-                path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
-            }
-
-            if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
-                path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
-            }
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         }
 
-        String[] parts = path.replaceAll("\\..+$", "").split("/+");
-        String prefix = "/test";
+        path = (String) request.getAttribute("requestFISID");
 
-        for (String part:parts) {
-            String jspPath = prefix + "/" + part + ".jsp";
+        if (path != null) {
+            tryPaths.add(path.replace(":", "/").replaceAll("(^/|/$|\\..+$)", ""));
+        }
 
-            try {
-                URL url = request.getSession().getServletContext().getResource(jspPath);
-                if (url != null) {
-                    ServletResponseWrapper resp = new ResponseWrapper(response);
-                    request.setAttribute("context", context);
-                    request.getRequestDispatcher(jspPath).include(request, resp);
+        path = request.getServletPath();
+
+        if (path.endsWith(".jsp") && path.startsWith(Settings.getString("jspDir", "/WEB-INF/views"))){
+            path = path.substring(Settings.getString("jspDir", "/WEB-INF/views").length());
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
+        } else if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
+            path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
+        }
+
+        for (String path2:tryPaths) {
+
+            String[] parts = path2.split("/+");
+            String prefix = "/test";
+
+            for (String part:parts) {
+                String jspPath = prefix + "/" + part + ".jsp";
+
+                try {
+                    URL url = request.getSession().getServletContext().getResource(jspPath);
+                    if (url != null) {
+                        ServletResponseWrapper resp = new ResponseWrapper(response);
+                        request.setAttribute("context", context);
+                        request.getRequestDispatcher(jspPath).include(request, resp);
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
                 }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
 
-            prefix += "/" + part;
+                prefix += "/" + part;
+            }
         }
     }
 }

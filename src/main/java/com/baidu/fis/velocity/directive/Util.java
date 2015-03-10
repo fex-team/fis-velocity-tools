@@ -61,7 +61,7 @@ public class Util {
             return blocks.get(id);
         }
 
-        final static String key = ExtendInfo.class.getName();
+//        final static String key = ExtendInfo.class.getName();
     }
 
     final static String EXTEND_KEY = Util.class.getName() + ".extend.";
