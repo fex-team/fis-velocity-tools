@@ -203,6 +203,8 @@ public class MockFilter implements Filter {
         } else if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
             path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
+        } else {
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         }
 
         JSONObject jsonData = new JSONObject();
@@ -282,6 +284,8 @@ public class MockFilter implements Filter {
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         } else if (path.startsWith(Settings.getString("views.path", "/WEB-INF/views"))) {
             path = path.substring(Settings.getString("views.path", "/WEB-INF/views").length());
+            tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
+        } else {
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         }
 

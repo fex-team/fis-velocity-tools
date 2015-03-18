@@ -244,6 +244,10 @@ public class Resource {
         if ( loaded.get(id) != null && loaded.get(id) == deffer ||
                 deffer && loaded.get(id) != null && !loaded.get(id) ) {
             return getUri(id, true);
+        } else if (loaded.get(id) != null && !deffer && loaded.get(id)) {
+            // 如果之前是异步加载，这次是同步加载。
+            removeDefferFromList(id);
+            loaded.remove(id);
         }
 
         info = map.getNode(id);
@@ -258,6 +262,19 @@ public class Resource {
 
                 for (Object obj : has) {
                     loaded.put(obj.toString(), deffer);
+
+                    if (deffer && info.get("type").toString().equals("js")) {
+                        ArrayList<Res> list = collection.get("jsDeffer");
+
+                        if (list == null) {
+                            list = new ArrayList<Res>();
+                            collection.put("jsDeffer", list);
+                        }
+
+                        if (!drop) {
+                            list.add(new Res(obj.toString(), prefix, affix));
+                        }
+                    }
                 }
             }
         } else {
@@ -311,6 +328,68 @@ public class Resource {
         }
 
         return uri;
+    }
+
+    protected Res findResInList(ArrayList<Res> list, String uri) {
+        for (Res res:list) {
+            if (res.getValue().equals(uri)) {
+                return res;
+            }
+        }
+
+        return null;
+    }
+
+    protected void removeDefferFromList(String id) {
+        JSONObject info, node;
+        String uri;
+
+        if (!contains(id)) {
+            return;
+        }
+
+        ArrayList<Res> list = collection.get("jsDeffer");
+        if (list == null) {
+            return;
+        }
+
+        info = map.getNode(id);
+        String pkg = (String) info.get("pkg");
+
+        if (!ignorePkg && pkg != null) {
+            info = map.getNode(pkg, "pkg");
+            uri = info.getString("uri");
+            Res res = findResInList(list, uri);
+
+            // if found, then remove it.
+            if (res != null) {
+                list.remove(res);
+            }
+
+            if (info.containsKey("has")) {
+                JSONArray has = info.getJSONArray("has");
+
+                for (Object obj : has) {
+                    removeDefferFromList(obj.toString());
+                }
+            }
+        } else {
+            uri = info.getString("uri");
+            Res res = findResInList(list, uri);
+
+            // if found, then remove it.
+            if (res != null) {
+                list.remove(res);
+            }
+        }
+
+        // 如果有同步依赖，则把同步依赖也添加进来。
+        if (info.containsKey("deps")) {
+            JSONArray deps = info.getJSONArray("deps");
+            for (Object dep : deps) {
+                removeDefferFromList(dep.toString());
+            }
+        }
     }
 
     public Boolean exists(String id) {
