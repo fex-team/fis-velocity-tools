@@ -341,7 +341,7 @@ public class Resource {
     }
 
     protected void removeDefferFromList(String id) {
-        JSONObject info, node;
+        JSONObject info;
         String uri;
 
         if (!contains(id)) {
@@ -370,7 +370,12 @@ public class Resource {
                 JSONArray has = info.getJSONArray("has");
 
                 for (Object obj : has) {
-                    removeDefferFromList(obj.toString());
+                    res = findResInList(list, obj.toString());
+
+                    // if found, then remove it.
+                    if (res != null) {
+                        list.remove(res);
+                    }
                 }
             }
         } else {
@@ -380,14 +385,6 @@ public class Resource {
             // if found, then remove it.
             if (res != null) {
                 list.remove(res);
-            }
-        }
-
-        // 如果有同步依赖，则把同步依赖也添加进来。
-        if (info.containsKey("deps")) {
-            JSONArray deps = info.getJSONArray("deps");
-            for (Object dep : deps) {
-                removeDefferFromList(dep.toString());
             }
         }
     }
@@ -645,11 +642,12 @@ public class Resource {
                 // 再把对应的 pkg 加入。
                 if (!ignorePkg && pkg != null) {
                     info = map.getNode(pkg, "pkg");
+                    JSONObject pkgInfo = new JSONObject();
 
-                    info.put("url", info.getString("uri"));
-                    info.remove("uri");
+                    pkgInfo.put("url", info.get("uri"));
+                    pkgInfo.put("type", info.get("type"));
 
-                    pkgMap.put(pkg, info);
+                    pkgMap.put(pkg, pkgInfo);
                 }
 
                 res.put(item.value, infoCopy);
