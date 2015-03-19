@@ -186,6 +186,11 @@ public class MockFilter implements Filter {
         String path = (String)request.getAttribute("javax.servlet.forward.request_uri");
 
         if (path != null) {
+
+            if (!request.getContextPath().isEmpty()) {
+                path = path.substring(request.getContextPath().length());
+            }
+
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         }
 
@@ -211,6 +216,9 @@ public class MockFilter implements Filter {
 
 
         for (String path2:tryPaths) {
+            if (path2.isEmpty()) {
+                continue;
+            }
             String[] parts = path2.split("/+");
             String prefix = "/test";
 
@@ -268,6 +276,11 @@ public class MockFilter implements Filter {
         String path = (String)request.getAttribute("javax.servlet.forward.request_uri");
 
         if (path != null) {
+
+            if (!request.getContextPath().isEmpty()) {
+                path = path.substring(request.getContextPath().length());
+            }
+
             tryPaths.add(path.replaceAll("(^/|/$|\\..+$)", ""));
         }
 
