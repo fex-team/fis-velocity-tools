@@ -45,6 +45,10 @@
         <servlet-name>upload</servlet-name>
         <url-pattern>/upload</url-pattern>
     </servlet-mapping>
+    <listener>
+        <listener-class>com.baidu.fis.servlet.MapListener</listener-class>
+    </listener>
+
     <welcome-file-list>
         <welcome-file>index.vm</welcome-file>
     </welcome-file-list>
