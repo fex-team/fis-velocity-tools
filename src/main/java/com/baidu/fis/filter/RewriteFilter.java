@@ -1,6 +1,7 @@
 package com.baidu.fis.filter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.fis.util.MapCache;
 import com.baidu.fis.util.MapJson;
 import com.baidu.fis.util.Settings;
 
@@ -52,6 +53,8 @@ public class RewriteFilter implements Filter {
                         '}';
             }
         }
+
+
 
         protected ArrayList<Ruler> rulers = new ArrayList<Ruler>();
 
@@ -124,18 +127,21 @@ public class RewriteFilter implements Filter {
         }
     }
 
-    private MapJson map = null;
+    //private MapJson map = null;
+    private MapCache map = null;
 
     public void init(FilterConfig config) throws ServletException {
     }
     public void destroy() {
     }
 
+
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
 
         ServletContext context = ((HttpServletRequest)req).getSession().getServletContext();
         Settings.init(context);
-        map = new MapJson();
+        //map = new MapJson();
+        map = MapCache.getInstance();
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;

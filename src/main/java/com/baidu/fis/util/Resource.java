@@ -79,7 +79,8 @@ public class Resource {
     public static final String FRAMEWORK_CONFIG = "<!--FIS_FRAMEWORK_CONFIG-->";
 
     protected String framework = null;
-    protected MapJson map = null;
+    //protected MapJson map = null;
+    protected MapCache map = null;
     protected Map<String, Boolean> loaded;
     protected Map<String, ArrayList<Res>> collection;
     protected Map<String, ArrayList<Res>> embed;
@@ -91,7 +92,8 @@ public class Resource {
         this.loaded = new HashMap<String, Boolean>();
         this.collection = new HashMap<String, ArrayList<Res>>();
         this.embed = new HashMap<String, ArrayList<Res>>();
-        this.map = new MapJson();
+        //this.map = new MapJson();
+        this.map = MapCache.getInstance();
 
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -110,7 +112,7 @@ public class Resource {
         this.loaded = new HashMap<String, Boolean>();
         this.collection = new HashMap<String, ArrayList<Res>>();
         this.embed = new HashMap<String, ArrayList<Res>>();
-        this.map = new MapJson();
+        this.map = MapCache.getInstance();
 
         ignorePkg = request.getParameter("debug") != null;
     }
