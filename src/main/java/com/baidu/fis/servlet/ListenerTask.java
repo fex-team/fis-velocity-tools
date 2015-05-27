@@ -41,7 +41,7 @@ public class ListenerTask extends TimerTask {
     }
     protected void setRefresh(){
         MapCache mc = MapCache.getInstance();
-        mc.setRefreshMap(true);
+        mc.reloadMap();
     }
     /**
      * 监听文件夹下的文件是否被更新。
