@@ -2,6 +2,7 @@ package com.baidu.fis.util;
 
 import com.alibaba.fastjson.JSONObject;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,29 +14,17 @@ import java.util.ArrayList;
  * Created by xuchenhui on 2015/5/25.
  */
 public class MapCache {
-    protected String dir = "/WEB-INF/config";
-    protected String loaderType = "webapp";
-
-    // 用于判定map表是否被缓存
-    private static Boolean refreshMap = false;
-    public final static Integer lock = 1;
-
-    /**
-     * 设置下次请求时更新整个map表缓存
-     */
-    public synchronized void setRefreshMap(Boolean map) {
-        refreshMap = map;
-    }
-    public synchronized Boolean getRefreshMap(){ return refreshMap; }
+    protected static String dir = "/WEB-INF/config";
+    protected static String loaderType = "webapp";
 
     // 缓存并操控map表
     public static JSONObject map = null;
-    public synchronized void setMap(JSONObject newMap){ map = newMap; }
+    //public void setMap(JSONObject newMap){ map = newMap; }
     public void reloadMap(){
         if (map != null){
             System.out.println("Reload all map files in " + this.dir + "[" + map.hashCode() + "]");
         }
-        setMap(loadAllMap(dir));
+        map = loadAllMap(dir);
         System.out.println("Reload finished all maps [" + map.hashCode() + "]");
     }
     public JSONObject getMap(){
@@ -45,7 +34,7 @@ public class MapCache {
     public JSONObject getMap(String id){
         return map;
     }
-    public synchronized void resetMap(){
+    public void resetMap(){
         map.clear();
     }
 
@@ -168,19 +157,6 @@ public class MapCache {
     // 通过id获取map表节点
     public JSONObject getNode(String key, String type){
         JSONObject node, info;
-        synchronized (lock) {
-            if (!this.getRefreshMap()){
-                // 首先标志已经更新缓存
-                this.setRefreshMap(true);
-                // 而后开始更新缓存
-                try{
-                    this.reloadMap();
-                }catch(Exception e){
-                    // 更新缓存失败，重新设置下次继续更新
-                    this.setRefreshMap(false);
-                }
-            }
-        }
 
         // 尝试读取
         try{
@@ -198,15 +174,18 @@ public class MapCache {
 
     // 单例模式
     private MapCache() {
-        this.dir = Settings.getString("mapDir", dir);
-        this.loaderType = Settings.getString("mapLoaderType", this.loaderType);
+        dir = Settings.getString("mapDir", dir);
+        loaderType = Settings.getString("mapLoaderType", loaderType);
         // 首次实例化加载
-        if (!refreshMap && map == null){
+        if (map == null){
             this.reloadMap();
         }
     }
-    private static final MapCache instance = new MapCache();
-    public static MapCache getInstance() {
+    private static MapCache instance = null;
+    public static synchronized MapCache getInstance() {
+        if (instance == null) {
+            instance = new MapCache();
+        }
         return instance;
     }
 }
