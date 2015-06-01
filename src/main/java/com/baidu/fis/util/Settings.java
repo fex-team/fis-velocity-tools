@@ -9,7 +9,7 @@ import java.util.Properties;
 public class Settings {
 
     final static String Key = ServletContext.class.getName();
-
+    
     public static void init(ServletContext context) {
         if (Settings.getApplicationAttribute(Key) != null) {
             return;

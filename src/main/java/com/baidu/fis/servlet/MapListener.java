@@ -1,10 +1,12 @@
 package com.baidu.fis.servlet;
 
+import com.baidu.fis.util.MapCache;
 import com.baidu.fis.util.Settings;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.http.HttpServletRequest;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,22 +33,18 @@ public class MapListener implements ServletContextListener {
      */
     private final int sec_start = 1000*30;
 
-    protected String dir = "/WEB-INF/config";
-    protected String loaderType = "webapp";
-    protected String mapDir = null;
-
     public void contextInitialized(ServletContextEvent event) {
         ServletContext ctx = event.getServletContext();
-        //String mapDir = Settings.getString("mapDir", dir);
-        String mdir = ctx.getRealPath("map");
+        Settings.init(ctx);
+        MapCache mc = MapCache.getInstance();
+        mc.init(ctx);
 
-        System.out.println("Start to listen directory : " + mdir);
-        //event.getServletContext().log("Start to listen directory : " + mdir);
-        timer.schedule(new ListenerTask(mdir), sec_start, sec);
+        System.out.println("Start to listen directory : " + mc.mapPath);
+        timer.schedule(new ListenerTask(mc.mapPath), sec_start, sec);
     }
 
     public void contextDestroyed(ServletContextEvent event) {
-        event.getServletContext().log("Stop listener for :" + mapDir);
+        event.getServletContext().log("Stop listener for :" +  MapCache.getInstance().mapPath);
         timer.cancel();
     }
 }
