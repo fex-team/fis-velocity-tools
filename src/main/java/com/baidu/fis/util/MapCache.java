@@ -16,13 +16,15 @@ import java.util.ArrayList;
 public class MapCache {
     protected static String dir = "/WEB-INF/config";
     protected static String loaderType = "webapp";
+    public static String mapDir = null;
+    public static String mapPath = null;
 
     // 缓存并操控map表
     public static JSONObject map = null;
     //public void setMap(JSONObject newMap){ map = newMap; }
     public void reloadMap(){
         if (map != null){
-            System.out.println("Reload all map files in " + this.dir + "[" + map.hashCode() + "]");
+            System.out.println("Reload all map files in " + mapDir + "[" + map.hashCode() + "]");
         }
         map = loadAllMap(dir);
         System.out.println("Reload finished all maps [" + map.hashCode() + "]");
@@ -53,16 +55,16 @@ public class MapCache {
         JSONObject resMap = new JSONObject();
         JSONObject pkgMap = new JSONObject();
 
-        ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
+        /*ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
         if (ctx == null) {
             System.out.println("Please set the servlet context through Setting.setApplicationAttribute");
             throw new IllegalArgumentException("miss calling Setting.setApplicationAttribute");
-        }
-        String realDirPath = ctx.getRealPath(filePath);
-        System.out.println("Load map files in : " + realDirPath);
+        }*/
+        System.out.println("Load map files in : " + mapPath);
 
-        File root = new File(realDirPath);
+        File root = new File(mapPath);
         File[] files = root.listFiles();
+
         for(File file:files) {
             if (file.isDirectory()) {
                 this.loadAllMap(file.getAbsolutePath());
@@ -70,6 +72,7 @@ public class MapCache {
                 String fileName = file.getName();
                 if (fileName.matches(".*\\.json")){
                     JSONObject json = this.loadJson(fileName);
+
                     if (json != null) {
                         System.out.println("Load map file : " + fileName);
                         resMap = mergeJSONObjects(resMap, json.getJSONObject("res"));
@@ -99,30 +102,22 @@ public class MapCache {
         return newMap;
     }
     protected JSONObject loadJson(String filename) {
-        InputStream input = null;
+        FileInputStream input = null;
+        File file = null;
 
-        if (this.loaderType.equals("file")) {
-            File file = new File(dir, filename);
+        if (loaderType.equals("file")) {
+            file = new File(filename);
+        }else if (!mapPath.isEmpty()){
+            file = new File(mapPath, filename);
+        }
 
+        try {
             if (file.canRead()) {
-                try {
-                    input = new FileInputStream(file.getAbsolutePath());
-                } catch (FileNotFoundException ex) {
-                    input = null;
-                }
+                System.out.println("Read map file : " + file.toPath());
+                input = new FileInputStream(file);
             }
-        } else {
-            if (!dir.isEmpty()) {
-                filename = dir + "/" + filename;
-            }
-            ServletContext ctx = (ServletContext)Settings.getApplicationAttribute(ServletContext.class.getName());
-
-            if (ctx == null) {
-                System.out.println("Please set the servlet context through Setting.setApplicationAttribute");
-                throw new IllegalArgumentException("miss calling Setting.setApplicationAttribute");
-            }
-
-            input = ctx.getResourceAsStream(filename);
+        } catch (Exception ex) {
+            input = null;
         }
 
         if (input == null) {
@@ -130,7 +125,6 @@ public class MapCache {
         }
 
         String data = readStream(input);
-
         if (data != null) {
             return JSONObject.parseObject(data);
         }
@@ -172,15 +166,20 @@ public class MapCache {
         return getNode(key, "res");
     }
 
-    // 单例模式
-    private MapCache() {
-        dir = Settings.getString("mapDir", dir);
+    /// 初始化方法
+    public String init(ServletContext context){
+        mapDir = Settings.getString("mapDir", dir);
+        mapPath = context.getRealPath(mapDir);
         loaderType = Settings.getString("mapLoaderType", loaderType);
         // 首次实例化加载
         if (map == null){
-            this.reloadMap();
+            reloadMap();
         }
+        return mapPath;
     }
+
+    // 单例模式
+    private MapCache() {}
     private static MapCache instance = null;
     public static synchronized MapCache getInstance() {
         if (instance == null) {
