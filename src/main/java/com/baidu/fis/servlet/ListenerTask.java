@@ -66,7 +66,7 @@ public class ListenerTask extends TimerTask {
                             break;
                         }
                     }else{
-                        System.out.println("File" +  currentFiles[i] + " has be created.");
+                        System.out.println("File " +  currentFiles[i] + " has be created.");
                         setRefresh();
                         filelist = currentFiles;
                         break;
