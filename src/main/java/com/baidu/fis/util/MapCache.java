@@ -2,13 +2,8 @@ package com.baidu.fis.util;
 
 import com.alibaba.fastjson.JSONObject;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
+
 
 /**
  * Created by xuchenhui on 2015/5/25.

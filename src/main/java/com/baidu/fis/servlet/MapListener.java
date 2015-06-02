@@ -6,12 +6,8 @@ import com.baidu.fis.util.Settings;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpServletRequest;
 
 import java.util.Timer;
-import java.util.TimerTask;
-
-import java.io.File;
 
 /**
  * Created by xuchenhui on 2015/5/25.
@@ -26,16 +22,20 @@ public class MapListener implements ServletContextListener {
     /**
      * 时钟间隔周期
      */
-    private final int sec = 1000*10;
+    private int sec = 1000*10;
 
     /**
      * 启动服务后多久开始进行监听
      */
-    private final int sec_start = 1000*30;
+    private int sec_start = 1000*30;
 
     public void contextInitialized(ServletContextEvent event) {
         ServletContext ctx = event.getServletContext();
         Settings.init(ctx);
+
+        sec = Integer.parseInt(Settings.getString("listener.interval", "10")) * 1000;
+        sec_start = Integer.parseInt(Settings.getString("listener.start", "30")) * 1000;
+
         MapCache mc = MapCache.getInstance();
         mc.init(ctx);
 
