@@ -7,8 +7,8 @@ package com.baidu.fis.servlet;
 import com.baidu.fis.util.MapCache;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.TimerTask;
-import java.util.Observable;
 
 /**
  * 自动监听任务
@@ -28,7 +28,6 @@ public class ListenerTask extends TimerTask {
      * @param path
      */
     public ListenerTask(String path) {
-
         this.path = path;
         this.lastModified = System.currentTimeMillis();
         this.files = new File(path);
@@ -49,20 +48,30 @@ public class ListenerTask extends TimerTask {
     private void docheck() {
         if (files.isDirectory()) {
             String[] currentFiles = files.list();
-            if (filelist.length == currentFiles.length){
+
+            if (filelist.length != currentFiles.length){
+                System.out.println("Directory changed");
+                setRefresh();
+                filelist = currentFiles;
+            }else{
                 // 对比文件
                 for (int i = 0; i < currentFiles.length; i++) {
-                    File file = new File(path + currentFiles[i]);
-                    while (isFileUpdated(file)) {
+                    if (Arrays.binarySearch(filelist, currentFiles[i]) > -1){
+                        File file = new File(path, currentFiles[i]);
+
+                        System.out.println("Check " + file.toPath());
+                        if (file.exists() && isFileUpdated(file)) {
+                            setRefresh();
+                            System.out.println(currentFiles[i]+" changed");
+                            break;
+                        }
+                    }else{
+                        System.out.println("File " +  currentFiles[i] + " has be created.");
                         setRefresh();
-                        System.out.println(currentFiles[i]+" changed");
+                        filelist = currentFiles;
                         break;
                     }
                 }
-            } else {
-                setRefresh();
-                System.out.println("Directory changed");
-                filelist = currentFiles;
             }
         }else{
             System.out.println("Directory not found");
