@@ -108,7 +108,7 @@ public class MapCache {
 
         try {
             if (file.canRead()) {
-                System.out.println("Read map file : " + file.toPath());
+                //System.out.println("Read map file : " + file.toPath());
                 input = new FileInputStream(file);
             }
         } catch (Exception ex) {
