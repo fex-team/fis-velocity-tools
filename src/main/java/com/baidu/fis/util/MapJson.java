@@ -6,6 +6,10 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Use MapCache instead.
+ * @deprecated
+ */
 public class MapJson {
 
     protected String dir = "/WEB-INF/config";

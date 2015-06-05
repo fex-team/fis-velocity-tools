@@ -39,12 +39,12 @@ public class MapListener implements ServletContextListener {
         MapCache mc = MapCache.getInstance();
         mc.init(ctx);
 
-        System.out.println("Start to listen directory : " + mc.mapPath);
-        timer.schedule(new ListenerTask(mc.mapPath), sec_start, sec);
+        System.out.println("Start to listen directory : " + mc.getDir());
+        timer.schedule(new ListenerTask(mc.getDir()), sec_start, sec);
     }
 
     public void contextDestroyed(ServletContextEvent event) {
-        event.getServletContext().log("Stop listener for :" +  MapCache.getInstance().mapPath);
+        event.getServletContext().log("Stop listener for :" +  MapCache.getInstance().getDir());
         timer.cancel();
     }
 }

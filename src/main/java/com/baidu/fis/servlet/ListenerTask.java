@@ -46,7 +46,7 @@ public class ListenerTask extends TimerTask {
      * 监听文件夹下的文件是否被更新。
      */
     private void docheck() {
-        if (files.isDirectory()) {
+        if (files.isDirectory() && files.exists()) {
             String[] currentFiles = files.list();
 
             if (filelist.length != currentFiles.length){
