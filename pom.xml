@@ -4,7 +4,7 @@
     <packaging>war</packaging>
     <groupId>com.baidu.fis</groupId>
     <artifactId>fis-velocity-tools</artifactId>
-    <version>1.8</version>
+    <version>2.0-rc</version>
     <name>F.I.S Velocity Tools.</name>
     <url>https://github.com/fex-team/fis-velocity-tools</url>
 
