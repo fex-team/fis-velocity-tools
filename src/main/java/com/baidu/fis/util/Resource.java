@@ -7,10 +7,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by 2betop on 4/29/14.
@@ -20,38 +17,51 @@ import java.util.Stack;
 public class Resource {
 
     protected static class Res {
-        private String value;
-        private String prefix;
-        private String affix;
+        private String content = "";
+        private String uri = "";
+        private String id = "";
+        private String type = "unknown";
+        private String prefix = null;
+        private String affix = null;
+        private Boolean embed = false;
+        private Boolean async = false;
+        private Boolean isFramework = false;
+        private ArrayList<Res> children;
 
-        public Res(String value) {
-            init(value, null, null);
+        public String getContent() {
+            return content;
         }
 
-        public Res(String value, String prefix) {
-            init(value, prefix, null);
+        public void setContent(String content) {
+            this.content = content;
         }
 
-        public Res(String value, String prefix, String affix) {
-            init(value, prefix, affix);
+        public String getUri() {
+            return uri;
         }
 
-        public void init(String url, String prefix, String affix) {
-            this.value = url;
-            this.prefix = prefix;
-            this.affix = affix;
+        public void setUri(String uri) {
+            this.uri = uri;
         }
 
-        public String getValue() {
-            return value;
+        public String getId() {
+            return id;
         }
 
-        public void setValue(String value) {
-            this.value = value;
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
 
         public String getPrefix() {
-            return prefix;
+            return prefix == null ? "" : prefix;
         }
 
         public void setPrefix(String prefix) {
@@ -59,14 +69,46 @@ public class Resource {
         }
 
         public String getAffix() {
-            return affix;
+            return affix == null ? "" : affix;
         }
 
         public void setAffix(String affix) {
             this.affix = affix;
         }
 
-        public int myCode() {
+        public Boolean getEmbed() {
+            return embed;
+        }
+
+        public void setEmbed(Boolean embed) {
+            this.embed = embed;
+        }
+
+        public Boolean getAsync() {
+            return async;
+        }
+
+        public void setAsync(Boolean async) {
+            this.async = async;
+        }
+
+        public ArrayList<Res> getChildren() {
+            return children;
+        }
+
+        public void setChildren(ArrayList<Res> children) {
+            this.children = children;
+        }
+
+        public Boolean getIsFramework() {
+            return isFramework;
+        }
+
+        public void setIsFramework(Boolean isFramework) {
+            this.isFramework = isFramework;
+        }
+
+        public int fixCode() {
             int result = prefix != null ? prefix.hashCode() : 0;
             result = 31 * result + (affix != null ? affix.hashCode() : 0);
             return result;
@@ -79,42 +121,75 @@ public class Resource {
     public static final String FRAMEWORK_CONFIG = "<!--FIS_FRAMEWORK_CONFIG-->";
 
     protected String framework = null;
-    //protected MapJson map = null;
     protected MapCache map = null;
     protected Map<String, Boolean> loaded;
-    protected Map<String, ArrayList<Res>> collection;
-    protected Map<String, ArrayList<Res>> embed;
+    protected ArrayList<Res> res;
+    protected ArrayList<Res> js;
+    protected ArrayList<Res> css;
+    protected ArrayList<Res> asyncs;
+    protected Boolean calculated = false;
+
     public int refs = 0;
     public Boolean ignorePkg = false;
+    public Boolean inspect = false;
+    public Stack<Res> stack = new Stack<Res>();
 
     // velocity 入口
     public Resource() {
         this.loaded = new HashMap<String, Boolean>();
-        this.collection = new HashMap<String, ArrayList<Res>>();
-        this.embed = new HashMap<String, ArrayList<Res>>();
+        this.res = new ArrayList<Res>();
+
+        this.js = new ArrayList<Res>();
+        this.css = new ArrayList<Res>();
+        this.asyncs = new ArrayList<Res>();
+
         //this.map = new MapJson();
         this.map = MapCache.getInstance();
 
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
-            if (request.getParameter("debug") != null) {
-                ignorePkg = true;
-            }
+            ignorePkg = request.getParameter("debug") != null;
+            inspect = request.getParameter("inspect") != null;
         } catch (Exception err) {
+
             // do nothing.
             ignorePkg = Settings.getBoolean("debug", false);
+            inspect = Settings.getBoolean("inspect", false);
+        }
+
+        inspect = true;
+
+        if (inspect) {
+            Res root = new Res();
+            root.id = "root";
+            root.uri = "root";
+            root.children = new ArrayList<Res>();
+            this.stack.push(root);
         }
     }
 
     // jsp 入口
     public Resource(ServletRequest request) {
         this.loaded = new HashMap<String, Boolean>();
-        this.collection = new HashMap<String, ArrayList<Res>>();
-        this.embed = new HashMap<String, ArrayList<Res>>();
+        this.res = new ArrayList<Res>();
+        this.js = new ArrayList<Res>();
+        this.css = new ArrayList<Res>();
+        this.asyncs = new ArrayList<Res>();
+
+        //this.map = new MapJson();
         this.map = MapCache.getInstance();
 
         ignorePkg = request.getParameter("debug") != null;
+        inspect = request.getParameter("inspect") != null;
+
+        if (inspect) {
+            Res root = new Res();
+            root.id = "root";
+            root.uri = "root";
+            root.children = new ArrayList<Res>();
+            this.stack.push(root);
+        }
     }
 
     public String getFramework() {
@@ -125,8 +200,173 @@ public class Resource {
         this.framework = framework;
     }
 
+    public Boolean contains(String id) {
+        JSONObject info = map.getMap(id);
+        return info != null && info.containsKey("res") && info.getJSONObject("res").containsKey(id);
+    }
+
+    public String add(String id) {
+        return add(id, false);
+    }
+
+    public String add(String id, Boolean deffer) {
+        return add(id, deffer, null);
+    }
+
+    public String add(String id, Boolean deffer, String prefix) {
+        return add(id, deffer, prefix, null);
+    }
+
+    public String add (String id, Boolean deffer, String prefix, String affix) {
+        return add(id, deffer, prefix, affix, false);
+    }
+
+    public String add(String id, Boolean deffer, String prefix, String affix, Boolean withPkg) {
+        if (!contains(id)) {
+            return id;
+        }
+
+        JSONObject node = map.getNode(id);
+
+        if (node.containsKey("type") && "css".equals(node.getString("type"))) {
+            deffer = false;
+        }
+
+        // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
+        // 如果之前是同步的这次异步添加则忽略掉。都同步添加过了，不需要异步再添加一次。
+        // 注意：null 不能直接用来和 false\true 比较，否则报错。
+        if ( loaded.containsKey(id) && loaded.get(id) == deffer ||
+                deffer && loaded.containsKey(id) && !loaded.get(id) ) {
+            return getUri(id, true);
+        } else if (loaded.containsKey(id) && !deffer && loaded.get(id)) {
+            // 如果之前是异步加载，这次是同步加载。
+            remove(id, true);
+        }
+
+        Res item = new Res();
+        item.setId(id);
+
+        if (inspect) {
+            if (stack.peek().getChildren() == null) {
+                stack.peek().setChildren(new ArrayList<Res>());
+            }
+
+            stack.peek().getChildren().add(item);
+
+            stack.add(item);
+        }
+
+        loaded.put(id, deffer);
+
+        String pkg = (String) node.get("pkg");
+
+        String uri = node.getString("uri");
+
+        if (withPkg && pkg != null) {
+            JSONObject pkgNode = map.getNode(pkg, "pkg");
+
+            uri = pkgNode.getString("uri");
+
+            if (pkgNode.containsKey("has")) {
+                for (Object dep: pkgNode.getJSONArray("has")) {
+                    loaded.put(dep.toString(), deffer);
+
+                    if (inspect) {
+                        Res has = new Res();
+                        has.setId(dep.toString());
+
+                        if (item.getChildren() == null) {
+                            item.setChildren(new ArrayList<Res>());
+                        }
+
+                        item.getChildren().add(has);
+                    }
+                }
+            }
+        }
+
+        // 如果有同步依赖，则把同步依赖也添加进来。
+        if (node.containsKey("deps")) {
+            JSONArray deps = node.getJSONArray("deps");
+            for (Object dep : deps) {
+                this.add(dep.toString(), deffer, prefix, affix, withPkg);
+            }
+        }
+
+        // 如果有异步依赖，则添加异步依赖
+        if (node.containsKey("extras")) {
+            JSONObject extras = node.getJSONObject("extras");
+            if (extras.containsKey("async")) {
+                JSONArray async = node.getJSONArray("async");
+                for (Object dep : async) {
+                    this.add(dep.toString(), true, prefix, affix, withPkg);
+                }
+            }
+        }
+
+        if (inspect) {
+            stack.pop();
+        }
+
+        String type = node.getString("type");
+        if (!type.equals("js") && !type.equals("css")) {
+            return getUri(id, true);
+        }
+
+        item.setUri(uri);
+        item.setPrefix(prefix);
+        item.setAffix(affix);
+        item.setType(type);
+        item.setAsync(deffer);
+
+        res.add(item);
+
+        return getUri(id, true);
+    }
+
+    public void remove(String id, Boolean deffer) {
+        if (!contains(id)) {
+            return;
+        }
+
+        JSONObject node = map.getNode(id);
+
+        if (loaded.get(id) != null && loaded.get(id) == deffer) {
+            loaded.remove(id);
+        }
+
+        if (node.containsKey("extras")) {
+            node = node.getJSONObject("extras");
+            if (node.containsKey("async")) {
+                JSONArray async = node.getJSONArray("async");
+                for (Object dep : async) {
+                    this.remove(dep.toString(), true);
+                }
+            }
+        }
+
+        if (node.containsKey("deps")) {
+            JSONArray deps = node.getJSONArray("deps");
+            for (Object dep : deps) {
+                this.remove(dep.toString(), deffer);
+            }
+        }
+
+        String type = node.getString("type");
+        if (!type.equals("js") && !type.equals("css")) {
+            return;
+        }
+
+        for (Res item:res) {
+            if (item.getId().equals(id) && item.getAsync() == deffer) {
+                res.remove(item);
+                break;
+            }
+        }
+    }
+
     public void addJS(String id) {
-        addJS(id, null, null);
+        addJS(id, null);
     }
 
     public void addJS(String id, String prefix) {
@@ -134,19 +374,16 @@ public class Resource {
     }
 
     public void addJS(String id, String prefix, String affix) {
-       if (id.contains(":") && !id.contains(":/") && !id.contains(":\\")) {
-           this.addResource(id);
-       } else {
-           String type = "js";
-           ArrayList<Res> list = collection.get(type);
-
-           if (list == null) {
-               list = new ArrayList<Res>();
-               collection.put(type, list);
-           }
-
-           list.add(new Res(id, prefix, affix));
-       }
+        if (exists(id)) {
+            this.add(id, false, prefix, affix);
+        } else {
+            Res item = new Res();
+            item.setUri(id);
+            item.setType("js");
+            item.setPrefix(prefix);
+            item.setAffix(affix);
+            res.add(item);
+        }
     }
 
     public void addJSEmbed(String content) {
@@ -158,18 +395,17 @@ public class Resource {
     }
 
     public void addJSEmbed(String content, String prefix, String affix) {
-        ArrayList<Res> list = embed.get("js");
-
-        if (list == null) {
-            list = new ArrayList<Res>();
-            embed.put("js", list);
-        }
-
-        list.add(new Res(content, prefix, affix));
+        Res item = new Res();
+        item.setContent(content);
+        item.setType("js");
+        item.setPrefix(prefix);
+        item.setAffix(affix);
+        item.setEmbed(true);
+        res.add(item);
     }
 
     public void addCSS(String id) {
-        addCSS(id, null, null);
+        addCSS(id, null);
     }
 
     public void addCSS(String id, String prefix) {
@@ -177,18 +413,15 @@ public class Resource {
     }
 
     public void addCSS(String id, String prefix, String affix) {
-        if (id.contains(":") && !id.contains(":/") && !id.contains(":\\")) {
-            this.addResource(id);
+        if (exists(id)) {
+            this.add(id, false, prefix, affix);
         } else {
-            String type = "css";
-            ArrayList<Res> list = collection.get(type);
-
-            if (list == null) {
-                list = new ArrayList<Res>();
-                collection.put(type, list);
-            }
-
-            list.add(new Res(id, prefix, affix));
+            Res item = new Res();
+            item.setUri(id);
+            item.setType("css");
+            item.setPrefix(prefix);
+            item.setAffix(affix);
+            res.add(item);
         }
     }
 
@@ -201,19 +434,13 @@ public class Resource {
     }
 
     public void addCSSEmbed(String content, String prefix, String affix) {
-        ArrayList<Res> list = embed.get("css");
-
-        if (list == null) {
-            list = new ArrayList<Res>();
-            embed.put("css", list);
-        }
-
-        list.add(new Res(content, prefix, affix));
-    }
-
-    public Boolean contains(String id) {
-        JSONObject info = map.getMap(id);
-        return info != null && info.containsKey("res") && info.getJSONObject("res").containsKey(id);
+        Res item = new Res();
+        item.setContent(content);
+        item.setType("css");
+        item.setPrefix(prefix);
+        item.setAffix(affix);
+        item.setEmbed(true);
+        res.add(item);
     }
 
     public String addResource(String id){
@@ -233,162 +460,7 @@ public class Resource {
     }
 
     public String addResource(String id, Boolean deffer, Boolean drop, String prefix, String affix) {
-        JSONObject info, node;
-        String uri;
-
-        if (!contains(id)) {
-            return id;
-        }
-
-        // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
-        // 如果之前是同步的这次异步添加则忽略掉。都同步添加过了，不需要异步再添加一次。
-        // 注意：null 不能直接用来和 false\true 比较，否则报错。
-        if ( loaded.get(id) != null && loaded.get(id) == deffer ||
-                deffer && loaded.get(id) != null && !loaded.get(id) ) {
-            return getUri(id, true);
-        } else if (loaded.get(id) != null && !deffer && loaded.get(id)) {
-            // 如果之前是异步加载，这次是同步加载。
-            removeDefferFromList(id);
-            loaded.remove(id);
-        }
-
-        info = map.getNode(id);
-        String pkg = (String) info.get("pkg");
-
-        if (!ignorePkg && pkg != null) {
-            info = map.getNode(pkg, "pkg");
-            uri = info.getString("uri");
-
-            if (info.containsKey("has")) {
-                JSONArray has = info.getJSONArray("has");
-
-                for (Object obj : has) {
-                    loaded.put(obj.toString(), deffer);
-
-                    if (deffer && info.get("type").toString().equals("js")) {
-                        ArrayList<Res> list = collection.get("jsDeffer");
-
-                        if (list == null) {
-                            list = new ArrayList<Res>();
-                            collection.put("jsDeffer", list);
-                        }
-
-                        if (!drop) {
-                            list.add(new Res(obj.toString(), prefix, affix));
-                        }
-                    }
-                }
-            }
-        } else {
-            uri = info.getString("uri");
-            loaded.put(id, deffer);
-        }
-
-
-        try {
-            // 如果有异步依赖，则添加异步依赖
-            if (info.containsKey("extras")) {
-                node = info.getJSONObject("extras");
-                if (node.containsKey("async")) {
-                    JSONArray async = node.getJSONArray("async");
-                    for (Object dep : async) {
-                        this.addResource(dep.toString(), true);
-                    }
-                }
-            }
-
-            // 如果有同步依赖，则把同步依赖也添加进来。
-            if (info.containsKey("deps")) {
-                JSONArray deps = info.getJSONArray("deps");
-                for (Object dep : deps) {
-                    this.addResource(dep.toString(), deffer);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        String type = info.get("type").toString();
-
-        if (type.equals("js") && deffer) {
-            type = "jsDeffer";
-
-            // 如果是异步 js，用 id 代替 uri。因为还要生成依赖。
-            // 注意：此处 uri 已不再是 uri。
-            uri = id;
-        }
-
-        ArrayList<Res> list = collection.get(type);
-
-        if (list == null) {
-            list = new ArrayList<Res>();
-            collection.put(type, list);
-        }
-
-        if (!drop) {
-            list.add(new Res(uri, prefix, affix));
-        }
-
-        return uri;
-    }
-
-    protected Res findResInList(ArrayList<Res> list, String uri) {
-        for (Res res:list) {
-            if (res.getValue().equals(uri)) {
-                return res;
-            }
-        }
-
-        return null;
-    }
-
-    protected void removeDefferFromList(String id) {
-        JSONObject info;
-        String uri;
-
-        if (!contains(id)) {
-            return;
-        }
-
-        ArrayList<Res> list = collection.get("jsDeffer");
-        if (list == null) {
-            return;
-        }
-
-        info = map.getNode(id);
-        String pkg = (String) info.get("pkg");
-
-        if (!ignorePkg && pkg != null) {
-            info = map.getNode(pkg, "pkg");
-            uri = info.getString("uri");
-            Res res = findResInList(list, uri);
-
-            // if found, then remove it.
-            if (res != null) {
-                list.remove(res);
-            }
-
-            if (info.containsKey("has")) {
-                JSONArray has = info.getJSONArray("has");
-
-                for (Object obj : has) {
-                    res = findResInList(list, obj.toString());
-
-                    // if found, then remove it.
-                    if (res != null) {
-                        list.remove(res);
-                    }
-                }
-            }
-        } else {
-            uri = info.getString("uri");
-            Res res = findResInList(list, uri);
-
-            // if found, then remove it.
-            if (res != null) {
-                list.remove(res);
-            }
-        }
+        return add(id, deffer, prefix, affix);
     }
 
     public Boolean exists(String id) {
@@ -417,303 +489,331 @@ public class Resource {
         return node.getString("uri");
     }
 
-    public String renderCSS() {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<Res> arr = collection.get("css");
+    protected void calculate() {
+        if (calculated) {
+            return;
+        }
+        calculated = true;
 
-        if (arr != null) {
-            for (Res res : arr) {
-                if (res.prefix != null) {
-                    sb.append(res.prefix);
-                }
+        ArrayList<Res> res = this.res;
+        this.res = new ArrayList<Res>();
+        this.loaded = new HashMap<String, Boolean>();
 
-                sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-                sb.append(res.value);
-                sb.append("\"/>");
+        if (inspect) {
+            Res root = new Res();
+            root.id = "root";
+            root.uri = "root";
+            root.children = new ArrayList<Res>();
+            this.stack.push(root);
+        }
 
-                if (res.affix != null) {
-                    sb.append(res.affix);
-                }
+        if (this.framework!=null) {
+            add(this.framework, false, null, null, !ignorePkg);
+
+            if (this.res.size() > 0) {
+                this.res.get(0).setIsFramework(true);
             }
         }
 
-        ArrayList<Res> list = embed.get("css");
-
-        if (list != null && !list.isEmpty()) {
-            Stack<StringBuilder> group = new Stack<StringBuilder>();
-            Res lastRes = null;
-
-            for (Res item:list) {
-                if (lastRes == null || item.myCode() != lastRes.myCode()) {
-                    if (lastRes != null) {
-                        group.lastElement().append("</style>");
-                        if (lastRes.affix != null) {
-                            group.lastElement().append(lastRes.affix);
-                        }
-                    }
-
-                    group.add(new StringBuilder());
-                    if (item.prefix != null) {
-                        group.lastElement().append(item.prefix);
-                    }
-                    group.lastElement().append("<style type=\"text/css\">");
-                }
-
-                group.lastElement().append(item.value);
-                lastRes = item;
-            }
-
-            group.lastElement().append("</style>");
-            if (lastRes != null && lastRes.affix != null) {
-                group.lastElement().append(lastRes.affix);
-            }
-
-            for (StringBuilder item:group) {
-                sb.append(item);
-            }
-        }
-
-        return sb.toString();
-    }
-
-    protected String modJs = "";
-    public String renderFrameWork() {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<Res> arr = collection.get("js");
-
-        Boolean needModJs = framework != null && (arr != null && !arr.isEmpty() || collection.get("jsDeffer") != null);
-
-        if (needModJs) {
-            modJs = addResource(framework, false, true);
-            sb.append("<script type=\"text/javascript\" src=\"");
-            sb.append(modJs);
-            sb.append("\"></script>");
-        }
-
-        return sb.toString();
-    }
-
-    public String renderFrameworkConfig() {
-        StringBuilder sb = new StringBuilder();
-
-        if (collection.get("jsDeffer") != null) {
-            Boolean useAmd = !(framework != null && framework.endsWith("mod.js"));
-
-            if (!useAmd && Settings.getBoolean("sourceMap", true)) {
-                Map<String, Map> defferMap = this.buildDefferMap();
-                sb.append("<script type=\"text/javascript\">require.resourceMap(");
-                sb.append(JSONObject.toJSON(defferMap));
-                sb.append(");</script>");
+        for (Res item:res) {
+            if (!item.getId().isEmpty()) {
+                this.add(item.getId(), item.getAsync(), item.getPrefix(), item.getAffix(), !ignorePkg);
             } else {
-                // 输出 amd 方式 require.config({paths: {}});
-                Map<String, String> paths = this.buildAmdPaths();
-                sb.append("<script type=\"text/javascript\">require.config({paths:");
-                sb.append(JSONObject.toJSON(paths));
-                sb.append("});</script>");
+                this.res.add(item);
             }
         }
 
-        return sb.toString();
+        for (Res item:this.res) {
+            if (item.getType().equals("js")) {
+                if (item.getAsync()) {
+                    this.asyncs.add(item);
+                } else {
+                    this.js.add(item);
+                }
+            } else if (item.getType().equals("css")) {
+                this.css.add(item);
+            }
+        }
+    }
+
+    protected String buildResourceMap() {
+        JSONObject res = new JSONObject();
+        JSONObject pkg = new JSONObject();
+
+        calculate();
+
+        for (String id: this.loaded.keySet()) {
+            Boolean async = loaded.get(id);
+
+            if (!async) {
+                continue;
+            }
+
+            JSONObject node = map.getNode(id);
+            JSONObject item = new JSONObject();
+            item.put("url", node.get("uri"));
+            item.put("type", node.get("type"));
+
+            if (node.containsKey("deps")) {
+                JSONArray deps = node.getJSONArray("deps");
+                Iterator<Object> iterator = deps.iterator();
+
+                while (iterator.hasNext()) {
+                    String dep = (String) iterator.next();
+
+                    if (loaded.containsKey(id) && !loaded.get(id) || dep.endsWith(".css")) {
+                        iterator.remove();
+                    }
+                }
+
+                item.put("desp", deps);
+            }
+
+            res.put(id, item);
+
+            if (node.containsKey("pkg")) {
+                item.put("pkg", node.getString("pkg"));
+                JSONObject pkgNode = map.getNode(node.getString("pkg"), "pkg");
+
+                JSONObject pkgItem = new JSONObject();
+                pkgItem.put("uri", pkgNode.get("uri"));
+                pkgItem.put("type", pkgNode.get("type"));
+
+                pkg.put(node.getString("pkg"), pkgItem);
+            }
+        }
+
+        if (res.isEmpty()) {
+            return "";
+        }
+
+        JSONObject map = new JSONObject();
+        map.put("res", res);
+
+        if (!pkg.isEmpty()) {
+            map.put("pkg", pkg);
+        }
+
+        return "require.resourceMap(" + JSONObject.toJSON(map) + ");";
+    }
+
+    public String buildAMDPath() {
+        JSONObject paths = new JSONObject();
+
+        calculate();
+
+        for (String id: this.loaded.keySet()) {
+            Boolean async = loaded.get(id);
+
+            if (!async) {
+                continue;
+            }
+
+            JSONObject node = map.getNode(id);
+
+            if (!node.getString("type").equals("js")) {
+                continue;
+            }
+
+            String moduleId = node.containsKey("extra") && node.getJSONObject("extra").containsKey("moduleId") ?
+                    node.getJSONObject("extra").getString("moduleId") :
+                    id.replaceAll("\\.js$", "");
+            String uri = node.getString("uri");
+
+            if (node.containsKey("pkg")) {
+                JSONObject pkgNode = map.getNode(node.getString("pkg"), "pkg");
+                uri = pkgNode.getString("uri");
+            }
+
+            paths.put(moduleId, uri.replaceAll("\\.js$", ""));
+        }
+
+        if (paths.isEmpty()) {
+            return "";
+        } else {
+            return "require.config({paths: " + JSONObject.toJSON(paths) + "})";
+        }
+    }
+
+    public String renderFrameWork() {
+        for (Res item:this.js) {
+            if (item.getIsFramework()) {
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("<script type=\"text/javascript\" src=\"");
+                sb.append(item.getUri());
+                sb.append("\"></script>");
+
+                this.js.remove(item);
+                return sb.toString();
+            }
+        }
+
+        return "";
     }
 
     public String renderJS() {
         StringBuilder sb = new StringBuilder();
-        ArrayList<Res> arr = collection.get("js");
 
-        if (arr != null) {
-            for (Res res : arr) {
-                if (res.value.equals(modJs)) {
-                    continue;
+        StringBuilder group = new StringBuilder();
+        Res lastItem = null;
+
+        for (Res item:this.js) {
+            if (item.getEmbed() && lastItem != null && lastItem.fixCode() == item.fixCode()) {
+                group.append(";");
+                group.append(item.getContent().trim());
+                group.append("\n");
+            } else {
+                if (group.length() > 0 && lastItem != null) {
+                    sb.append(lastItem.getPrefix());
+                    sb.append("<script type=\"text/javascript\">");
+                    sb.append(group.toString());
+                    sb.append("</script>");
+                    sb.append(lastItem.getAffix());
                 }
-                if (res.prefix != null) {
-                    sb.append(res.prefix);
-                }
-                sb.append("<script type=\"text/javascript\" src=\"");
-                sb.append(res.value);
-                sb.append("\"></script>");
-                if (res.affix != null) {
-                    sb.append(res.affix);
+
+                if (item.getEmbed()) {
+                    sb.append(item.getPrefix());
+                    sb.append("<script type=\"text/javascript\">");
+                    sb.append(item.getContent());
+                    sb.append("</script>");
+                    sb.append(item.getAffix());
+                } else {
+                    sb.append(item.getPrefix());
+                    sb.append("<script type=\"text/javascript\" src=\"");
+                    sb.append(item.getUri());
+                    sb.append("\"></script>");
                 }
             }
+
+            lastItem = item;
         }
 
-        // 输出 embed js
-        ArrayList<Res> list = embed.get("js");
+        if (group.length() > 0 && lastItem != null) {
+            sb.append(lastItem.getPrefix());
+            sb.append("<script type=\"text/javascript\">");
+            sb.append(group.toString());
+            sb.append("</script>");
+            sb.append(lastItem.getAffix());
+        }
 
-        if (list != null && !list.isEmpty()) {
-            Stack<StringBuilder> group = new Stack<StringBuilder>();
-            Res lastRes = null;
+        return sb.toString();
+    }
 
-            for (Res item:list) {
-                if (lastRes == null || item.myCode() != lastRes.myCode()) {
-                    if (lastRes != null) {
-                        group.lastElement().append("</script>");
-                        if (lastRes.affix != null) {
-                            group.lastElement().append(lastRes.affix);
-                        }
-                    }
+    public String renderCSS() {
+        StringBuilder sb = new StringBuilder();
 
-                    group.add(new StringBuilder());
-                    if (item.prefix != null) {
-                        group.lastElement().append(item.prefix);
-                    }
-                    group.lastElement().append("<script type=\"text/javascript\">");
+        StringBuilder group = new StringBuilder();
+        Res lastItem = null;
+
+        for (Res item:this.css) {
+            if (item.getEmbed() && lastItem != null && lastItem.fixCode() == item.fixCode()) {
+                group.append(item.getContent().trim());
+                group.append("\n");
+            } else {
+                if (group.length() > 0 && lastItem != null) {
+                    sb.append(lastItem.getPrefix());
+                    sb.append("<style type=\"text/css\">");
+                    sb.append(group.toString());
+                    sb.append("</style>");
+                    sb.append(lastItem.getAffix());
                 }
 
-                group.lastElement().append(";").append(item.value);
-                lastRes = item;
+                if (item.getEmbed()) {
+                    sb.append(item.getPrefix());
+                    sb.append("<style type=\"text/css\">");
+                    sb.append(item.getContent());
+                    sb.append("</style>");
+                    sb.append(item.getAffix());
+                } else {
+                    sb.append(item.getPrefix());
+                    sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+                    sb.append(item.getUri());
+                    sb.append("\" />");
+                }
             }
 
-            group.lastElement().append("</script>");
-            if (lastRes != null && lastRes.affix != null) {
-                group.lastElement().append(lastRes.affix);
-            }
+            lastItem = item;
+        }
 
-            for (StringBuilder item:group) {
-                sb.append(item);
+        if (group.length() > 0 && lastItem != null) {
+            sb.append(lastItem.getPrefix());
+            sb.append("<script type=\"text/javascript\">");
+            sb.append(group.toString());
+            sb.append("</script>");
+            sb.append(lastItem.getAffix());
+        }
+
+        return sb.toString();
+    }
+
+    protected String inspectRes(Res item, int depth) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < depth; i++) {
+            sb.append("-");
+        }
+
+        sb.append(" ");
+        sb.append(item.id);
+
+        if (!item.uri.isEmpty()) {
+            sb.append("  [");
+            sb.append(item.uri);
+            sb.append("]");
+        }
+
+        if (item.getChildren() != null) {
+            for (Res child:item.getChildren()) {
+                sb.append("\n");
+                sb.append(inspectRes(child, depth + 4));
             }
         }
 
         return sb.toString();
     }
 
-    /**
-     * 生成异步JS资源表。
-     * @return
-     */
-    protected Map<String, Map> buildDefferMap() {
-        Map<String, Map> defferMap = new HashMap<String, Map>();
-        Map<String, JSONObject> res = new HashMap<String, JSONObject>();
-        Map<String, JSONObject> pkgMap = new HashMap<String, JSONObject>();
-
-        ArrayList<Res> list = collection.get("jsDeffer");
-        JSONObject info;
-
-        if (list != null) {
-
-            for (Res item : list) {
-
-                // 已经同步加载，则忽略。
-                if (loaded.get(item.value) != null && !loaded.get(item.value)) {
-                    continue;
-                }
-
-                info = map.getNode(item.value);
-
-
-                if (info == null) {
-                    throw new IllegalArgumentException("missing resource [" + item.value + "]");
-                }
-
-                // 先加 res
-                String pkg = info.getString("pkg");
-
-                JSONObject infoCopy = new JSONObject();
-                infoCopy.put("url", info.getString("uri"));
-
-                // 保留 pkg 信息
-                if (!ignorePkg && pkg != null) {
-                    infoCopy.put("pkg", pkg);
-                }
-
-                // 过滤掉非 .js 的依赖。
-                // 同时过滤掉已经同步加载的依赖。
-                if (info.containsKey("deps")) {
-                    JSONArray deps = info.getJSONArray("deps");
-                    JSONArray depsFilter = new JSONArray();
-
-                    for (Object dep : deps) {
-                        String sDep = dep.toString();
-
-                        if (!sDep.endsWith(".js")) {
-                            continue;
-                        } else if ( loaded.get(sDep) != null && !loaded.get(sDep)) {
-
-                            // 同步中已经依赖。
-                            continue;
-                        }
-
-                        depsFilter.add(sDep);
-                    }
-
-                    if (!depsFilter.isEmpty()) {
-                        infoCopy.put("deps", depsFilter);
-                    }
-                }
-
-                // 再把对应的 pkg 加入。
-                if (!ignorePkg && pkg != null) {
-                    info = map.getNode(pkg, "pkg");
-                    JSONObject pkgInfo = new JSONObject();
-
-                    pkgInfo.put("url", info.get("uri"));
-                    pkgInfo.put("type", info.get("type"));
-
-                    pkgMap.put(pkg, pkgInfo);
-                }
-
-                res.put(item.value, infoCopy);
-            }
-        }
-
-        if (!res.isEmpty()) {
-            defferMap.put("res", res);
-        }
-
-        if (!pkgMap.isEmpty()) {
-            defferMap.put("pkg", pkgMap);
-        }
-
-        return defferMap;
-    }
-
-    public Map<String, String> buildAmdPaths() {
-        Map<String, String> paths = new HashMap<String, String>();
-        JSONObject info;
-
-        for (String id : loaded.keySet()) {
-            if (loaded.get(id) == null || !loaded.get(id)) {
-                continue;
-            }
-
-            // 异步依赖
-            info = map.getNode(id);
-
-            if (!info.getString("type").equals("js")) {
-                continue;
-            }
-
-
-            if (info.containsKey("extras")) {
-                String uri = info.getString("uri");
-
-                    if (!ignorePkg && info.containsKey("pkg")) {
-                        JSONObject pkg = map.getNode(info.getString("pkg"), "pkg");
-                        uri = pkg.getString("uri");
-                    }
-
-                if (uri.endsWith(".js")) {
-                    uri = uri.substring(0, uri.length() - 3);
-                }
-
-                if (info.getJSONObject("extras").containsKey("moduleId")) {
-                    paths.put(info.getJSONObject("extras").getString("moduleId"), uri);
-                }
-            }
-
-        }
-
-        return paths;
-    }
 
     public String filterContent(String input) {
+        calculate();
+
+        if (inspect) {
+            StringBuilder sb = new StringBuilder();
+
+            while (!stack.isEmpty()) {
+                sb.append(inspectRes(stack.pop(), 0));
+                sb.append("\n\n");
+            }
+
+            return sb.toString();
+        }
 
         if (input.contains(Resource.FRAMEWORK_PLACEHOLDER)) {
             input = input.replace(Resource.FRAMEWORK_PLACEHOLDER, renderFrameWork());
         }
 
+        StringBuilder sb = new StringBuilder();
+
+        if (framework != null) {
+            String resourcemap = framework.endsWith("mod.js") ? buildResourceMap() : buildAMDPath();
+
+            if (!resourcemap.isEmpty()) {
+                if (input.contains(Resource.FRAMEWORK_CONFIG)) {
+                    sb.append("<script type=\"text/javascript\">");
+                    sb.append(resourcemap);
+                    sb.append("</script>");
+                } else {
+                    Res item = new Res();
+                    item.setContent(resourcemap);
+                    item.setEmbed(true);
+                    item.setType("js");
+                    this.js.add(0, item);
+                }
+            }
+        }
+
         if (input.contains(Resource.FRAMEWORK_CONFIG)) {
-            input = input.replace(Resource.FRAMEWORK_CONFIG, renderFrameworkConfig());
+            input = input.replace(Resource.FRAMEWORK_CONFIG, sb.toString());
         }
 
         if (input.contains(Resource.SCRIPT_PLACEHOLDER)) {
@@ -724,7 +824,7 @@ public class Resource {
             input = input.replace(Resource.STYLE_PLACEHOLDER, renderCSS());
         }
 
-        return input;
+        return input.trim();
     }
 
 }
