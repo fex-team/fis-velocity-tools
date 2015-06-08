@@ -158,8 +158,6 @@ public class Resource {
             inspect = Settings.getBoolean("inspect", false);
         }
 
-        inspect = true;
-
         if (inspect) {
             Res root = new Res();
             root.id = "root";
