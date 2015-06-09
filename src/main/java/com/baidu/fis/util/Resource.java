@@ -667,6 +667,7 @@ public class Resource {
                     sb.append(group.toString());
                     sb.append("</script>");
                     sb.append(lastItem.getAffix());
+                    group = new StringBuilder();
                 }
 
                 if (item.getEmbed()) {
@@ -714,6 +715,7 @@ public class Resource {
                     sb.append(group.toString());
                     sb.append("</style>");
                     sb.append(lastItem.getAffix());
+                    group = new StringBuilder();
                 }
 
                 if (item.getEmbed()) {
