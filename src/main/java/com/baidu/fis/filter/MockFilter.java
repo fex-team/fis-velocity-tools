@@ -155,10 +155,14 @@ public class MockFilter implements Filter {
 
             if (req.getParameter("inspect") != null) {
                 Resource.inspect = true;
+            } else {
+                Resource.inspect = false;
             }
 
             if (req.getParameter("debug") != null) {
                 Resource.ignorePkg = true;
+            } else {
+                Resource.ignorePkg = false;
             }
 
             this.attachJson(ctx, req);
