@@ -130,8 +130,8 @@ public class Resource {
     protected Boolean calculated = false;
 
     public int refs = 0;
-    public Boolean ignorePkg = false;
-    public Boolean inspect = false;
+    public static Boolean ignorePkg = false;
+    public static Boolean inspect = false;
     public Stack<Res> stack = new Stack<Res>();
 
     // velocity 入口
@@ -155,7 +155,6 @@ public class Resource {
 
             // do nothing.
             ignorePkg = Settings.getBoolean("debug", false);
-            inspect = Settings.getBoolean("inspect", false);
         }
 
         if (inspect) {

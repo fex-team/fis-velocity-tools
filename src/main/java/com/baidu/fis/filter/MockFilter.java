@@ -1,6 +1,7 @@
 package com.baidu.fis.filter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.fis.util.Resource;
 import com.baidu.fis.util.ResponseWrapper;
 import com.baidu.fis.util.Settings;
 import com.baidu.fis.util.UnicodeReader;
@@ -151,6 +152,14 @@ public class MockFilter implements Filter {
             HttpServletRequest req = (HttpServletRequest)request;
 
             Context ctx = new Context(req.getSession().getServletContext());
+
+            if (req.getParameter("inspect") != null) {
+                Resource.inspect = true;
+            }
+
+            if (req.getParameter("debug") != null) {
+                Resource.ignorePkg = true;
+            }
 
             this.attachJson(ctx, req);
             this.includeJsp(ctx, req, (HttpServletResponse) response);
