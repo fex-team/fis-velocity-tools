@@ -49,7 +49,7 @@ public class ListenerTask extends TimerTask {
     public void docheck() {
         String newPath = Settings.getMapDir();
 
-        if (!newPath.equals(path)) {
+        if (path == null || !newPath.equals(path)) {
             path = newPath;
             files = new File(newPath);
         }
