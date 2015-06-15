@@ -737,9 +737,9 @@ public class Resource {
 
         if (group.length() > 0 && lastItem != null) {
             sb.append(lastItem.getPrefix());
-            sb.append("<script type=\"text/javascript\">");
+            sb.append("<style type=\"text/css\">");
             sb.append(group.toString());
-            sb.append("</script>");
+            sb.append("</style>");
             sb.append(lastItem.getAffix());
         }
 
