@@ -67,7 +67,7 @@ public class ListenerTask extends TimerTask {
                     if (Arrays.binarySearch(filelist, currentFiles[i]) > -1){
                         File file = new File(path, currentFiles[i]);
 
-                        System.out.println("Check " + file.toPath());
+//                        System.out.println("Check " + file.toPath());
                         if (file.exists() && isFileUpdated(file)) {
                             setRefresh();
                             System.out.println(currentFiles[i]+" changed");

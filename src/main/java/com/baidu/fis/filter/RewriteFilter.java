@@ -139,6 +139,8 @@ public class RewriteFilter implements Filter {
 
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
         //map = new MapJson();
+
+        /* 开发环境，让修改及时生效，反正真正的后端是不会执行到这的！*/
         Settings.reload();
         map = MapCache.getInstance();
         ListenerTask task = (ListenerTask)Settings.getApplicationAttribute(ListenerTask.class.getName());
