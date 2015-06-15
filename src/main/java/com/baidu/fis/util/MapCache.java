@@ -165,6 +165,10 @@ public class MapCache {
         loaderType = Settings.getString("mapLoaderType", loaderType);
 
         if (loaderType.equals("webapp")) {
+            if (!dir.startsWith("/")) {
+                dir = "/" + dir;
+            }
+
             dir = context.getRealPath(dir);
         }
 

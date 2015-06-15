@@ -294,7 +294,7 @@ public class Resource {
         if (node.containsKey("extras")) {
             JSONObject extras = node.getJSONObject("extras");
             if (extras.containsKey("async")) {
-                JSONArray async = node.getJSONArray("async");
+                JSONArray async = extras.getJSONArray("async");
                 for (Object dep : async) {
                     this.add(dep.toString(), true, prefix, affix, withPkg);
                 }
