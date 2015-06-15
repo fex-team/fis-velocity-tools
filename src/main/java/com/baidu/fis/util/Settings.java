@@ -77,4 +77,30 @@ public class Settings {
     public static void put(String key, String val) {
         data.setProperty(key, val);
     }
+
+    public static String getMapDir() {
+        String mapDir = Settings.getString("mapDir", "/WEB-INF/config");
+        String mapDirType = Settings.getString("mapLoaderType", "webapp");
+
+        if (mapDirType.equals("webapp")) {
+            ServletContext context = (ServletContext)Settings.getApplicationAttribute(Key);
+
+            if (!mapDir.startsWith("/")) {
+                mapDir = "/" + mapDir;
+            }
+
+            mapDir = context.getRealPath(mapDir);
+        }
+
+        return mapDir;
+    }
+
+    public static void reload() {
+        if (Settings.getApplicationAttribute(Key) == null) {
+            return;
+        }
+
+        ServletContext context = (ServletContext)Settings.getApplicationAttribute(Key);
+        Settings.load(context.getResourceAsStream(Settings.DEFAULT_PATH));
+    }
 }

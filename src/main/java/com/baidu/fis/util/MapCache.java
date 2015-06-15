@@ -3,23 +3,18 @@ package com.baidu.fis.util;
 import com.alibaba.fastjson.JSONObject;
 import javax.servlet.ServletContext;
 import java.io.*;
+import java.util.Set;
 
 
 /**
  * Created by xuchenhui on 2015/5/25.
  */
 public class MapCache {
-    protected static String dir = "/WEB-INF/config";
-    protected static String loaderType = "webapp";
-
-    public String getDir() {
-        return dir;
-    }
-
     // 缓存并操控map表
     public static JSONObject map = null;
     //public void setMap(JSONObject newMap){ map = newMap; }
     public void reloadMap(){
+        String dir = Settings.getMapDir();
         if (map != null){
             System.out.println("Reload all map files in " + dir + "[" + map.hashCode() + "]");
         }
@@ -160,24 +155,11 @@ public class MapCache {
     }
 
     /// 初始化方法
-    public String init(ServletContext context){
-        dir = Settings.getString("mapDir", dir);
-        loaderType = Settings.getString("mapLoaderType", loaderType);
-
-        if (loaderType.equals("webapp")) {
-            if (!dir.startsWith("/")) {
-                dir = "/" + dir;
-            }
-
-            dir = context.getRealPath(dir);
-        }
-
+    public void init(ServletContext context){
         // 首次实例化加载
         if (map == null){
             reloadMap();
         }
-
-        return dir;
     }
 
     // 单例模式

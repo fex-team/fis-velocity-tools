@@ -5,6 +5,7 @@ package com.baidu.fis.servlet;
  */
 
 import com.baidu.fis.util.MapCache;
+import com.baidu.fis.util.Settings;
 
 import java.io.File;
 import java.util.Arrays;
@@ -45,7 +46,14 @@ public class ListenerTask extends TimerTask {
     /**
      * 监听文件夹下的文件是否被更新。
      */
-    private void docheck() {
+    public void docheck() {
+        String newPath = Settings.getMapDir();
+
+        if (!newPath.equals(path)) {
+            path = newPath;
+            files = new File(newPath);
+        }
+
         if (files.isDirectory() && files.exists()) {
             String[] currentFiles = files.list();
 

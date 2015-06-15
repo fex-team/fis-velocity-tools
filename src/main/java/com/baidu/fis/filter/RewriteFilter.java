@@ -1,6 +1,7 @@
 package com.baidu.fis.filter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.fis.servlet.ListenerTask;
 import com.baidu.fis.util.MapCache;
 import com.baidu.fis.util.MapJson;
 import com.baidu.fis.util.Settings;
@@ -138,7 +139,12 @@ public class RewriteFilter implements Filter {
 
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
         //map = new MapJson();
+        Settings.reload();
         map = MapCache.getInstance();
+        ListenerTask task = (ListenerTask)Settings.getApplicationAttribute(ListenerTask.class.getName());
+        if (task != null) {
+            task.docheck();
+        }
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
