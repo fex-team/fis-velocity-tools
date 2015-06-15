@@ -49,7 +49,7 @@ public class ListenerTask extends TimerTask {
         if (files.isDirectory() && files.exists()) {
             String[] currentFiles = files.list();
 
-            if (filelist.length != currentFiles.length){
+            if (filelist == null || filelist.length != currentFiles.length){
                 System.out.println("Directory changed");
                 setRefresh();
                 filelist = currentFiles;
