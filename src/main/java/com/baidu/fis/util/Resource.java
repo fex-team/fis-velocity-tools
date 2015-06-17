@@ -225,9 +225,9 @@ public class Resource {
 
         JSONObject node = map.getNode(id);
 
-        if (node.containsKey("type") && "css".equals(node.getString("type"))) {
-            deffer = false;
-        }
+//        if (node.containsKey("type") && "css".equals(node.getString("type"))) {
+//            deffer = false;
+//        }
 
         // 如果添加过了而且添加的方式也相同则不重复添加。（这里说的方式是指，同步 or 异步）
         // 如果之前是同步的这次异步添加则忽略掉。都同步添加过了，不需要异步再添加一次。
