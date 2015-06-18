@@ -505,7 +505,12 @@ public class Resource {
         }
 
         if (this.framework!=null) {
-            add(this.framework, false, null, null, !ignorePkg);
+            if (contains(this.framework)) {
+                add(this.framework, false, null, null, !ignorePkg);
+            } else {
+                addJS(this.framework);
+            }
+
 
             if (this.res.size() > 0) {
                 this.res.get(0).setIsFramework(true);
