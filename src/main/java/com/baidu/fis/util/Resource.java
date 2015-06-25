@@ -259,6 +259,8 @@ public class Resource {
 
         String uri = node.getString("uri");
 
+        JSONArray deps = node.getJSONArray("deps");
+
         if (withPkg && pkg != null) {
             JSONObject pkgNode = map.getNode(pkg, "pkg");
 
@@ -280,11 +282,14 @@ public class Resource {
                     }
                 }
             }
+
+            if (pkgNode.containsKey("deps")) {
+                deps = pkgNode.getJSONArray("deps");
+            }
         }
 
         // 如果有同步依赖，则把同步依赖也添加进来。
-        if (node.containsKey("deps")) {
-            JSONArray deps = node.getJSONArray("deps");
+        if (deps != null) {
             for (Object dep : deps) {
                 this.add(dep.toString(), deffer, prefix, affix, withPkg);
             }
