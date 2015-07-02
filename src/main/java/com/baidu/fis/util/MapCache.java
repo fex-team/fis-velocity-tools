@@ -18,8 +18,15 @@ public class MapCache {
         if (map != null){
             System.out.println("Reload all map files in " + dir + "[" + map.hashCode() + "]");
         }
-        map = loadAllMap(dir);
-        System.out.println("Reload finished all maps [" + map.hashCode() + "]");
+
+        try{
+            map = loadAllMap(dir);
+            System.out.println("Reload finished all maps [" + map.hashCode() + "]");
+        }catch(Exception e){
+            // 捕获可能的异常，不影响下次map的重新加载，否则导致当前线程退出，就不会再加载了。
+            System.err.println("Failed to reload all maps [" + map.hashCode() + "]");
+            e.printStackTrace();
+        }
     }
     public JSONObject getMap(){
         return map;
