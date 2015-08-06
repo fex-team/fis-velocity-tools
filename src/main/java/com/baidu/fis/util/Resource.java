@@ -573,7 +573,7 @@ public class Resource {
                     }
                 }
 
-                item.put("desp", deps);
+                item.put("deps", deps);
             }
 
             res.put(id, item);
