@@ -338,9 +338,9 @@ public class Resource {
         }
 
         if (node.containsKey("extras")) {
-            node = node.getJSONObject("extras");
-            if (node.containsKey("async")) {
-                JSONArray async = node.getJSONArray("async");
+            JSONObject extras = node.getJSONObject("extras");
+            if (extras.containsKey("async")) {
+                JSONArray async = extras.getJSONArray("async");
                 for (Object dep : async) {
                     this.remove(dep.toString(), true);
                 }
@@ -355,7 +355,7 @@ public class Resource {
         }
 
         String type = node.getString("type");
-        if (!type.equals("js") && !type.equals("css")) {
+        if (type == null || (!type.equals("js") && !type.equals("css"))) {
             return;
         }
 
