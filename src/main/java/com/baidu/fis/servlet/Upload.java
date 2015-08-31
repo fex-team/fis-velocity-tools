@@ -59,7 +59,7 @@ public class Upload extends HttpServlet {
                     if (!file.delete() || !file.createNewFile()) {
                         throw new Exception("Permission denied");
                     }
-                } else if (!file.getParentFile().mkdirs() || !file.createNewFile()) {
+                } else if (!file.getParentFile().exists() && !file.getParentFile().mkdirs() || !file.createNewFile()) {
                     throw new Exception("Permission denied");
                 }
 

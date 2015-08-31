@@ -338,9 +338,9 @@ public class Resource {
         }
 
         if (node.containsKey("extras")) {
-            node = node.getJSONObject("extras");
-            if (node.containsKey("async")) {
-                JSONArray async = node.getJSONArray("async");
+            JSONObject extras = node.getJSONObject("extras");
+            if (extras.containsKey("async")) {
+                JSONArray async = extras.getJSONArray("async");
                 for (Object dep : async) {
                     this.remove(dep.toString(), true);
                 }
@@ -355,7 +355,7 @@ public class Resource {
         }
 
         String type = node.getString("type");
-        if (!type.equals("js") && !type.equals("css")) {
+        if (type == null || (!type.equals("js") && !type.equals("css"))) {
             return;
         }
 
@@ -573,7 +573,7 @@ public class Resource {
                     }
                 }
 
-                item.put("desp", deps);
+                item.put("deps", deps);
             }
 
             res.put(id, item);
@@ -663,6 +663,7 @@ public class Resource {
         StringBuilder sb = new StringBuilder();
 
         StringBuilder group = new StringBuilder();
+        StringBuilder innerScript = new StringBuilder();
         Res lastItem = null;
 
         for (Res item:this.js) {
@@ -672,20 +673,19 @@ public class Resource {
                 group.append("\n");
             } else {
                 if (group.length() > 0 && lastItem != null) {
-                    sb.append(lastItem.getPrefix());
-                    sb.append("<script type=\"text/javascript\">");
-                    sb.append(group.toString());
-                    sb.append("</script>");
-                    sb.append(lastItem.getAffix());
+                    innerScript.append(lastItem.getPrefix());
+                    innerScript.append("<script type=\"text/javascript\">");
+                    innerScript.append(group.toString());
+                    innerScript.append("</script>");
+                    innerScript.append(lastItem.getAffix());
                     group = new StringBuilder();
                 }
 
                 if (item.getEmbed()) {
-                    sb.append(item.getPrefix());
-                    sb.append("<script type=\"text/javascript\">");
-                    sb.append(item.getContent());
-                    sb.append("</script>");
-                    sb.append(item.getAffix());
+                    group.append(";");
+                    group.append(item.getContent().trim());
+                    group.append("\n");
+                    lastItem = item;
                 } else {
                     sb.append(item.getPrefix());
                     sb.append("<script type=\"text/javascript\" src=\"");
@@ -693,18 +693,17 @@ public class Resource {
                     sb.append("\"></script>");
                 }
             }
-
-            lastItem = item;
         }
 
         if (group.length() > 0 && lastItem != null) {
-            sb.append(lastItem.getPrefix());
-            sb.append("<script type=\"text/javascript\">");
-            sb.append(group.toString());
-            sb.append("</script>");
-            sb.append(lastItem.getAffix());
+            innerScript.append(lastItem.getPrefix());
+            innerScript.append("<script type=\"text/javascript\">");
+            innerScript.append(group.toString());
+            innerScript.append("</script>");
+            innerScript.append(lastItem.getAffix());
         }
 
+        sb.append(innerScript.toString());
         return sb.toString();
     }
 
