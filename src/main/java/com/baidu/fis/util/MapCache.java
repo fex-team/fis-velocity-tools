@@ -125,8 +125,9 @@ public class MapCache {
                 return JSONObject.parseObject(data);
             }
         }catch(Exception e){
-            System.err.println("Error while parse JSON file: " + file.getName());
-            throw new Exception("Error while parse JSON file: " + file.getName());
+            String msg = "Error while parse JSON file: " + file.getName() + e.getMessage();
+            System.err.println(msg);
+            throw new Exception(msg);
         }
         return null;
     }
