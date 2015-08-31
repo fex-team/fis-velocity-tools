@@ -24,7 +24,7 @@ public class MapCache {
             System.out.println("Reload finished all maps [" + map.hashCode() + "]");
         }catch(Exception e){
             // 捕获可能的异常，不影响下次map的重新加载，否则导致当前线程退出，就不会再加载了。
-            System.err.println("Failed to reload all maps [" + map.hashCode() + "]");
+            System.err.println("Failed to reload all maps: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -48,7 +48,7 @@ public class MapCache {
         return json1;
     }
     // 重新读取所有的map文件并生成map表
-    protected JSONObject loadAllMap(String filePath){
+    protected JSONObject loadAllMap(String filePath) throws Exception{
         JSONObject resMap = new JSONObject();
         JSONObject pkgMap = new JSONObject();
 
@@ -102,7 +102,7 @@ public class MapCache {
         }*/
         return newMap;
     }
-    protected JSONObject loadJson(File file) {
+    protected JSONObject loadJson(File file) throws Exception {
         FileInputStream input = null;
 
         try {
@@ -111,7 +111,7 @@ public class MapCache {
                 input = new FileInputStream(file);
             }
         } catch (Exception ex) {
-            System.out.println("Got error: while load " + file.getAbsolutePath() + ".\n Error:" + ex.getMessage());
+            System.out.println("Error while load " + file.getAbsolutePath() + ".\n Error:" + ex.getMessage());
             input = null;
         }
 
@@ -119,9 +119,15 @@ public class MapCache {
             return null;
         }
 
-        String data = readStream(input);
-        if (data != null) {
-            return JSONObject.parseObject(data);
+        try{
+            String data = readStream(input);
+            if (data != null) {
+                return JSONObject.parseObject(data);
+            }
+        }catch(Exception e){
+            String msg = "Error while parse JSON file: " + file.getName() + e.getMessage();
+            System.err.println(msg);
+            throw new Exception(msg);
         }
         return null;
     }
