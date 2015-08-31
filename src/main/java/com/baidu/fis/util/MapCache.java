@@ -48,7 +48,7 @@ public class MapCache {
         return json1;
     }
     // 重新读取所有的map文件并生成map表
-    protected JSONObject loadAllMap(String filePath){
+    protected JSONObject loadAllMap(String filePath) throws Exception{
         JSONObject resMap = new JSONObject();
         JSONObject pkgMap = new JSONObject();
 
@@ -102,7 +102,7 @@ public class MapCache {
         }*/
         return newMap;
     }
-    protected JSONObject loadJson(File file) {
+    protected JSONObject loadJson(File file) throws Exception {
         FileInputStream input = null;
 
         try {
@@ -111,7 +111,7 @@ public class MapCache {
                 input = new FileInputStream(file);
             }
         } catch (Exception ex) {
-            System.out.println("Got error: while load " + file.getAbsolutePath() + ".\n Error:" + ex.getMessage());
+            System.out.println("Error while load " + file.getAbsolutePath() + ".\n Error:" + ex.getMessage());
             input = null;
         }
 
@@ -119,9 +119,14 @@ public class MapCache {
             return null;
         }
 
-        String data = readStream(input);
-        if (data != null) {
-            return JSONObject.parseObject(data);
+        try{
+            String data = readStream(input);
+            if (data != null) {
+                return JSONObject.parseObject(data);
+            }
+        }catch(Exception e){
+            System.err.println("Error while parse JSON file: " + file.getName());
+            throw new Exception("Error while parse JSON file: " + file.getName());
         }
         return null;
     }
