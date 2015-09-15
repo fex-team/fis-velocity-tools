@@ -1,18 +1,29 @@
 package com.baidu.fis.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.fis.velocity.dest.RouterMapManager;
+import com.baidu.fis.velocity.dest.ThreadRequestUtil;
+
 import javax.servlet.ServletContext;
 import java.io.*;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  * Created by xuchenhui on 2015/5/25.
  */
 public class MapCache {
+
+    /**
+     * WEB所在的本地资源
+     */
+    public static final String FESERVER_LOCAL = "localhost";
+
     // 缓存并操控map表
     public static JSONObject map = null;
     //public void setMap(JSONObject newMap){ map = newMap; }
+
     public void reloadMap(){
         String dir = Settings.getMapDir();
         if (map != null){
@@ -27,14 +38,49 @@ public class MapCache {
             System.err.println("Failed to reload all maps: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // 将本地放入到HashMap中
+        mapList.put(FESERVER_LOCAL, map);
     }
     public JSONObject getMap(){
         return map;
     }
+
     // 向后兼容旧方法
     public JSONObject getMap(String id){
-        return map;
+
+        // 根据IP请求获取VM服务器的地址
+        String feServerId = ThreadRequestUtil.getThreadFeServerId();
+        JSONObject feServerMap = null;
+
+        if(feServerId == null){
+            // 从本地索取
+            feServerId = FESERVER_LOCAL;
+            feServerMap = mapList.get(feServerId);
+        }else{
+            // 从指定FeServer索取
+            feServerMap = mapList.get(feServerId);
+
+            boolean searchFromNextLoader = RouterMapManager.getInstance().getSearchFromNextLoader();
+            boolean notExistedInFeServerMap = feServerMap.containsKey("res") && !feServerMap.getJSONObject("res").containsKey(id);
+            boolean existedInLocalServerMap = notExistedInFeServerMap && mapList.get(FESERVER_LOCAL).containsKey("res") &&  mapList.get(FESERVER_LOCAL).getJSONObject("res").containsKey(id);
+
+            if(notExistedInFeServerMap && searchFromNextLoader && existedInLocalServerMap){
+                System.out.format("FIS use local resource, feServerId[%s] does not exists:%s \n", feServerId, id);
+                // 如果启用该功能，并且FeServer不存在，则支持从本地索取
+                feServerMap = mapList.get(FESERVER_LOCAL);
+            }
+        }
+
+
+        if(feServerMap == null){
+            String message = "Can't find MapCache for feServerId: " + feServerId;
+            System.err.println(message);
+        }
+
+        return feServerMap;
     }
+
     public void resetMap(){
         map.clear();
     }
@@ -47,6 +93,7 @@ public class MapCache {
         }
         return json1;
     }
+
     // 重新读取所有的map文件并生成map表
     protected JSONObject loadAllMap(String filePath) throws Exception{
         JSONObject resMap = new JSONObject();
@@ -176,11 +223,14 @@ public class MapCache {
     }
 
     // 单例模式
-    private MapCache() {}
+    protected MapCache() {}
     private static MapCache instance = null;
+
+    protected static Map<String, JSONObject> mapList = new HashMap<String, JSONObject>();
+
     public static synchronized MapCache getInstance() {
         if (instance == null) {
-            instance = new MapCache();
+            instance = new RemoteMapCache();
         }
         return instance;
     }
