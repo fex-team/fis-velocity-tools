@@ -183,4 +183,12 @@ public class MapCache {
         }
         return instance;
     }
+    public static synchronized void setInstance(MapCache inst){
+
+        if(instance != null){
+            System.err.println("MapCache has been created, so ignore setInstance.");
+        }else{
+            instance = inst;
+        }
+    }
 }

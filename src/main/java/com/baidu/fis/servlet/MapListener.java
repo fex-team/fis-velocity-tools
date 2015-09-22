@@ -7,6 +7,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import java.lang.reflect.Method;
 import java.util.Timer;
 
 /**
@@ -36,8 +37,7 @@ public class MapListener implements ServletContextListener {
         sec = Integer.parseInt(Settings.getString("listener.interval", "10")) * 1000;
         sec_start = Integer.parseInt(Settings.getString("listener.start", "30")) * 1000;
 
-        MapCache mc = MapCache.getInstance();
-        mc.init(ctx);
+        initMapCache(ctx);
 
         System.out.println("Start to listen directory : " + Settings.getMapDir());
         ListenerTask task = new ListenerTask(Settings.getMapDir());
@@ -47,7 +47,42 @@ public class MapListener implements ServletContextListener {
     }
 
     public void contextDestroyed(ServletContextEvent event) {
-        event.getServletContext().log("Stop listener for :" +  Settings.getMapDir());
+        event.getServletContext().log("Stop listener for :" + Settings.getMapDir());
         timer.cancel();
+    }
+
+    /**
+     * 初始化MapCache
+     * @param ctx
+     */
+    public void initMapCache(ServletContext ctx){
+
+        String mapCacheClassName = ctx.getInitParameter("mapCacheClass");
+
+        MapCache mc = null;
+        if(mapCacheClassName == null){
+            mc = MapCache.getInstance();
+            mc.init(ctx);
+        }else{
+            try{
+                Class mapCacheClass = Class.forName(mapCacheClassName);
+                Method instMethod = mapCacheClass.getMethod("getInstance");
+                Object inst = instMethod.invoke(null, null);
+
+                if(inst instanceof MapCache){
+                    MapCache instance = (MapCache)inst;
+                    MapCache.setInstance(instance);
+
+                    mc = MapCache.getInstance();
+                    mc.init(ctx);
+                    System.out.println(String.format("MapCache load succeed[%s].", mc.getClass()));
+                }else{
+                    throw new Exception(String.format("Failed to convert object[%s] to MapCache", inst.getClass()));
+                }
+            }catch (Exception e){
+                System.err.println("MapCache load failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 }
