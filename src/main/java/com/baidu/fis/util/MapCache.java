@@ -98,7 +98,6 @@ public class MapCache {
             out.write(sb.toString().getBytes("utf-8"));//注意需要转换对应的字符集
             out.close();
         }catch (Exception e){
-
         }*/
         return newMap;
     }
@@ -176,12 +175,20 @@ public class MapCache {
     }
 
     // 单例模式
-    private MapCache() {}
-    private static MapCache instance = null;
+    protected MapCache() {}
+    protected static MapCache instance = null;
     public static synchronized MapCache getInstance() {
         if (instance == null) {
             instance = new MapCache();
         }
         return instance;
+    }
+    public static synchronized void setInstance(MapCache inst){
+
+        if(instance != null){
+            System.err.println("MapCache has been created, so ignore setInstance.");
+        }else{
+            instance = inst;
+        }
     }
 }
