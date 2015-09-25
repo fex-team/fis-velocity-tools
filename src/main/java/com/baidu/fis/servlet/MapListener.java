@@ -57,7 +57,7 @@ public class MapListener implements ServletContextListener {
      */
     public void initMapCache(ServletContext ctx){
 
-        String mapCacheClassName = ctx.getInitParameter("mapCacheClass");
+        String mapCacheClassName = Settings.getString("mapCacheClass");
 
         MapCache mc = null;
         if(mapCacheClassName == null){
