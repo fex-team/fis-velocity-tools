@@ -189,6 +189,7 @@ public class MapCache {
             System.err.println("MapCache has been created, so ignore setInstance.");
         }else{
             instance = inst;
+            System.out.println("MapCache setInstance: " + inst.getClass().getName());
         }
     }
 }
