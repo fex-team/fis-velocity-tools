@@ -58,7 +58,7 @@ public class ListenerTask extends TimerTask {
             String[] currentFiles = files.list();
 
             if (filelist == null || filelist.length != currentFiles.length){
-                System.out.println("Directory changed");
+                System.out.format("Directory[%s] changed\n", files.getAbsolutePath());
                 setRefresh();
                 filelist = currentFiles;
             }else{
@@ -82,7 +82,7 @@ public class ListenerTask extends TimerTask {
                 }
             }
         }else{
-            System.out.println("Directory not found");
+            System.out.format("Directory[%s] not found\n", files.getAbsolutePath());
         }
     }
     /**
