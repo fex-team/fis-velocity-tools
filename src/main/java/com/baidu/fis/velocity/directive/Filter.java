@@ -26,6 +26,13 @@ public class Filter extends AbstractBlock {
         Resource fisResource = Util.getResource(context);
 
         Writer buffer = new StringWriter();
+        String framework;
+        // 如果指定了 framework （通过第一个参数指定）
+        // 如: #html( "static/js/mod.js")#end
+        if (node.jjtGetNumChildren() > 1) {
+            framework = node.jjtGetChild(0).value(context).toString();
+            fisResource.setFramework(framework);
+        }
 
         // 让父级去渲染 block body。
         super.render(context, buffer);
