@@ -796,7 +796,7 @@ public class Resource {
             return sb.toString();
         }
 
-        if (input.contains(Resource.FRAMEWORK_PLACEHOLDER)) {
+        if (input.contains(Resource.FRAMEWORK_PLACEHOLDER) && input.contains("<html>")) {
             input = input.replace(Resource.FRAMEWORK_PLACEHOLDER, renderFrameWork());
         }
 
