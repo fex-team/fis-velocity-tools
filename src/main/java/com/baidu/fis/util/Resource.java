@@ -691,6 +691,7 @@ public class Resource {
                     sb.append("<script type=\"text/javascript\" src=\"");
                     sb.append(item.getUri());
                     sb.append("\"></script>");
+                    sb.append(item.getAffix());
                 }
             }
         }
@@ -738,6 +739,7 @@ public class Resource {
                     sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
                     sb.append(item.getUri());
                     sb.append("\" />");
+                    sb.append(item.getAffix());
                 }
             }
 
