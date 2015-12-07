@@ -667,6 +667,11 @@ public class Resource {
         Res lastItem = null;
 
         for (Res item:this.js) {
+            // 不处理 framework
+            if (item.getIsFramework()){
+                continue;
+            }
+
             if (item.getEmbed() && lastItem != null && lastItem.fixCode() == item.fixCode()) {
                 group.append(";");
                 group.append(item.getContent().trim());
@@ -804,8 +809,8 @@ public class Resource {
 
         StringBuilder sb = new StringBuilder();
 
-        if (framework != null) {
-            String resourcemap = framework.endsWith("mod.js") ? buildResourceMap() : buildAMDPath();
+        if (framework != null || input.contains(Resource.FRAMEWORK_CONFIG)) {
+            String resourcemap = framework != null && framework.endsWith("mod.js") ? buildResourceMap() : buildAMDPath();
 
             if (!resourcemap.isEmpty()) {
                 if (input.contains(Resource.FRAMEWORK_CONFIG)) {
