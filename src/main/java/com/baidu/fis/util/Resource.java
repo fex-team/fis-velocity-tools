@@ -803,7 +803,17 @@ public class Resource {
             return sb.toString();
         }
 
-        if (input.contains(Resource.FRAMEWORK_PLACEHOLDER)) {
+        boolean isHtml = input.contains("<html>");
+        if(!isHtml) {
+            for(Res res:this.js) {
+                if(res.getId().equals(this.framework)) {
+                    this.js.remove(res);
+                    break;
+                }
+            }
+        }
+
+        if (input.contains(Resource.FRAMEWORK_PLACEHOLDER) && isHtml) {
             input = input.replace(Resource.FRAMEWORK_PLACEHOLDER, renderFrameWork());
         }
 
