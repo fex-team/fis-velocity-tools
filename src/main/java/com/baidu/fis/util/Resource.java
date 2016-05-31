@@ -1,5 +1,6 @@
 package com.baidu.fis.util;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -563,17 +564,20 @@ public class Resource {
 
             if (node.containsKey("deps")) {
                 JSONArray deps = node.getJSONArray("deps");
+                JSONArray filtedDeps = new JSONArray();
                 Iterator<Object> iterator = deps.iterator();
 
                 while (iterator.hasNext()) {
                     String dep = (String) iterator.next();
 
                     if (loaded.containsKey(id) && !loaded.get(id) || dep.endsWith(".css")) {
-                        iterator.remove();
+//                        iterator.remove();
+                    } else {
+                        filtedDeps.add(dep);
                     }
                 }
 
-                item.put("deps", deps);
+                item.put("deps", filtedDeps);
             }
 
             res.put(id, item);
