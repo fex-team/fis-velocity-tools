@@ -27,6 +27,14 @@ public class Util {
         return resource;
     }
 
+    public static Resource getResource(JspContext context, boolean noAutoCreate) {
+        if (!noAutoCreate) {
+            return Util.getResource(context);
+        }
+
+        return (Resource)context.getAttribute(RESOURCE_KEY, PageContext.REQUEST_SCOPE);
+    }
+
     final static String SEVLETCONTEXT_KEY = ServletContext.class.getName();
     static Boolean flag = false;
     public static void initFis(JspContext context) {

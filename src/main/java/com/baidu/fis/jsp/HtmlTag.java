@@ -22,6 +22,7 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
     }
 
     private String framework;
+    private boolean firstTime = false;
 
     public String getFramework() {
         return framework;
@@ -49,6 +50,8 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
      */
     @Override
     public int doStartTag() throws JspException {
+        this.firstTime = Util.getResource(pageContext, true) == null;
+
         if (this.framework != null) {
             Util.getResource(pageContext).setFramework(this.framework);
         }
@@ -59,12 +62,15 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
 
         JspWriter out = pageContext.getOut();
 
+        if (!this.firstTime) {
+            return EVAL_BODY_BUFFERED;
+        }
+
         try {
             out.write("<html");
 
             for (String key:attrs.keySet()) {
                 Object value = attrs.get(key);
-
                 out.write(" ");
                 out.write(key);
                 out.write("=\"");
@@ -91,6 +97,13 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
 
         try {
             BodyContent body = this.getBodyContent();
+            JspWriter out = pageContext.getOut();
+
+            if (!this.firstTime) {
+                out.write(body.getString());
+                return EVAL_PAGE;
+            }
+
             String html = body.getString() + "</html>";
             Resource resource = Util.getResource(pageContext);
 
@@ -98,7 +111,7 @@ public class HtmlTag extends BodyTagSupport implements DynamicAttributes {
                 html = resource.filterContent(html);
 //            }
 
-            JspWriter out = pageContext.getOut();
+
 
             out.write(html);
         } catch (IOException ex) {
